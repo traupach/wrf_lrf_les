@@ -236,12 +236,6 @@ BENCH_END(phy_prep_tim)
          CALL wrf_error_fatal('WRFU_TimeGet failed')
          ENDIF
 
-         ! Changd T. Raupach.
-
-         ! Only call the radiation driver if constant radiative cooling is not
-         ! selected.
-         if(config_flags%const_rad_cooling .eq. 0) then
-         
 ! this driver is only needed to handle non-local shadowing effects
       CALL pre_radiation_driver ( grid, config_flags                        &
      &        ,itimestep=grid%itimestep, ra_call_offset=grid%ra_call_offset    &
@@ -449,8 +443,8 @@ BENCH_START(rad_driver_tim)
      &         ,EFSS=grid%EFSS,QS_CU=grid%QS_CU)
 
       BENCH_END(rad_driver_tim)
-   endif
-   
+
+   ! Changed T. Raupach.
    ! Prescribe the radiative cooling profile as in Herman and Kuang (2013).
    if(config_flags%const_rad_cooling .gt. 0) then
       !$OMP PARALLEL DO   &
