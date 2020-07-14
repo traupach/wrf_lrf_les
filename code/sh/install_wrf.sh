@@ -15,6 +15,11 @@ fi
 
 dir=$1
 
+if [ ! -d WRFV3 ]; then
+    echo "This script should be run from the WRF directory containing WRFV3."
+    exit
+fi
+
 if [ ! -d $dir/WRFV3 ]; then
     echo "WRF directory must contain WRFV3 directory."
     exit
