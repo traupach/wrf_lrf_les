@@ -630,11 +630,13 @@ CONTAINS
    CASE(hill2d_x, quarter_ss, squall2d_x, squall2d_y, grav2d_x, b_wave)
    IF (stretch_grid) THEN ! exponential stretch for eta (nearly constant dz)
       DO k=1, kde
-         ! Changed by T. Raupach, 22.04.2020. Read eta-levels from namelist.
+         ! Changed T. Raupach.
          !grid%znw(k) = (exp(-(k-1)/float(kde-1)/z_scale) - exp(-1./z_scale))/ &
          !                          (1.-exp(-1./z_scale))
+
+         ! Read eta_levels from namelist.
          grid%znw(k) = model_config_rec%eta_levels(k)
-         ! End changed block. 
+         ! End changed block.
      ENDDO
    ELSE
      DO k=1, kde
@@ -992,6 +994,7 @@ CONTAINS
 !  calc hydrostatic balance (alternatively we could interp the geopotential from the
 !  sounding, but this assures that the base state is in exact hydrostatic balance with
 !  respect to the model eqns.
+
     DO kk  = 2,kte
       k=kk - 1
       grid%phb(i,kk,j) = grid%phb(i,kk-1,j) - grid%dnw(kk-1)*(grid%c1h(k)*grid%mub(i,j)+grid%c2h(k))*grid%alb(i,kk-1,j)
@@ -1031,12 +1034,12 @@ CONTAINS
     grid%MU0(i,j) = grid%MU_1(i,j) + grid%MUB(i,j)
 ! given the dry pressure and coordinate system, interp the potential
 ! temperature and qv
+
     do k=1,kde-1
       p_level = grid%c3h(k)*(pd_surf - grid%p_top) + grid%c4h(k) + grid%p_top
       moist(i,k,j,P_QV) = interp_0( qv, pd_in, p_level, nl_in )
       grid%t_1(i,k,j)          = interp_0( theta, pd_in, p_level, nl_in ) - t0
       grid%t_2(i,k,j)          = grid%t_1(i,k,j)
-      
     enddo
 !  integrate the hydrostatic equation (from the RHS of the bigstep
 !  vertical momentum equation) down from the top to get grid%p.
@@ -1051,7 +1054,7 @@ CONTAINS
     grid%alt(i,kk,j) = (r_d/p1000mb)*(grid%t_1(i,kk,j)+t0)*qvf* &
                 (((grid%p(i,kk,j)+grid%pb(i,kk,j))/p1000mb)**cvpm)
     grid%al(i,kk,j) = grid%alt(i,kk,j) - grid%alb(i,kk,j)
-!  down the column
+    !  down the column
     do kk=kte-2,1,-1
       k = kk + 1
       qvf1 = 0.5*(moist(i,kk,j,P_QV)+moist(i,kk+1,j,P_QV))
@@ -1062,7 +1065,8 @@ CONTAINS
       grid%alt(i,kk,j) = (r_d/p1000mb)*(grid%t_1(i,kk,j)+t0)*qvf* &
                   (((grid%p(i,kk,j)+grid%pb(i,kk,j))/p1000mb)**cvpm)
       grid%al(i,kk,j) = grid%alt(i,kk,j) - grid%alb(i,kk,j)
-    enddo
+   enddo
+
 !  this is the hydrostatic equation used in the model after the
 !  small timesteps.  In the model, grid%al (inverse density)
 !  is computed from the geopotential.
@@ -1072,7 +1076,7 @@ CONTAINS
       grid%ph_1(i,kk,j) = grid%ph_1(i,kk-1,j) - (grid%dnw(kk-1))*(       &
                    ((grid%c1h(k)*grid%mub(i,j)+grid%c2h(k))+(grid%c1h(k)*grid%mu_1(i,j)))*grid%al(i,kk-1,j)+ &
                     (grid%c1h(k)*grid%mu_1(i,j))*grid%alb(i,kk-1,j)  )
-                                                   
+      
       grid%ph_2(i,kk,j) = grid%ph_1(i,kk,j)
       grid%ph0(i,kk,j) = grid%ph_1(i,kk,j) + grid%phb(i,kk,j)
     ENDDO
@@ -1098,7 +1102,7 @@ CONTAINS
 
   ENDDO
   ENDDO
-
+  
 !===============
   ideal_pert: SELECT CASE ( model_config_rec%ideal_case )
   CASE (quarter_ss)
@@ -1136,16 +1140,21 @@ CONTAINS
 !  rebalance hydrostatically
 
       DO k  = 2,kte
-        grid%ph_1(i,k,j) = grid%ph_1(i,k-1,j) - (grid%dnw(k-1))*(       &
-                     ((grid%c1h(k)*grid%mub(i,j)+grid%c2h(k))+(grid%c1h(k)*grid%mu_1(i,j)))*grid%al(i,k-1,j)+ &
-                      (grid%c1h(k)*grid%mu_1(i,j))*grid%alb(i,k-1,j)  )
+
+         ! Changed T. Raupach; c1h(k) changed to c1h(k-1) and c2h(k) changed to
+         ! c2h(k-1), to match calculation of ph_1 above.
+         grid%ph_1(i,k,j) = grid%ph_1(i,k-1,j) - (grid%dnw(k-1))*(       &
+              ((grid%c1h(k-1)*grid%mub(i,j)+grid%c2h(k-1))+(grid%c1h(k-1)*grid%mu_1(i,j)))*grid%al(i,k-1,j)+ &
+              (grid%c1h(k-1)*grid%mu_1(i,j))*grid%alb(i,k-1,j)  )
+         ! End changed block.
 
         grid%ph_2(i,k,j) = grid%ph_1(i,k,j)
         grid%ph0(i,k,j) = grid%ph_1(i,k,j) + grid%phb(i,k,j)
       ENDDO
 
     ENDDO
-  ENDDO
+ ENDDO
+ 
   CASE (squall2d_x)
 !  QSS thermal perturbation to kick off convection
 
@@ -1439,10 +1448,9 @@ CONTAINS
   ENDDO
 
   END SELECT ideal_pert
-
+  
 #if 0
-!===============
-
+!===============  
 !  Test for resting atmosphere
 
   DO iter_loop = 1, 100

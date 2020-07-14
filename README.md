@@ -1,5 +1,20 @@
 # WRF modifications for LRF perturbations
 
+Installation:
+
+```
+cd <WRFDIR>
+git clone -b V4.1.4 git@github.com:coecms/WRF.git
+cd wrf_lrf_les
+install.sh <WRFDIR>
+```
+
+Compilation:
+
+```
+./run_compile --clean --compile_case em_quarter_ss
+```
+
 Implementation in WRF LES of Kuang (2010)'s linear response function.
 
 * The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
@@ -27,7 +42,9 @@ WRFV3/dyn_em:
   module_em.F                      -
   module_first_rk_step_part1.F     -
   module_first_rk_step_part2.F     - 
-  module_initialize_ideal.F        -
+  module_initialize_ideal.F        - fixed bug in hydrostatic rebalancing of ph_1 where c1h(k) and c2h(k)
+				     were used instead of c1h(k-1) and c2h(k-1) as in the first
+				     calculation of ph_1.
   module_nudging.F                 - 
   solve_em.F                       -
   start_em.F                       -
