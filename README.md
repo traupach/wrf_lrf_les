@@ -1,6 +1,8 @@
 # WRF modifications for LRF perturbations
 
-Installation:
+**Implementation in WRF LES of Kuang (2010)'s linear response function.**
+
+## Installation:
 
 ```
 cd <WRFDIR>
@@ -9,14 +11,23 @@ cd <GITDIR>/wrf_lrf_les/WRF/
 code/sh/install_wrf.sh <WRFDIR>/WRF/
 ```
 
-Compilation:
+## WRF compilation:
 
 ```
 cd <WRFDIR>/WRF/WRFV3/
 ./run_compile --clean --compile_case em_quarter_ss
 ```
 
-Implementation in WRF LES of Kuang (2010)'s linear response function.
+## Directory structure:
+
+```
+WRF      - WRF source files modified for this project.
+code     - Code organised by language.
+runtime  - Data files used for running WRF.
+analysis - Jupyter notebooks and python code used to analyse outputs.
+```
+
+## Modifications to WRF:
 
 * The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
