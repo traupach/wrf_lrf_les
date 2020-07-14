@@ -6,12 +6,13 @@ Installation:
 cd <WRFDIR>
 git clone -b V4.1.4 git@github.com:coecms/WRF.git
 cd <GITDIR>/wrf_lrf_les/WRF/
-code/sh/install_wrf.sh <WRFDIR>
+code/sh/install_wrf.sh <WRFDIR>/WRF/
 ```
 
 Compilation:
 
 ```
+cd <WRFDIR>/WRF/WRFV3/
 ./run_compile --clean --compile_case em_quarter_ss
 ```
 
