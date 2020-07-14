@@ -1,22 +1,28 @@
 # WRF modifications for LRF perturbations
 
-**Implementation in WRF LES of Kuang (2010)'s linear response function.**
+Implementation in WRF LES of Kuang (2010)'s linear response function.
 
 ## Installation:
+
+The script `install_wrf.sh` makes backup copies of the original version of modified files, then makes symlinks in a WRF installation to the modified versions.
 
 ```
 cd <WRFDIR>
 git clone -b V4.1.4 git@github.com:coecms/WRF.git
 cd <GITDIR>/wrf_lrf_les/WRF/
-code/sh/install_wrf.sh <WRFDIR>/WRF/
+../code/sh/install_wrf.sh <WRFDIR>/WRF/
 ```
 
 ## WRF compilation:
+
+In this project the `em_quarter_ss` ideal case is used as the base case.
 
 ```
 cd <WRFDIR>/WRF/WRFV3/
 ./run_compile --clean --compile_case em_quarter_ss
 ```
+
+To check compilation, look at the end of the most recent `compile_job.` file.
 
 ## Directory structure:
 
