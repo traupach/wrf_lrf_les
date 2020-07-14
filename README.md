@@ -5,8 +5,8 @@ Installation:
 ```
 cd <WRFDIR>
 git clone -b V4.1.4 git@github.com:coecms/WRF.git
-cd wrf_lrf_les
-install.sh <WRFDIR>
+cd <GITDIR>/wrf_lrf_les/WRF/
+code/sh/install_wrf.sh <WRFDIR>
 ```
 
 Compilation:
