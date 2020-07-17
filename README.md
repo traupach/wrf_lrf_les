@@ -85,7 +85,7 @@ Changes are made to the following files:
 	- load wind profiles and assign relaxation tendencies to U and V if required.
 - `WRFV3/dyn_em/module_first_rk_step_part2.F` - updated function calls:
 	- updated call to `calculate_phy_tend` to pass new tendencies.
-	- updated call to `phy_bc` to pass new wind tendencies.
+	- updated call to `phy_bc` to pass new (wind) tendencies.
 	- updated call to `update_phy_ten` to pass new tendencies.
 - `WRFV3/dyn_em/module_initialize_ideal.F` - updated model initiation (particularly for `quarter_ss` ideal case):
 	- set `mminlu2` to `USGS` and water land-use code to 16.
@@ -95,8 +95,12 @@ Changes are made to the following files:
 	- set variable `TMN` (soil minimum temperature) to `TSK-0.5` (K) where `TSK` is SST.
 - `WRFV3/dyn_em/module_nudging.F` - new module containing the following function:
 	- `apply_light_nudging`: nudge variables towards the grid average of the variable (without using a tendency variable).
-- `WRFV3/dyn_em/solve_em.F`
+- `WRFV3/dyn_em/solve_em.F` -
+	- added printout of information.
+	- added light nudging code into third runge-kutta step. 
+	- updated call to `phy_prep_part2` to pass new tendencies.
 - `WRFV3/dyn_em/start_em.F`
+	- updated call to `phy_init` to pass new tendencies.
 
 ```
 WRFV3/phys:
