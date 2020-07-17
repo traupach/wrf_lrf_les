@@ -102,15 +102,10 @@ Changes are made to the following files:
 - `WRFV3/dyn_em/start_em.F`
 	- updated call to `phy_init` to pass new tendencies.
 
-```
-WRFV3/phys:
-  module_physics_addtendc.F        -
-  module_physics_init.F            - 
-  module_ra_rrtmg_sw.F             - 
-  module_radiation_driver.F        -
-  module_sf_sfclayrev.F            -
-  module_surface_driver.F          -
-
-WRFV3/share:
-  output_wrf.F                     -
-```
+- `WRFV3/phys/module_physics_addtendc.F` - updated function `update_phy_tend` to accept new tendencies and add them to tendency sums.
+- `WRFV3/phys/module_physics_init.F` - updated function `phy_init` to accept new tendencies and initialise them to zero.
+- `WRFV3/phys/module_ra_rrtmg_sw.F` - updated to fix solar constant as per Yi-Ling Hwong's code.
+- `WRFV3/phys/module_radiation_driver.F` - updated to fix solar constant as per Yi-Ling Hwong's code.
+- `WRFV3/phys/module_sf_sfclayrev.F` - implemented ideal evaporation as per Yi-Ling Hwong's code.
+- `WRFV3/phys/module_surface_driver.F`
+- `WRFV3/share/output_wrf.F`
