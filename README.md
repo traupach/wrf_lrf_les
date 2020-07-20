@@ -35,6 +35,24 @@ cd <WRFDIR>/WRF/WRFV3/
 
 To check compilation, look at the end of the most recent `compile_job.` file.
 
+## Scripts
+
+The following scripts are included in this repository:
+
+- Main scripts:
+ 	- `sh/install_wrf.sh` - install the WRF modifications in this repository into a WRF codebase.
+	- `sh/setup_wrf_run.sh` - make a new runtime directory with all files required for a WRF run.
+	- `sh/move_wrf_output.sh` - move all WRF output, settings, and lots for a run to a given directory.
+	- `sh/run_ideal.sh` - run the WRF `ideal.exe` to prepare model.
+	- `sh/run_wrf.sh` - run the WRF model in parallel.
+	- `sh/extract_WRF_vars_parallel.sh` - extract WRF variables for analysis in parallel.
+
+- Helper scripts:
+	- `python/extract_WRF_vars.py` - extract, vertically interpolate and average WRF variables.
+	- `sh/extract_WRF_variables.sh` - call the python extraction script for WRF variables.
+
+## Analysis
+
 ## Modifications to WRF
 
 ### New namelist options
