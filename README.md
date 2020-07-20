@@ -67,8 +67,8 @@ The `analysis` directory contains Jupyter notebooks and python modules to analys
 
 Assuming this respository is cloned to `~/git`:
 
-1. [Install WRF and modifications](#installation)
-2. [Compile WRF](#wrf-compilation)
+1. [Download WRF code and install modifications.](#installation)
+2. [Compile WRF.](#wrf-compilation)
 3. Copy runtime files to a new directory using `~/git/wrf_lrf_les/scripts/sh/setup_wrf_run.sh`. 
 4. `cd` to the runtime directory.
 5. Edit `namelist.input` to set WRF settings.
