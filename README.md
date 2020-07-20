@@ -37,38 +37,52 @@ To check compilation, look at the end of the most recent `compile_job.` file.
 
 ## Modifications to WRF
 
+### New namelist options
+
+Under `rce_control`:
+- `ssttsk` - sea surface temperature for initial state (K).
+- `use_light_nudging` - use light nudging for wind fields?
+- `ideal_evap_flag` - use ideal evaporation?
+- `surface_wind` - surface wind value for initial state (m s-1).
+- `const_rad_cooling` - use prescribed, constant radiative cooling profile as per [Herman and Kuang (2013)](https://doi.org/10.1002/jame.20037)?
+- `relax_uv_winds` - relax U and V winds to target profiles?
+- `wind_relaxation_time` - wind relaxation time (s).
+- `relax_u_profile_file` - filename for target U wind profile.
+- `relax_v_profile_file` - filename for target V wind profile.
+
+Under `lrf_control`:
+- `perturb_t` - perturb temperature (theta)?
+- `perturb_q` - perturb moisture (QV)?  
+- `k_pert` - the 1-based vertical level index to apply perturbations to.
+- `TtendAmp` - amplitude of theta perturbation (K day-1).
+- `QtendAmp` - amplitude of QV perturbation (kg kg-1 day-1).
+
 ### General notes
 
-* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
+* Many of the changes to the code were adapted from code changes made by Yi-Ling Hwong, Maxime Colin, David Fuchs, or Nidhi Nishant for previous versions of WRF. I 
+have updated the code and applied it to v4.1.4. Previously, perturbations were applied by modifying the humidity, temperature, or wind tendencies for the planetary 
+boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables that are treated in the same way to other 
+tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model. 
+
+* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, 
+SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, 
+SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
 ### Specific changes
 
-Note that theta means potential temperature (K), QV means water vapour mixing ratio (kg kg-1), U and V are horizontal winds (m s-1). 'New tendencies' refers to the new tendency variables introduced specifically to be separate from any other scheme (PBL, radiation, etc), which are called `RTHFORCETEN` (theta), `RQVFORCETEN` (QV), `RUFORCETEN` (U) and `RVFORCETEN` (V) in the model code.
+Note that theta means potential temperature (K), QV means water vapour mixing ratio (kg kg-1), U and V are horizontal winds (m s-1). 'New tendencies' refers to the 
+new tendency variables introduced specifically to be separate from any other scheme (PBL, radiation, etc), which are called `RTHFORCETEN` (theta), `RQVFORCETEN` 
+(QV), `RUFORCETEN` (U) and `RVFORCETEN` (V) in the model code.
 
 Changes are made to the following files:
 
-- `WRFV3/Registry/Registry.EM_COMMON` - added variables and options:
+- `WRFV3/Registry/Registry.EM_COMMON`:
 	- made `RTHRATEN` (potential temperature tendency due to radiation scheme) an output variable.
 	- added new grid variables:
 		- `RTHFORCETEN`, `RQVFORCETEN` - tendency due to perturbation forcing in U and V respectively.
 		- `RUFORCETEN`, `RVFORCETEN` - tendency due to wind relaxation in U and V respectively.
 		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V wind profiles for wind relaxation.
-	- added control options: 
-		- `ssttsk` - sea surface temperature for initial state (K).
-		- `use_light_nudging` - use light nudging for wind fields?
-		- `ideal_evap_flag` - use ideal evaporation?
-		- `surface_wind` - surface wind value for initial state (m s-1).
-		- `const_rad_cooling` - use prescribed, constant radiative cooling profile as per [Herman and Kuang (2013)](https://doi.org/10.1002/jame.20037)?
-		- `relax_uv_winds` - relax U and V winds to target profiles?
-		- `wind_relaxation_time` - wind relaxation time (s).
-		- `relax_u_profile_file` - filename for target U wind profile.
-		- `relax_v_profile_file` - filename for target V wind profile.
-		- `perturb_t` - perturb temperature (theta)?
-		- `perturb_q` - perturb moisture (QV)?  
-		- `k_pert` - the 1-based vertical level index to apply perturbations to.
-		- `TtendAmp` - amplitude of theta perturbation (K day-1).
-		- `QtendAmp` - amplitude of QV perturbation (kg kg-1 day-1).
-
+	- added new namelist options. 
 - `WRFV3/dyn_em/Makefile` - added compilation rules for `module_nudging` and `module_LRF`.
 - `WRFV3/dyn_em/module_LRF.F` - new module containing the following functions:
 	- `force_LRF`: force vertical temperature and moisture tendencies.
@@ -95,17 +109,22 @@ Changes are made to the following files:
 	- set variable `TMN` (soil minimum temperature) to `TSK-0.5` (K) where `TSK` is SST.
 - `WRFV3/dyn_em/module_nudging.F` - new module containing the following function:
 	- `apply_light_nudging`: nudge variables towards the grid average of the variable (without using a tendency variable).
-- `WRFV3/dyn_em/solve_em.F` -
+- `WRFV3/dyn_em/solve_em.F`:
 	- added printout of information.
 	- added light nudging code into third runge-kutta step. 
 	- updated call to `phy_prep_part2` to pass new tendencies.
-- `WRFV3/dyn_em/start_em.F`
-	- updated call to `phy_init` to pass new tendencies.
-
+- `WRFV3/dyn_em/start_em.F` - updated call to `phy_init` to pass new tendencies.
 - `WRFV3/phys/module_physics_addtendc.F` - updated function `update_phy_tend` to accept new tendencies and add them to tendency sums.
 - `WRFV3/phys/module_physics_init.F` - updated function `phy_init` to accept new tendencies and initialise them to zero.
 - `WRFV3/phys/module_ra_rrtmg_sw.F` - updated to fix solar constant as per Yi-Ling Hwong's code.
 - `WRFV3/phys/module_radiation_driver.F` - updated to fix solar constant as per Yi-Ling Hwong's code.
-- `WRFV3/phys/module_sf_sfclayrev.F` - implemented ideal evaporation as per Yi-Ling Hwong's code.
-- `WRFV3/phys/module_surface_driver.F`
+- `WRFV3/phys/module_sf_sfclayrev.F` - implemented ideal evaporation and setting of surface wind, as per Yi-Ling Hwong's code.
+	- updated function `sfclayrev` to accept ideal evaporation and surface wind options.
+	- updated function `sfclayrev1d` and call it it, to accept/pass ideal evaporation and surface wind options.
+	- if ideal evaporation is used, surface moist and surface heat fluxes are set to be constant according to the value of the surface wind.
+- `WRFV3/phys/module_surface_driver.F`:
+	- updated function `surface_driver` to accept ideal evaporation and surface wind options.
+	- updated calls to and functions of `sfclayrev_seaice_wrapper` to pass/accept ideal evaporation and surface wind options.
+	- updated call to `sfclayrev` to pass ideal evaporation and surface wind options.
 - `WRFV3/share/output_wrf.F`
+	- updated output to include the values of important options in netcdf files.
