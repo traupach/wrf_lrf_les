@@ -4887,7 +4887,9 @@ SUBROUTINE phy_bc ( config_flags,div,defor11,defor22,defor33,              &
                     RUBLTEN, RVBLTEN,                                      &
                     RUCUTEN, RVCUTEN,                                      &
                     RUSHTEN, RVSHTEN,                                      &
+                    ! Changed T. Raupach
                     ruforceten, rvforceten,                                &
+                    ! End changed block.
                     ids, ide, jds, jde, kds, kde,                          &
                     ims, ime, jms, jme, kms, kme,                          &
                     ips, ipe, jps, jpe, kps, kpe,                          &

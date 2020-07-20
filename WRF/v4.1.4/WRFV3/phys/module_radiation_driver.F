@@ -2,7 +2,7 @@
 !WRF:MEDIATION_LAYER:PHYSICS
 !
 
-! Modified by T. Raupach in 2020 using code by Yi-Ling Huang, to ensure a fixed
+! Modified by T. Raupach in 2020 using code by Yi-Ling Hwong, to ensure a fixed
 ! solar constant; changes are marked with "Changed T. Raupach" and "End changed
 ! block".
 
@@ -3100,7 +3100,7 @@ CONTAINS
        enddo
 
        ! Changed T. Raupach 14.05.2020.
-       coszen = 0.8 ! From Yi-Ling Huang, she noted this is Maxime Colin's
+       coszen = 0.8 ! From Yi-Ling Hwong, she noted this is Maxime Colin's
                     ! change to have constant solar cst.
        ! End changed block.
        

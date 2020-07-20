@@ -7,7 +7,7 @@ module load python3/3.7.4
 module load netcdf/4.7.3
 module load hdf5/1.10.5
 
-SCRIPT="$HOME/code/python/extract_WRF_vars.py"
+SCRIPT="$HOME/git/wrf_lrf_les/scripts/python/extract_WRF_vars.py"
 
 if [ $# -ne 1 ]; then
     echo "extract_WRF_variables.sh: Extract analysis variables from wrfout file."

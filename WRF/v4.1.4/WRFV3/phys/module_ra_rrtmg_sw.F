@@ -1,6 +1,6 @@
 !!MODULE module_ra_rrtmg_sw
 
-! Changes made by T. Raupach in 2020 using Yi-Ling Huang's code to fix the solar
+! Changes made by T. Raupach in 2020 using Yi-Ling Hwong's code to fix the solar
 ! constant. These are marked with "Changed T. Raupach" and "End changed block".
 
       module parrrsw

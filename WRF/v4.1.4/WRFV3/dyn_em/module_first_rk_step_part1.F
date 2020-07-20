@@ -1,7 +1,7 @@
 !WRF:MEDIATION_LAYER:SOLVER
 
-! Updated by T. Raupach in May 2020 using code originally written by Li-Ying
-! Huang for linear response function implementation. These changes are marked
+! Updated by T. Raupach in May 2020 using code originally written by Yi-Ling
+! Hwong for linear response function implementation. These changes are marked
 ! with "Changed T. Raupach" and "End changed block".
 
 #define BENCH_START(A)

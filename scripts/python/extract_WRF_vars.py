@@ -108,6 +108,7 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='RTHFORCETEN'),        # Theta forcing for LRF [K s-1].
     horiz_summary(nc=nc, varname='RQVFORCETEN'),        # Moisture forcing for LRF [kg kg-1 s-1].
     horiz_summary(nc=nc, varname='rh'),                 # Relative humidity [%].
+    horiz_summary(nc=nc, varname='z', interp=False),    # Full geopotential height [m].
     
     # Pressure min and max at eta levels [Pa].
     horiz_summary(nc=nc, varname="P_HYD", operation='min', rename='P_HYD_min', interp=False),

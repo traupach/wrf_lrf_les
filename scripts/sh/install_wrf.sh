@@ -16,7 +16,7 @@ fi
 dir=$1
 
 if [ ! -d WRFV3 ]; then
-    echo "This script should be run from the WRF directory containing WRFV3."
+    echo "This script should be run from the modified WRF code directory containing WRFV3."
     exit
 fi
 

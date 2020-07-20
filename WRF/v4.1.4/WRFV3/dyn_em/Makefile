@@ -4,7 +4,7 @@ LN      =       ln -sf
 MAKE    =       make -i -r
 RM      =       rm -f
 
-# Changed T. Raupach 22.04.2020 (added module_nudging.o).
+# Changed T. Raupach (added module_nudging and module_LRF).
 MODULES =                 		\
         module_advect_em.o   		\
 	module_nudging.o                \
@@ -29,6 +29,7 @@ MODULES =                 		\
 	module_stoch.o			\
 	module_after_all_rk_steps.o	\
 	$(CASE_MODULE)
+# End changed block.
 
 # possible CASE_MODULE settings
 #	module_initialize_b_wave.o      \

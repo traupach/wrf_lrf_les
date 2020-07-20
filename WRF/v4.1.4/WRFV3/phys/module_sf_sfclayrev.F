@@ -2,7 +2,7 @@
 !
 
 ! Modified by Tim Raupach in May 2020 to implement linear response function
-! code, using code by Yi-Ling Huang. Changes are marked with "Changed
+! code, using code by Yi-Ling Hwong. Changes are marked with "Changed
 ! T. Raupach" and "End changed block".
 
 MODULE module_sf_sfclayrev
