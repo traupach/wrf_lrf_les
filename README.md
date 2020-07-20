@@ -37,7 +37,7 @@ To check compilation, look at the end of the most recent `compile_job.` file.
 
 ## Scripts
 
-The following scripts are included in this repository:
+The following scripts are included in this repository in the `scripts` directory:
 
 - Main scripts:
  	- `sh/install_wrf.sh` - install the WRF modifications in this repository into a WRF codebase.
@@ -52,6 +52,34 @@ The following scripts are included in this repository:
 	- `sh/extract_WRF_variables.sh` - call the python extraction script for WRF variables.
 
 ## Analysis
+
+The `analysis` directory contains Jupyter notebooks and python modules to analyse WRF output:
+
+- Jupyter notebooks:
+	- `eta_levels.ipynb` - calculate WRF vertical level (eta-level) settings for desired vertical heights in the initial model setup.
+	- `perturbation_analysis.ipynb` - the main notebook for perturbation analysis.
+- Python modules:
+	- `modules.rcemip_profile` - code to calculate RCEMIP vertical profiles, as per [Wing et al., 2018](https://doi.org/10.5194/gmd-11-793-2018).
+	- `modules.wrf_perturbation` - main code for WRF perturbation analysis.
+	- `modules.wrf_profile` - code to calculate WRF profiles as per WRF's initialisation of ideal cases.
+	
+## How to run 
+
+Assuming this respository is cloned to `~/git`:
+
+1. [Install WRF and modifications](#installation)
+2. [Compile WRF](#compilation)
+3. Copy runtime files to a new directory using `~/git/wrf_lrf_les/scripts/sh/setup_wrf_run.sh`. 
+4. `cd` to the runtime directory.
+5. Edit `namelist.input` to set WRF settings.
+6. Edit `run_wrf.sh` to set job settings.
+7. Run `./run_ideal.sh`.
+7. Use `ncview` to check that the `wrfinput` file is correct.
+8. Submit the job using `qsub run_wrf.sh`.
+9. Make directory for output and copy output there using `move_wrf_output.sh`.
+10. `cd` to output directory.
+11. Extract variables in parallel using `qsub ~/git/wrf_lrf_les/scripts/sh/extract_WRF_vars_parallel.sh`.
+12. Edit notebook `perturbation_analysis.ipynb` to point to output and run to analyse perturbations.
 
 ## Modifications to WRF
 
