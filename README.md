@@ -21,7 +21,7 @@ versions. The modified files are based on code from the CEOCMS version of WRF de
 cd <WRFDIR>
 git clone -b V4.1.4 git@github.com:coecms/WRF.git
 cd <GITDIR>/wrf_lrf_les/WRF/v4.1.4/
-../scripts/sh/install_wrf.sh <WRFDIR>/WRF/
+../../scripts/sh/install_wrf.sh <WRFDIR>/WRF/
 ```
 
 ## WRF compilation
@@ -110,7 +110,7 @@ have updated the code and applied it to v4.1.4. Previously, perturbations were a
 boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables that are treated in the same way to other 
 tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model. 
 
-* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, 
+* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is not called, and instead the theta tendancy due to radiation is prescribed. Note this means the following variables, which are computed by the radiation driver, will not be calculated: `COSZEN, CLDFRA, 
 SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, 
 SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
