@@ -204,7 +204,7 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      INTEGER, INTENT(in), OPTIONAL      ::   IDEAL_EVAP_FLAG
+      logical, INTENT(in), OPTIONAL      ::   IDEAL_EVAP_FLAG
       REAL, INTENT(in), OPTIONAL         ::   surface_wind
       ! End changed block.
       
@@ -363,7 +363,7 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      INTEGER, INTENT(in), OPTIONAL ::   IDEAL_EVAP_FLAG
+      logical, INTENT(in), OPTIONAL ::   IDEAL_EVAP_FLAG
       REAL, INTENT(in), OPTIONAL    ::   surface_wind
       ! End changed block.
       
@@ -1056,7 +1056,7 @@ CONTAINS
         QFX(I)=FLQC(I)*(QSFC(I)-QX(I))
 
         ! Changed T. Raupach 2020.
-        IF (IDEAL_EVAP_FLAG .EQ. 1) THEN
+        IF (IDEAL_EVAP_FLAG .EQV. .TRUE.) THEN
            ! Use constant surface fluxes, as per Chua et al. (2019).
            QFX(I)= 0.0010*surface_wind*(QSFC(I)-QX(I))
         ENDIF 
@@ -1084,7 +1084,7 @@ CONTAINS
        ENDIF
 
        ! Changed T. Raupach 2020.
-       IF (IDEAL_EVAP_FLAG .EQ. 1) THEN
+       IF (IDEAL_EVAP_FLAG .EQV. .TRUE.) THEN
           ! Use constant surface fluxes as per Chua et al (2019).
           HFX(I)= CP*0.0010*surface_wind*(TSK(I)-T1D(I))
        ENDIF

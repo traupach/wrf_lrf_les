@@ -5227,7 +5227,7 @@ END SUBROUTINE phy_prep
    ENDIF
 
    ! Changed T. Raupach 21.05.2020.
-   if(config_flags%perturb_t .gt. 0) then
+   if(config_flags%perturb_t .eqv. .true.) then
       DO J=j_start,j_end
          DO K=k_start,k_end
             DO I=i_start,i_end
@@ -5237,7 +5237,7 @@ END SUBROUTINE phy_prep
       ENDDO
    endif
 
-   if(config_flags%perturb_q .gt. 0 .and. P_QV .ge. PARAM_FIRST_SCALAR) THEN
+   if((config_flags%perturb_q .eqv. .true.) .and. (P_QV .ge. PARAM_FIRST_SCALAR)) THEN
       DO J=j_start,j_end
          DO K=k_start,k_end
             DO I=i_start,i_end
@@ -5247,7 +5247,7 @@ END SUBROUTINE phy_prep
       ENDDO
    endif
 
-   if(config_flags%relax_uv_winds .gt. 0) then
+   if(config_flags%relax_uv_winds .eqv. .true.) then
       DO J=j_start,j_end
          DO K=k_start,k_end
             DO I=i_start,i_end

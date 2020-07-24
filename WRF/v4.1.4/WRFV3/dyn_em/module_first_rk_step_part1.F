@@ -236,6 +236,10 @@ BENCH_END(phy_prep_tim)
          CALL wrf_error_fatal('WRFU_TimeGet failed')
          ENDIF
 
+! Changed T. Raupach.
+! Only call radiation driver if const_rad_cooling is not set.
+if(config_flags%const_rad_cooling .eqv. .false.) then
+         
 ! this driver is only needed to handle non-local shadowing effects
       CALL pre_radiation_driver ( grid, config_flags                        &
      &        ,itimestep=grid%itimestep, ra_call_offset=grid%ra_call_offset    &
@@ -262,7 +266,7 @@ BENCH_END(phy_prep_tim)
       CALL wrf_debug ( 200 , ' call radiation_driver' )
 BENCH_START(rad_driver_tim)
 
-      CALL radiation_driver(                                                  &
+   CALL radiation_driver(                                                  &
      &         p_top=grid%p_top & !DJW 140312 added p_top for vertical nesting
      &        ,ACFRCV=grid%acfrcv      ,ACFRST=grid%acfrst      ,ALBEDO=grid%albedo  &
      &        ,CFRACH=grid%cfrach      ,CFRACL=grid%cfracl      ,CFRACM=grid%cfracm  &
@@ -443,10 +447,10 @@ BENCH_START(rad_driver_tim)
      &         ,EFSS=grid%EFSS,QS_CU=grid%QS_CU)
 
       BENCH_END(rad_driver_tim)
+   endif
 
-   ! Changed T. Raupach.
    ! Prescribe the radiative cooling profile as in Herman and Kuang (2013).
-   if(config_flags%const_rad_cooling .gt. 0) then
+   if(config_flags%const_rad_cooling .eqv. .true.) then
       !$OMP PARALLEL DO   &
       !$OMP PRIVATE ( ij )
       do ij = 1, grid%num_tiles
@@ -514,7 +518,7 @@ BENCH_START(surf_driver_tim)
 
       CALL surface_driver(                                                &
            ! Changed T. Raupach.
-           &        ideal_evap_flag=config_flags%ideal_evap_flag, & 
+           &        ideal_evap_flag=config_flags%ideal_evaporation, & 
            &        surface_wind=config_flags%surface_wind,       &
            ! End changed block.
      &        HYDRO_dt=HYDRO_dt,  sfcheadrt=grid%sfcheadrt,               &
@@ -1477,10 +1481,10 @@ do ij = 1, grid%num_tiles
         kts=k_start, kte=k_end)
 
    ! Relax winds to given profiles?
-   if(config_flags%relax_uv_winds .gt. 0) then
+   if(config_flags%relax_uv_winds .eqv. .true.) then
 
       ! Load target profiles only on first call.
-      if(load_target_profiles .eq. .true.) then
+      if(load_target_profiles .eqv. .true.) then
          call read_target_profiles(num_levels=k_end-k_start,    &
               u_profile_file=config_flags%relax_u_profile_file, &
               v_profile_file=config_flags%relax_v_profile_file, &

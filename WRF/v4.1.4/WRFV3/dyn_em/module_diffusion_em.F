@@ -4951,7 +4951,7 @@ SUBROUTINE phy_bc ( config_flags,div,defor11,defor22,defor33,              &
    ENDIF
 
    ! Changed T. Raupach.
-   if(config_flags%relax_uv_winds .gt. 0) then
+   if(config_flags%relax_uv_winds .eqv. .true.) then
       call set_physical_bc3d(ruforceten, 't', config_flags, &
            ids, ide, jds, jde, kds, kde,                    &
            ims, ime, jms, jme, kms, kme,                    &

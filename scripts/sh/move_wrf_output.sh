@@ -22,6 +22,8 @@ fi
 cp namelist.input $dir
 mv namelist.output $dir
 cp input_sounding $dir
+cp U_target $dir
+cp V_target $dir
 
 ## Output and restart files.
 mv wrfinput_d01 $dir

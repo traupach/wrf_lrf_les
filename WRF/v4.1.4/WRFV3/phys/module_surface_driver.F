@@ -1010,8 +1010,8 @@ CONTAINS
    REAL   , OPTIONAL, INTENT(IN )::   OML_RELAXATION_TIME
 
    ! Changed T. Raupach 2020.
-   INTEGER, INTENT(in), OPTIONAL ::   IDEAL_EVAP_FLAG 
-   REAL   , INTENT(in), OPTIONAL ::   surface_wind
+   logical, INTENT(in), OPTIONAL ::   ideal_evap_flag
+   real   , INTENT(in), OPTIONAL ::   surface_wind
    ! End changed block.
    
 !
@@ -5660,7 +5660,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
      INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX,IZ0TLND
 
      ! Changed T. Raupach 2020.
-     INTEGER, INTENT(in), OPTIONAL :: IDEAL_EVAP_FLAG 
+     logical, INTENT(in), OPTIONAL :: IDEAL_EVAP_FLAG 
      REAL, INTENT(in), OPTIONAL    :: surface_wind 
      INTEGER, INTENT(in), OPTIONAL :: scm_force_flux
      ! End changed block.

@@ -2112,7 +2112,7 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
    ENDIF
 
    ! Changed T. Raupach 22.05.2020.
-   if(config_flags%perturb_t .gt. 0) then
+   if(config_flags%perturb_t .eqv. .true.) then
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
@@ -2122,7 +2122,7 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
       ENDDO
    endif
    
-   if(config_flags%perturb_q .gt. 0 .and. P_QV .ge. PARAM_FIRST_SCALAR) THEN
+   if((config_flags%perturb_q .eqv. .true.) .and. (P_QV .ge. PARAM_FIRST_SCALAR)) THEN
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
@@ -2132,7 +2132,7 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
       ENDDO
    endif
 
-   if(config_flags%relax_uv_winds .gt. 0) then
+   if(config_flags%relax_uv_winds .eqv. .true.) then
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf

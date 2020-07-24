@@ -49,10 +49,10 @@
 			       0.002573, 0.001735, 0.001280, 0.000546, 0.000187
 
  &rce_control
- ssttsk                      = 300,       ! Starting surface temperature [K].
+ ssttsk                      = 301.15,    ! Starting surface temperature [K].
  use_light_nudging           = 0          ! Light nudging on U and V fields?
  ideal_evap_flag             = 1,         ! Use ideal evaporation?
- surface_wind                = 4.8,       ! Surface wind for fluxes [m s-1].
+ surface_wind                = 4.8,       ! Surface U wind for fluxes [m s-1].
  const_rad_cooling           = 1, 	  ! Constant radiative cooling.
  relax_uv_winds              = 1,         ! Relax U, V winds to a profile?
  wind_relaxation_time        = 345600     ! Wind relaxation time [s].

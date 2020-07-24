@@ -881,8 +881,8 @@ BENCH_END(rk_tend_tim)
      ! Perform light nudging on U and V, for stability reasons. Maxime noted: moved (inside
      ! solve_em) from after_all_rk_steps to just before the beginning of the RK steps (here):
 
-     ! If use_light_nudging is set, then run nudging on the last Runge-Kutta step.
-     if(config_flags%use_light_nudging .eqv. .TRUE.) then
+     ! If light_nudging is set, then run nudging on the last Runge-Kutta step.
+     if(config_flags%light_nudging .eqv. .TRUE.) then
      
         !$OMP PARALLEL DO   &
         !$OMP PRIVATE ( ij )

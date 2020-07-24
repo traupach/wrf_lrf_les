@@ -35,7 +35,8 @@ CONTAINS
     implicit none
 
     ! Input variables.
-    integer, intent(in)                                  :: perturb_t, perturb_q, k_pert
+    logical, intent(in)                                  :: perturb_t, perturb_q
+    integer, intent(in)                                  :: k_pert
     real, intent(in)                                     :: TtendAmp, QtendAmp
     real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: p, pi
     integer, intent(in)                                  :: ids,ide,jds,jde,kds,kde, &
@@ -55,7 +56,7 @@ CONTAINS
 
 
     ! If neither temperature or moisture are to be perturbed, return.
-    if (perturb_t .eq. 0 .and. perturb_q .eq. 0) return
+    if ((perturb_t .eqv. .false.) .and. (perturb_q .eqv. .false.)) return
   
     ! The forcing form is from the one used in Appendix A of Kuang 2012. The
     ! difference btw this form and the one used in Equation (4) of Herman and
@@ -75,7 +76,7 @@ CONTAINS
              
              ! Temperature forcing as a forcing on potential temperature
              ! (theta) tendency.
-             if(perturb_t .gt. 0) then
+             if(perturb_t .eqv. .true.) then
                 tten(i,k,j) = 0.5 * (TtendAmp/86400 * & 
                      (deltaf + exp(-((p(i,k,j)-p(i,k_pert,j))/7500.)**2.)))
 
@@ -84,7 +85,7 @@ CONTAINS
              endif
              
              ! Moisture forcing as a forcing on moisture tendency.
-             if(perturb_q .gt. 0) then
+             if(perturb_q .eqv. .true.) then
                 qten(i,k,j) = 0.5 * (QtendAmp/86400 * & 
                      (deltaf + exp(-((p(i,k,j)-p(i,k_pert,j))/7500.)**2.)))
                 
