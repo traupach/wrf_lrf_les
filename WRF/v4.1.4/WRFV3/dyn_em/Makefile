@@ -9,6 +9,7 @@ MODULES =                 		\
         module_advect_em.o   		\
 	module_nudging.o                \
         module_LRF.o                    \
+	module_ideal_radiation.o        \
 	module_diffusion_em.o  		\
 	module_small_step_em.o 		\
         module_big_step_utilities_em.o  \

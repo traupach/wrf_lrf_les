@@ -53,6 +53,7 @@ CONTAINS
     ! Changed T. Raupach.
     USE module_force_scm
     USE module_LRF
+    USE module_ideal_radiation
     ! End changed block.
     USE module_convtrans_prep
     USE module_big_step_utilities_em, ONLY : phy_prep
@@ -151,8 +152,6 @@ CONTAINS
    CHARACTER (LEN=256) :: mminlu
    CHARACTER (LEN=1000) :: message
    ! Changed T. Raupach.
-   REAL :: t_tend
-   INTEGER :: k
    LOGICAL, SAVE :: load_target_profiles = .true.
    ! End changed block
 
@@ -452,29 +451,15 @@ BENCH_START(rad_driver_tim)
    ! Prescribe the radiative cooling profile as in Herman and Kuang (2013).
    if(config_flags%const_rad_cooling .eqv. .true.) then
       !$OMP PARALLEL DO   &
-      !$OMP PRIVATE ( ij )
+      !$OMP PRIVATE (ij)
       do ij = 1, grid%num_tiles
-         DO j=grid%j_start(ij), min(grid%j_end(ij), jde-1)
-            DO k=k_start, min(k_end, kde-1)
-               DO i=grid%i_start(ij), min(grid%i_end(ij), ide-1)
-                  
-                  if (grid%p_hyd(i,k,j) .ge. 20000) then             
-                     ! From surface to 200 hPa, constant radiative cooling value
-                     ! of Qrad = -1.5 K day-1 (converted to K s-1).
-                     t_tend = -1.5/86400
-                  else if (grid%p_hyd(i,k,j) .le. 10000) then
-                     ! Above 100 hPa, radiative cooling is zero.
-                     t_tend = 0.0
-                  else
-                     ! Linear change between 200 hPa and 100 hPa.
-                     t_tend = -((1.5*grid%p_hyd(i,k,j)/10000 - 1.5) / 86400)   
-                  endif
-                  
-                  ! Convert from temperature tendency to theta tendency.
-                  grid%rthraten(i,k,j) = t_tend/pi_phy(i,k,j) 
-               enddo
-            enddo
-         enddo
+         call fix_radiation(p_hyd=grid%p_hyd, pi_phy=pi_phy, rthraten=grid%rthraten, &
+              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+              ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+              its=grid%i_start(ij), ite=grid%i_end(ij),             &
+              jts=grid%j_start(ij), jte=grid%j_end(ij),             &
+              kts=k_start, kte=k_end)
       enddo
       !$OMP END PARALLEL DO
    end if
