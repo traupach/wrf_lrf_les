@@ -21,7 +21,7 @@ versions. The modified files are based on code from the CEOCMS version of WRF de
 cd <WRFDIR>
 git clone -b V4.1.4 git@github.com:coecms/WRF.git
 cd <GITDIR>/wrf_lrf_les/WRF/v4.1.4/
-../scripts/sh/install_wrf.sh <WRFDIR>/WRF/
+../../scripts/sh/install_wrf.sh <WRFDIR>/WRF/
 ```
 
 ## WRF compilation
@@ -34,6 +34,52 @@ cd <WRFDIR>/WRF/WRFV3/
 ```
 
 To check compilation, look at the end of the most recent `compile_job.` file.
+
+## Scripts
+
+The following scripts are included in this repository in the `scripts` directory:
+
+- Main scripts:
+ 	- `sh/install_wrf.sh` - install the WRF modifications in this repository into a WRF codebase.
+	- `sh/setup_wrf_run.sh` - make a new runtime directory with all files required for a WRF run.
+	- `sh/move_wrf_output.sh` - move all WRF output, settings, and lots for a run to a given directory.
+	- `sh/run_ideal.sh` - run the WRF `ideal.exe` to prepare model.
+	- `sh/run_wrf.sh` - run the WRF model in parallel.
+	- `sh/extract_WRF_vars_parallel.sh` - extract WRF variables for analysis in parallel.
+
+- Helper scripts:
+	- `python/extract_WRF_vars.py` - extract, vertically interpolate and average WRF variables.
+	- `sh/extract_WRF_variables.sh` - call the python extraction script for WRF variables.
+
+## Analysis
+
+The `analysis` directory contains Jupyter notebooks and python modules to analyse WRF output:
+
+- Jupyter notebooks:
+	- `eta_levels.ipynb` - calculate WRF vertical level (eta-level) settings for desired vertical heights in the initial model setup.
+	- `perturbation_analysis.ipynb` - the main notebook for perturbation analysis.
+- Python modules:
+	- `modules.rcemip_profile` - code to calculate RCEMIP vertical profiles, as per [Wing et al., 2018](https://doi.org/10.5194/gmd-11-793-2018).
+	- `modules.wrf_perturbation` - main code for WRF perturbation analysis.
+	- `modules.wrf_profile` - code to calculate WRF profiles as per WRF's initialisation of ideal cases.
+	
+## How to run 
+
+Assuming this respository is cloned to `~/git`:
+
+1. [Download WRF code and install modifications.](#installation)
+2. [Compile WRF.](#wrf-compilation)
+3. Copy runtime files to a new directory using `~/git/wrf_lrf_les/scripts/sh/setup_wrf_run.sh`. 
+4. `cd` to the runtime directory.
+5. Edit `namelist.input` to set WRF settings.
+6. Edit `run_wrf.sh` to set job settings.
+7. Run `./run_ideal.sh`.
+7. Use `ncview` to check that the `wrfinput` file is correct.
+8. Submit the job using `qsub run_wrf.sh`.
+9. Make directory for output and copy output there using `move_wrf_output.sh`.
+10. `cd` to output directory.
+11. Extract variables in parallel using `qsub ~/git/wrf_lrf_les/scripts/sh/extract_WRF_vars_parallel.sh`.
+12. Edit notebook `perturbation_analysis.ipynb` to point to output and run to analyse perturbations.
 
 ## Modifications to WRF
 
@@ -64,7 +110,7 @@ have updated the code and applied it to v4.1.4. Previously, perturbations were a
 boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables that are treated in the same way to other 
 tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model. 
 
-* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is called, and immediately afterwards the theta tendancy due to radiation is prescribed. Note this may affect the accuracy of the following variables which are computed by the radiation driver: `COSZEN, CLDFRA, 
+* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is not called, and instead the theta tendancy due to radiation is prescribed. Note this means the following variables, which are computed by the radiation driver, will not be calculated: `COSZEN, CLDFRA, 
 SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, 
 SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
