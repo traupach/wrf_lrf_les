@@ -1,7 +1,7 @@
 ! AUTHOR: Yi-Ling Hwong (CCRC), with modifications by Tim Raupach, 2020.
 !
-! Forces vertical temperature or moisture tendencies to implement Herman & Kuang
-! (2013) Linear Response Function (LRF).
+! Functions for forcing vertical temperature or moisture tendencies to implement
+! Herman & Kuang (2013) Linear Response Function (LRF).
 
 module module_LRF
   
@@ -94,7 +94,6 @@ CONTAINS
           enddo
        enddo
     enddo
-    
   end subroutine force_LRF
 
   subroutine relax_winds_to_profile(uten, vten, u, v, &
@@ -129,10 +128,9 @@ CONTAINS
          ips, ipe, jps, jpe, kps, kpe, &
          its, ite, jts, jte, kts, kte
 
-    integer                                    :: i,j,k
-    real, dimension(kte)                       :: target_wind_u, target_wind_v
-    character (len=256)                        :: message       
-    real                                       :: tau
+    integer              :: i,j,k
+    real, dimension(kte) :: target_wind_u, target_wind_v
+    real                 :: tau
 
     ! Determine how many time steps there are in the relaxation time.
     tau = relaxation_time / dt
@@ -148,8 +146,84 @@ CONTAINS
     enddo
   end subroutine relax_winds_to_profile
 
+  subroutine relax_stratospheric_t_qv( &
+       t_phy, qv, p_hyd, dt,           &
+       relax_t, relax_q,               &
+       target_t, target_q,             &
+       ids, ide, jds, jde, kds, kde,   &
+       ims, ime, jms, jme, kms, kme,   &
+       ips, ipe, jps, jpe, kps, kpe,   &
+       its, ite, jts, jte, kts, kte)
+    ! Relax T and q in the stratosphere to match a given target profile, as per
+    ! Figure 1 in Herman and Kuang (2013).
+    !
+    ! t_phy: The theta field to adjust [K].
+    ! qv: The water vapour mixing ratio field to adjust [kg kg-1].
+    ! p_hyd: Hydrostatic pressure [Pa].
+    ! dt: Timestep length [s].
+    ! relax_t: Output variable to store the relaxation amount for T [K].
+    ! relax_q: Output variable to store the relaxation amount of q [kg kg-1].
+    ! target_t: Target profile for T [K].
+    ! target_q: Target profile for q [kg kg-1].
+    ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
+    ! ims, ime, jms, jme, kms, kme: Memory dimensions.
+    ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
+    ! its, ite, jts, jte, kts, kte: Tile dimensions.
+
+    implicit none
+    
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: t_phy, qv
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(in)    :: p_hyd
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(out)   :: relax_t, relax_q
+    real, dimension(kte), intent(in) :: target_t, target_q
+    real, intent(in) :: dt
+    integer, intent(in) :: &
+         ids, ide, jds, jde, kds, kde, &
+         ims, ime, jms, jme, kms, kme, &
+         ips, ipe, jps, jpe, kps, kpe, &
+         its, ite, jts, jte, kts, kte
+    
+    integer :: i, j, k
+    real    :: tau, relaxation_time
+
+    ! Two days in seconds, meaning the maximum relaxation constant is 0.5 day-1
+    ! as per Herman and Kuang 2013.
+    relaxation_time = 2*24*3600 
+    
+    do i = its, min(ite, ide-1)
+       do k = kts, min(kte, kde-1)
+          do j = jts, min(jte, jde-1)
+             if (p_hyd(i,k,j) .ge. 16000) then
+                ! Below 160 hPa, don't do any relaxation of T or q. 
+                relax_t(i,k,j) = 0.0
+                relax_q(i,k,j) = 0.0
+             else
+                if (p_hyd(i,k,j) .le. 10000) then
+                   ! Above 100 hPa, use the full relaxation time.
+                   tau = relaxation_time
+                else
+                   ! Between 160 hPa and 100 hPa, vary tau linearly.
+                   tau = ((16000 - p_hyd(i,k,j)) * relaxation_time) / 10000
+                endif
+
+                ! Convert tau from per second to per timestep.
+                tau = tau / dt
+                
+                ! Relaxation amount per timestep.
+                relax_t(i,k,j) = -(t_phy(i,k,j) - target_t(k)) / tau
+                relax_q(i,k,j) = -(qv(i,k,j) - target_q(k)) / tau
+             endif
+
+             ! Relax the variables by the relaxation amoujnt.
+             t_phy(i,k,j) = t_phy(i,k,j) + relax_t(i,k,j)
+             qv(i,k,j) = qv(i,k,j) + relax_q(i,k,j)
+          enddo
+       enddo
+    enddo
+  end subroutine relax_stratospheric_t_qv
+  
   subroutine read_profile_file(num_levels, profile_file, vals)
-    ! Read a profile from file.
+    ! Read a profile from file. Expect one value per line.
     ! ---
     ! num_levels: The number of levels (values) to read.
     ! profile_file: The file to read from.
@@ -172,14 +246,13 @@ CONTAINS
     enddo
 
     close(unit=10, status='keep')
-    
   end subroutine read_profile_file
   
-  subroutine read_target_profiles(num_levels, u_profile_file, v_profile_file, &
-       u_val, v_val)
+  subroutine read_wind_target_profiles(num_levels, u_profile_file, &
+       v_profile_file, u_val, v_val)
     ! Read U and V profiles from two files.
     ! ---
-    ! num_levels: The number of levels (values) to read.
+    ! num_levels: The number of levels (values) to read, one per line.
     ! u_profile_file: The file to read from for U.
     ! v_profile_file: The file to read from for V.
     ! u_val: The read values (output) for U.
@@ -195,7 +268,82 @@ CONTAINS
     
     call read_profile_file(num_levels, u_profile_file, u_val)
     call read_profile_file(num_levels, v_profile_file, v_val)
+  end subroutine read_wind_target_profiles
 
-  end subroutine read_target_profiles
+  subroutine read_tq_target_profiles(num_levels, t_profile_file, &
+       q_profile_file, t_val, q_val)
+    ! Read U and V profiles from two files.
+    ! ---
+    ! num_levels: The number of levels (values) to read, one per line.
+    ! t_profile_file: The file to read from for T.
+    ! q_profile_file: The file to read from for q.
+    ! t_val: The read values (output) for T.
+    ! q_val: The read values (output) for q.
+    
+    implicit none
+    integer, intent(in) :: num_levels
+    character(len=*), intent(in) :: t_profile_file, q_profile_file
+    real, dimension(num_levels), intent(inout) :: t_val, q_val
+    write(6,*) 'Loading target profiles for T and q stratospheric relaxation.'
+    write(6,*) 'T target profile file:', t_profile_file
+    write(6,*) 'q target profile file:', q_profile_file
+    
+    call read_profile_file(num_levels, t_profile_file, t_val)
+    call read_profile_file(num_levels, q_profile_file, q_val)
+  end subroutine read_tq_target_profiles
 
+  subroutine fix_radiation( &
+       p_hyd, pi_phy, rthraten,      &
+       ids, ide, jds, jde, kds, kde, &
+       ims, ime, jms, jme, kms, kme, &
+       ips, ipe, jps, jpe, kps, kpe, &
+       its, ite, jts, jte, kts, kte)
+
+    ! Set the radiation profile to a constant cooling profile as per Herman and
+    ! Kuang (2013).
+    !
+    ! p_hyd: hydrostatic pressure at mass points.
+    ! pi_phy: the Exner function (absolute temperature/potential temperature).
+    ! rthraten: theta tendency due to radiation; set by this function.
+    ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
+    ! ims, ime, jms, jme, kms, kme: Memory dimensions.
+    ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
+    ! its, ite, jts, jte, kts, kte: Tile dimensions.
+    
+    implicit none
+    
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: p_hyd, pi_phy
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: rthraten
+    integer, intent(in) :: &
+         ids, ide, jds, jde, kds, kde, &
+         ims, ime, jms, jme, kms, kme, &
+         ips, ipe, jps, jpe, kps, kpe, &
+         its, ite, jts, jte, kts, kte
+    
+    integer :: i,j,k
+    real :: t_tend
+    
+    do j = jts, min(jte, jde-1)
+       do k = kts, min(kte, kde-1)
+          do i = its, min(ite, ide-1)
+
+             if (p_hyd(i,k,j) .ge. 20000) then             
+                ! From surface to 200 hPa, constant radiative cooling value
+                ! of Qrad = -1.5 K day-1 (converted to K s-1).
+                t_tend = -1.5/86400
+             else if (p_hyd(i,k,j) .le. 10000) then
+                ! Above 100 hPa, radiative cooling is zero.
+                t_tend = 0.0
+             else
+                ! Linear change between 200 hPa and 100 hPa.
+                t_tend = -((1.5*p_hyd(i,k,j)/10000 - 1.5) / 86400)   
+             endif
+             
+             ! Convert from temperature tendency to theta tendency.
+             rthraten(i,k,j) = t_tend/pi_phy(i,k,j) 
+          enddo
+       enddo
+    enddo
+  end subroutine fix_radiation
+  
 end module module_LRF

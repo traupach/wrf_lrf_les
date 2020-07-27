@@ -1699,6 +1699,10 @@ state  real  RUFORCETEN              ikj  misc  1  -  rh  "RUFORCETEN"          
 state  real  RVFORCETEN              ikj  misc  1  -  rh  "RVFORCETEN"              "FORCED V TENDENCY FOR WIND RELAXATION"  "m s-1"
 state  real  RELAX_U_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_U_TARGET_PROFILE"  "TARGET PROFILE FOR U"                   "m s-1"
 state  real  RELAX_V_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_V_TARGET_PROFILE"  "TARGET PROFILE FOR V"                   "m s-1"
+state  real  RELAX_T                 ikj  misc  1  -  rh  "RELAX_T"                 "LRF TEMPERATURE RELAXATION"             "K"
+state  real  RELAX_Q                 ikj  misc  1  -  rh  "RELAX_Q"                 "LRF MOISTURE RELAXATION"                "kg kg-1"
+state  real  RELAX_T_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_T_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR T"             "K"
+state  real  RELAX_Q_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_Q_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR Q"             "kg kg-1"
 # End changed block.
 
 # For Noah UA changes
@@ -2757,13 +2761,16 @@ rconfig   integer     ideal_case          namelist,ideal        1              0
 # Changed T. Raupach.
 # RCE run controls.
 rconfig  real      ssttsk                namelist,rce_control  1  302.        -  "ssttsk"                "Surface temperature (K) in the initial condition"             "K"
-rconfig  logical   light_nudging         namelist,rce_control  1  0           -  "light_nudging"         "Use light nudging to push U and V towards grid means?"        ""
+rconfig  logical   light_nudging         namelist,rce_control  1  .false.     -  "light_nudging"         "Use light nudging to push U and V towards grid means?"        ""
 rconfig  real      light_nudging_time    namelist,rce_control  1  7200.       -  "light_nudging_time"    "Time scale for light nudging."                                "s"
-rconfig  logical   ideal_evaporation     namelist,rce_control  1  0           -  "ideal_evaporation"       "Make evaporation only depend on rho,u_lowest,qsfac,q_lowest?" ""
+rconfig  logical   ideal_evaporation     namelist,rce_control  1  .false.     -  "ideal_evaporation"       "Make evaporation only depend on rho,u_lowest,qsfac,q_lowest?" ""
 rconfig  real      surface_wind          namelist,rce_control  1  0           -  "surface_wind"          "Surface wind for surface fluxes calculation"                  "m s-1"
-rconfig  logical   const_rad_cooling     namelist,rce_control  1  0           -  "const_rad_cooling"     "Use a constant radiative cooling profile as per Huang 2013?"  ""
-rconfig  logical   relax_uv_winds        namelist,rce_control  1  0           -  "relax_uv_winds"        "Relax U and V winds towards target profiles?"                 ""
+rconfig  logical   const_rad_cooling     namelist,rce_control  1  .false.     -  "const_rad_cooling"     "Use a constant radiative cooling profile as per Huang 2013?"  ""
+rconfig  logical   relax_uv_winds        namelist,rce_control  1  .false.     -  "relax_uv_winds"        "Relax U and V winds towards target profiles?"                 ""
 rconfig  real      wind_relaxation_time  namelist,rce_control  1  7200.       -  "wind_relaxation_time"  "Time scale for wind relaxation."                              "s"
+rconfig  logical   relax_stratosphere    namelist,rce_control  1  .false.     -  "relax_stratosphere"    "Relax T and q to target profile in stratosphere?"             ""
+rconfig  character relax_t_profile_file  namelist,rce_control  1  "t_profile" -  "relax_t_profile_file"  "Target profile file for T."                                   ""
+rconfig  character relax_q_profile_file  namelist,rce_control  1  "q_profile" -  "relax_q_profile_file"  "Target profile file for q."                                   ""
 rconfig  character relax_u_profile_file  namelist,rce_control  1  "u_profile" -  "relax_u_profile_file"  "Target profile file for U."                                   ""
 rconfig  character relax_v_profile_file  namelist,rce_control  1  "v_profile" -  "relax_v_profile_file"  "Target profile file for V."                                   ""
 

@@ -13,7 +13,8 @@ CONTAINS
        ips, ipe, jps, jpe, kps, kpe, &
        its, ite, jts, jte, kts, kte)
 
-    ! Set the radiation profile to a constant cooling profile as per Herman and Kuang (2013).
+    ! Set the radiation profile to a constant cooling profile as per Herman and
+    ! Kuang (2013).
     !
     ! p_hyd: hydrostatic pressure at mass points.
     ! pi_phy: the Exner function (absolute temperature/potential temperature).
@@ -25,9 +26,9 @@ CONTAINS
     
     implicit none
     
-    real, dimension(ims:ime,kms:kme,jms:jme), intent(in)    :: p_hyd, pi_phy
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: p_hyd, pi_phy
     real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: rthraten
-    integer, intent(in)                                     :: &
+    integer, intent(in) :: &
          ids, ide, jds, jde, kds, kde, &
          ims, ime, jms, jme, kms, kme, &
          ips, ipe, jps, jpe, kps, kpe, &

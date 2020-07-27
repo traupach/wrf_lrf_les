@@ -80,11 +80,15 @@ SUBROUTINE solve_em ( grid , config_flags  &
    USE module_cpl, ONLY : coupler_on, cpl_settime, cpl_store_input
 
    ! Changed by T. Raupach to include light nudging code by Maxime Colin; other
-   ! nudging-related changes in this file related to nudging (including
+   ! light-nudging-related changes in this file related to nudging (including
    ! print_info use) are also based on Maxime's nudging code, cleaned and
    ! updated to use module_nudging.F. Further changes (inclusion of rthforceten
    ! and rqvforceten and ruforceten and rvforceten) are independent.
-   USE module_nudging
+   USE module_nudging, ONLY: apply_light_nudging
+
+   ! Also include module_LRF for modified versions of Yi-Ling Hwong's
+   ! code for relaxation of stratospheric T and q fields.
+   USE module_LRF, ONLY : read_tq_target_profiles, relax_stratospheric_t_qv
    ! End changed block.
    
    IMPLICIT NONE
@@ -191,6 +195,10 @@ SUBROUTINE solve_em ( grid , config_flags  &
    INTEGER                                    :: num, den
    TYPE(WRFU_TimeInterval)                    :: dtInterval, intervaltime,restartinterval
 
+   ! Changed T. Raupach.
+   LOGICAL, SAVE :: load_target_tq_profiles = .true.
+   ! End changed block
+   
 ! Define benchmarking timers if -DBENCH is compiled
 #include "bench_solve_em_def.h"
 
@@ -876,10 +884,10 @@ BENCH_END(rk_tend_tim)
      ENDIF
 
      ! Changed T. Raupach 21.05.2020.
-     ! Start of nudging section ------------------------------------------------------------
 
-     ! Perform light nudging on U and V, for stability reasons. Maxime noted: moved (inside
-     ! solve_em) from after_all_rk_steps to just before the beginning of the RK steps (here):
+     ! If light_nudging is true, then perform light nudging on U and V, for
+     ! stability reasons. Maxime noted: moved (inside solve_em) from
+     ! after_all_rk_steps to just before the beginning of the RK steps (here).
 
      ! If light_nudging is set, then run nudging on the last Runge-Kutta step.
      if(config_flags%light_nudging .eqv. .TRUE.) then
@@ -4660,7 +4668,38 @@ BENCH_END(bc_2d_tim)
                             imsy, imey, jmsy, jmey, kmsy, kmey,  &
                             ipsy, ipey, jpsy, jpey, kpsy, kpey   )
 
+  ! Changed T. Raupach 2020.
+  if(config_flags%relax_stratosphere .eqv. .true.) then
 
+      ! Load target profiles only on first call.
+      if(load_target_tq_profiles .eqv. .true.) then
+         call read_tq_target_profiles(num_levels=k_end-k_start, &
+              t_profile_file=config_flags%relax_q_profile_file, &
+              q_profile_file=config_flags%relax_t_profile_file, &
+              t_val=grid%relax_t_target_profile,                &
+              q_val=grid%relax_q_target_profile)
+         load_target_tq_profiles = .false.
+      endif
+     
+     !$OMP PARALLEL DO PRIVATE (ij)
+     do ij = 1 , grid%num_tiles
+        call relax_stratospheric_t_qv(t_phy=grid%t_phy,            &
+             qv=moist(ims,kms,jms,P_QV), p_hyd=grid%p_hyd,         &
+             dt=grid%dt,                                           &
+             relax_t=grid%relax_t, relax_q=grid%RELAX_Q,           &
+             target_t=grid%relax_t_target_profile,                 &
+             target_q=grid%relax_q_target_profile,                 &
+             ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+             ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+             ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+             its=grid%i_start(ij), ite=min(grid%i_end(ij), ide-1), &
+             jts=grid%j_start(ij), jte=min(grid%j_end(ij), jde-1), &
+             kts=k_start, kte=min(k_end, kde-1))
+     enddo
+     !$OMP END PARALLEL DO
+     
+  endif
+  ! End changed block.
 
 #ifdef DM_PARALLEL
 !-----------------------------------------------------------------------

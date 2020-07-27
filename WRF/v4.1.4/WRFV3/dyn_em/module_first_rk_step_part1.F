@@ -53,7 +53,6 @@ CONTAINS
     ! Changed T. Raupach.
     USE module_force_scm
     USE module_LRF
-    USE module_ideal_radiation
     ! End changed block.
     USE module_convtrans_prep
     USE module_big_step_utilities_em, ONLY : phy_prep
@@ -152,7 +151,7 @@ CONTAINS
    CHARACTER (LEN=256) :: mminlu
    CHARACTER (LEN=1000) :: message
    ! Changed T. Raupach.
-   LOGICAL, SAVE :: load_target_profiles = .true.
+   LOGICAL, SAVE :: load_target_uv_profiles = .true.
    ! End changed block
 
    ! End changed block.
@@ -1449,7 +1448,9 @@ BENCH_END(shcu_driver_tim)
 ! Changed T. Raupach.
 !$OMP PARALLEL DO PRIVATE (ij)
 do ij = 1, grid%num_tiles
-   CALL force_LRF(perturb_t=config_flags%perturb_t,           &
+
+   ! Perturb T and Q for LRF analysis.
+   call force_LRF(perturb_t=config_flags%perturb_t,           &
         perturb_q=config_flags%perturb_q,                     &
         k_pert=config_flags%k_pert,                           &
         TtendAmp=config_flags%TtendAmp,                       &
@@ -1469,13 +1470,13 @@ do ij = 1, grid%num_tiles
    if(config_flags%relax_uv_winds .eqv. .true.) then
 
       ! Load target profiles only on first call.
-      if(load_target_profiles .eqv. .true.) then
-         call read_target_profiles(num_levels=k_end-k_start,    &
-              u_profile_file=config_flags%relax_u_profile_file, &
-              v_profile_file=config_flags%relax_v_profile_file, &
-              u_val=grid%relax_u_target_profile,                &
+      if(load_target_uv_profiles .eqv. .true.) then
+         call read_wind_target_profiles(num_levels=k_end-k_start, &
+              u_profile_file=config_flags%relax_u_profile_file,   &
+              v_profile_file=config_flags%relax_v_profile_file,   &
+              u_val=grid%relax_u_target_profile,                  &
               v_val=grid%relax_v_target_profile)
-         load_target_profiles = .false.
+         load_target_uv_profiles = .false.
       endif
 
       ! Relax U and V winds.
@@ -1492,7 +1493,7 @@ do ij = 1, grid%num_tiles
            its=grid%i_start(ij), ite=grid%i_end(ij),             &
            jts=grid%j_start(ij), jte=grid%j_end(ij),             &
            kts=k_start, kte=k_end)
-     endif
+   endif
 enddo
 !$OMP END PARALLEL DO
 ! End changed block.
