@@ -2777,7 +2777,7 @@ rconfig  character relax_v_profile_file  namelist,rce_control  1  "v_profile" - 
 # LRF controls
 rconfig  logical  perturb_t           namelist,lrf_control  1   0        -   "perturb_t"           "LRF perturb temperature switch"                               ""
 rconfig  logical  perturb_q           namelist,lrf_control  1   0        -   "perturb_q"           "LRF perturb QV switch"                                        ""
-rconfig  integer  k_pert              namelist,lrf_control  1   0        -   "k_pert"          	   "Perturbation level"                                           ""
+rconfig  real     p_pert              namelist,lrf_control  1   0        -   "p_pert"          	   "Pressure of maximum perturbation"                             "hPa"
 rconfig  real     TtendAmp            namelist,lrf_control  1   0        -   "TtendAmp"        	   "Amplitude of temperature tendency perturbation"		  "K day-1"
 rconfig  real     QtendAmp            namelist,lrf_control  1   0        -   "QtendAmp"        	   "Amplitude of moisture tendency perturbation"              	  "kg kg-1 day-1"
 # End changed block.

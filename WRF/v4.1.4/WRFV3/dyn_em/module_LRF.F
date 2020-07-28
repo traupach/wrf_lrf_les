@@ -9,7 +9,7 @@ CONTAINS
   
   subroutine force_LRF( &
        perturb_t, perturb_q, & 
-       k_pert, TtendAmp, QtendAmp, &
+       p_pert, TtendAmp, QtendAmp, &
        p, pi, thten, qvten, &
        ids, ide, jds, jde, kds, kde, &
        ims, ime, jms, jme, kms, kme, &
@@ -20,7 +20,7 @@ CONTAINS
     ! ---
     ! perturb_t: Perturb temperature tendencies?
     ! perturb_q: Perturb moisture tendencies?
-    ! k_pert: The index of the level (k) to perturb.
+    ! p_pert: The pressure around which to perturb [hPa].
     ! TtendAmp: Temperature (dT/dt) perturbation [K day-1].
     ! QtendAmp: Water vapour mixing ratio (dq/dt) perturbation [kg kg-1 day-1].
     ! p: Pressure field.
@@ -36,7 +36,7 @@ CONTAINS
 
     ! Input variables.
     logical, intent(in)                                  :: perturb_t, perturb_q
-    integer, intent(in)                                  :: k_pert
+    real, intent(in)                                     :: p_pert
     real, intent(in)                                     :: TtendAmp, QtendAmp
     real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: p, pi
     integer, intent(in)                                  :: ids,ide,jds,jde,kds,kde, &
@@ -45,51 +45,41 @@ CONTAINS
                                                             its,ite,jts,jte,kts,kte  
 
     ! Input/output variables.
-    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: thten 
-    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: qvten 
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: thten ! dT/dt (K s-1).
+    real, dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: qvten ! dq/dt (kg kg-1 s-1).
     
     ! Local variables.
-    real, dimension(ims:ime,kms:kme,jms:jme) :: tten   ! dT/dt (K/s).
-    real, dimension(ims:ime,kms:kme,jms:jme) :: qten   ! dq/dt (kg/kg/s).
-    real                                     :: deltaf ! Dirac delta function.
     integer                                  :: i,j,k
-
+    real                                     :: forcing
+    
 
     ! If neither temperature or moisture are to be perturbed, return.
     if ((perturb_t .eqv. .false.) .and. (perturb_q .eqv. .false.)) return
   
-    ! The forcing form is from the one used in Appendix A of Kuang 2012. The
-    ! difference btw this form and the one used in Equation (4) of Herman and
-    ! Kuang 2013 is a factor of 1/2. Note 86400 is number of s in a day.
+    ! The forcing form is from the one used in Appendix A of Kuang 2012. Their
+    ! forcing is around a vertical level and is the mean of a delta function and
+    ! gamma function. We adapr the form to use only use the gamma function part
+    ! and perturb around a pressure, not a level. This is because the pressure
+    ! levels in the model may not exactly align with the pressure around which
+    ! we want to perturb.
 
     ! Loop over staggered grid.
     do i = its, min(ite, ide-1)
        do k = kts, min(kte, kde-1)
           do j = jts, min(jte, jde-1)
 
-             ! Delta function.
-             if(k == k_pert) then
-                deltaf = 1.0
-             else
-                deltaf = 0.0
-             endif
+             forcing = exp(-((p(i,k,j)-(p_pert*100))/7500.)**2.)
              
-             ! Temperature forcing as a forcing on potential temperature
-             ! (theta) tendency.
+             ! Temperature forcing as a forcing on potential temperature (theta)
+             ! tendency. Convert dT/dt to theta tendency by dividing by the
+             ! exner function.
              if(perturb_t .eqv. .true.) then
-                tten(i,k,j) = 0.5 * (TtendAmp/86400 * & 
-                     (deltaf + exp(-((p(i,k,j)-p(i,k_pert,j))/7500.)**2.)))
-
-                ! Convert dT/dt to theta tendency.
-                thten(i,k,j) = tten(i,k,j) / pi(i,k,j)
+                thten(i,k,j) = ((TtendAmp/86400) * forcing) / pi(i,k,j)
              endif
              
              ! Moisture forcing as a forcing on moisture tendency.
              if(perturb_q .eqv. .true.) then
-                qten(i,k,j) = 0.5 * (QtendAmp/86400 * & 
-                     (deltaf + exp(-((p(i,k,j)-p(i,k_pert,j))/7500.)**2.)))
-                
-                qvten(i,k,j) = qten(i,k,j)
+                qvten(i,k,j) = (QtendAmp/86400) * forcing
              endif
           enddo
        enddo

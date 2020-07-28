@@ -1452,7 +1452,7 @@ do ij = 1, grid%num_tiles
    ! Perturb T and Q for LRF analysis.
    call force_LRF(perturb_t=config_flags%perturb_t,           &
         perturb_q=config_flags%perturb_q,                     &
-        k_pert=config_flags%k_pert,                           &
+        p_pert=config_flags%p_pert,                           &
         TtendAmp=config_flags%TtendAmp,                       &
         QtendAmp=config_flags%QtendAmp,                       &
         p=grid%p_hyd,                                         &
