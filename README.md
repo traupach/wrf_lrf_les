@@ -95,6 +95,9 @@ Under `rce_control`:
 - `wind_relaxation_time` - wind relaxation time (s).
 - `relax_u_profile_file` - filename for target U wind profile.
 - `relax_v_profile_file` - filename for target V wind profile.
+- `relax_stratosphere` - relax stratospheric T and q to target profiles?
+- `relax_t_profile_file` - filename for target T profile.
+- `relax_q_profile_file` - filename for target q profile.
 
 Under `lrf_control`:
 - `perturb_t` - perturb temperature (theta)?
@@ -107,10 +110,12 @@ Under `lrf_control`:
 
 * Many of the changes to the code were adapted from code changes made by Yi-Ling Hwong, Maxime Colin, David Fuchs, or Nidhi Nishant for previous versions of WRF. I 
 have updated the code and applied it to v4.1.4. Previously, perturbations were applied by modifying the humidity, temperature, or wind tendencies for the planetary 
-boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables that are treated in the same way to other 
-tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model. 
+boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables called `*FORCETEN` that are treated in the 
+same way as other tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model, and that 
+stratospheric relaxation of T and q fields are done to the fields directly without the use of tendency variables.
 
-* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is not called, and instead the theta tendancy due to radiation is prescribed. Note this means the following variables, which are computed by the radiation driver, will not be calculated: `COSZEN, CLDFRA, 
+* The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is not called, and instead the theta tendancy due to 
+radiation is prescribed. Note this means the following variables, which are computed by the radiation driver, will not be calculated: `COSZEN, CLDFRA, 
 SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, 
 SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
@@ -128,6 +133,8 @@ Changes are made to the following files:
 		- `RTHFORCETEN`, `RQVFORCETEN` - tendency due to perturbation forcing in U and V respectively.
 		- `RUFORCETEN`, `RVFORCETEN` - tendency due to wind relaxation in U and V respectively.
 		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V wind profiles for wind relaxation.
+		- `RELAX_T`, `RELAX_Q` - the amount by which the T and q fields were relaxed.
+		- `RELAX_T_TARGET_PROFILE`, `RELAX_Q_TARGET_PROFILE` - the target T and q profiles, used in the stratosphere.
 	- added new namelist options. 
 - `WRFV3/dyn_em/Makefile` - added compilation rules for `module_nudging` and `module_LRF`.
 - `WRFV3/dyn_em/module_LRF.F` - new module containing the following functions:
@@ -159,6 +166,7 @@ Changes are made to the following files:
 	- added printout of information.
 	- added light nudging code into third runge-kutta step. 
 	- updated call to `phy_prep_part2` to pass new tendencies.
+	- added stratospheric relaxation of T and q code after last runge-kutta step.
 - `WRFV3/dyn_em/start_em.F` - updated call to `phy_init` to pass new tendencies.
 - `WRFV3/phys/module_physics_addtendc.F` - updated function `update_phy_tend` to accept new tendencies and add them to tendency sums.
 - `WRFV3/phys/module_physics_init.F` - updated function `phy_init` to accept new tendencies and initialise them to zero.
