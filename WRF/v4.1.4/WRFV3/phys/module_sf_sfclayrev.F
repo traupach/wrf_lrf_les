@@ -30,8 +30,8 @@ CONTAINS
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte,                    &
                      ! Changed T. Raupach 2020
-                     ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,scm_force_flux, &
-                     ideal_evap_flag,surface_wind                        )
+                     ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,scm_force_flux,   &
+                     rho, ideal_evap_flag, sst_ideal, surface_wind )
                      ! End changed block.
 !-------------------------------------------------------------------
       IMPLICIT NONE
@@ -122,8 +122,10 @@ CONTAINS
 !-- kts         start index for k in tile
 !-- kte         end index for k in tile
 ! Changed T. Raupach 2020.
-!-- ideal_evap_flag: use constant surface fluxes, as per Chua et al. (2019).
-!-- surface_wind: surface wind for surface fluxes calculation [m s-1].
+!-- rho               near-surface air density [kg m-3].
+!-- ideal_evap_flag   use constant surface fluxes, as per Chua et al. (2019).
+!-- sst_ideal         sea-surface temperature assumed [K].
+!-- surface_wind      surface wind for surface fluxes calculation [m s-1].      
 ! End changed block.
 !-------------------------------------------------------------------
       INTEGER,  INTENT(IN )   ::        ids,ide, jds,jde, kds,kde, &
@@ -204,8 +206,10 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      logical, INTENT(in), OPTIONAL      ::   IDEAL_EVAP_FLAG
-      REAL, INTENT(in), OPTIONAL         ::   surface_wind
+      LOGICAL, INTENT(in), OPTIONAL                           :: IDEAL_EVAP_FLAG
+      REAL, INTENT(in), OPTIONAL                              :: sst_ideal, surface_wind
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN ) :: rho
+      REAL, DIMENSION(its:ite)                                :: rho1d 
       ! End changed block.
       
 ! LOCAL VARS
@@ -231,6 +235,10 @@ CONTAINS
            QV1D(i)=QV3D(i,1,j)
            P1D(i) =P3D(i,1,j)
            T1D(i) =T3D(i,1,j)
+
+           ! Changed T. Raupach 2020.
+           rho1d(i) = rho(i,1,j)
+           ! End changed block.
         ENDDO
 
         !  Sending array starting locations of optional variables may cause
@@ -252,13 +260,13 @@ CONTAINS
                 ids,ide, jds,jde, kds,kde,                         &
                 ims,ime, jms,jme, kms,kme,                         &
                 its,ite, jts,jte, kts,kte                          &
+                ! Changed T. Raupach 2020.
+                ,rho1d, ideal_evap_flag, sst_ideal, surface_wind   &
+                ! End changed block.
 #if ( EM_CORE == 1 )
                 ,isftcflx,iz0tlnd,scm_force_flux,                               &
                 USTM(ims,j),CK(ims,j),CKA(ims,j),                  &
                 CD(ims,j),CDA(ims,j)                               &
-                ! Changed T. Raupach 2020.
-                ,ideal_evap_flag,surface_wind                      &
-                ! End changed block.
 #endif
                                                                    )
       ENDDO
@@ -280,10 +288,10 @@ CONTAINS
                      ids,ide, jds,jde, kds,kde,                    &
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte,                    &
-                     isftcflx, iz0tlnd,scm_force_flux,                            &
                      ! Changed T. Raupach 2020.
-                     ustm,ck,cka,cd,cda,                           &
-                     ideal_evap_flag,surface_wind                  )
+                     rho1d, ideal_evap_flag, sst_ideal, surface_wind, &
+                     isftcflx, iz0tlnd,scm_force_flux,                      &
+                     ustm,ck,cka,cd,cda)
                      ! End changed block.
 !-------------------------------------------------------------------
       IMPLICIT NONE
@@ -363,8 +371,9 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      logical, INTENT(in), OPTIONAL ::   IDEAL_EVAP_FLAG
-      REAL, INTENT(in), OPTIONAL    ::   surface_wind
+      real, dimension(its:ite), intent(in) :: rho1d
+      logical, intent(in), optional        :: ideal_evap_flag
+      real, intent(in), optional           :: surface_wind, sst_ideal
       ! End changed block.
       
 ! LOCAL VARS
@@ -1053,13 +1062,35 @@ CONTAINS
      ENDIF
 
       DO 370 I=its,ite
-        QFX(I)=FLQC(I)*(QSFC(I)-QX(I))
-
         ! Changed T. Raupach 2020.
-        IF (IDEAL_EVAP_FLAG .EQV. .TRUE.) THEN
-           ! Use constant surface fluxes, as per Chua et al. (2019).
-           QFX(I)= 0.0010*surface_wind*(QSFC(I)-QX(I))
-        ENDIF 
+        if (ideal_evap_flag .eqv. .true.) then
+           ! Use ideal surface fluxes, as per Chua et al. (2019).
+
+           ! Based on Equation 2 in Chua et al. 2019, where they suggest a
+           ! constant of 0.005 kg m-1 s-1 composed of:
+           !   - drag coefficient of 0.001
+           !   - near-surface air density of 1 kg m-3
+           !   - constant near-surface wind speed of 5 m s-1
+           ! multiplying to 0.001 * 1 * 5 = 0.005 kg m-1 s-1.
+           !
+           ! Here we use variable surface wind speed and near-surface density
+           ! and only assume the drag coefficient of 0.001. The other terms are
+           ! q_sat, the saturated water vapour mixing ratio at the surface
+           ! temperature, q_a, the lowest model level water vapour mixing ratio,
+           ! and L, the latent heat of vaporisation of water (2.5x10^6 J
+           ! kg-1). We use QSFC (ground saturated mixing ratio) for q_sat and QX
+           ! (lowest-level water vapour mixing ratio in kg kg-1) for q_a, and
+           ! XLV is WRF's value of L (applied afterwards).
+
+           ! Units are:
+           ! kg m-2 s-1 = kg m-3   * -     * m s-1        * kg kg-1      
+           QFX(I)       = rho1d(I) * 0.001 * surface_wind * (QSFC(I)-QX(I))
+
+           ! When QFX is multiplied by XLV afterwards the units become:
+           ! J kg-1 kg m-2 s-1 = J s-1 m-2 = W m-2.
+        else
+           QFX(I)=FLQC(I)*(QSFC(I)-QX(I))           
+        endif
         ! End changed block.
          
         QFX(I)=AMAX1(QFX(I),0.)                                            
@@ -1070,25 +1101,40 @@ CONTAINS
 !                                                                                
   390 CONTINUE                                                                 
       DO 400 I=its,ite
-        IF(XLAND(I)-1.5.GT.0.)THEN                                           
-          HFX(I)=FLHC(I)*(THGB(I)-THX(I)) 
-!         IF ( PRESENT(ISFTCFLX) ) THEN
-!            IF ( ISFTCFLX.NE.0 ) THEN
-! AHW: add dissipative heating term (commented out in 3.6.1)
-!               HFX(I)=HFX(I)+RHOX(I)*USTM(I)*USTM(I)*WSPDI(I)
-!            ENDIF
-!         ENDIF 
-        ELSEIF(XLAND(I)-1.5.LT.0.)THEN                                       
-          HFX(I)=FLHC(I)*(THGB(I)-THX(I))                                
-          HFX(I)=AMAX1(HFX(I),-250.)                                       
-       ENDIF
+         ! Changed T. Raupach 2020.
+         IF (IDEAL_EVAP_FLAG .EQV. .TRUE.) THEN
+            ! Use ideal surface fluxes, as per Chua et al. (2019).
+            
+            ! Based on Equation 1 in Chua et al. 2019, where they suggest a
+            ! constant of 0.005 kg m-1 s-1 composed of:
+            !   - drag coefficient of 0.001
+            !   - near-surface air density of 1 kg m-3
+            !   - constant near-surface wind speed of 5 m s-1
+            ! multiplying to 0.001 * 1 * 5 = 0.005 kg m-1 s-1.
+            !
+            ! Here we use variable surface wind speed and near-surface density
+            ! and only assume the drag coefficient of 0.001. The other terms are
+            ! T_s, the surface temperature, T_a, the lowest model level
+            ! temperature, and c_p, the specific heat capacity of dry air
+            ! (1004.5 J kg-1 K-1). We use QSFC (ground saturated mixing ratio)
+            ! for q_sat and QX (lowest-level water vapour mixing ratio in kg
+            ! kg-1) for q_a, and CP is WRF's value of c_p. HFX is upward heat
+            ! flux at the surface (W m-2).
+            !
+            ! For the surface temperature we use the ideal SST (K).
 
-       ! Changed T. Raupach 2020.
-       IF (IDEAL_EVAP_FLAG .EQV. .TRUE.) THEN
-          ! Use constant surface fluxes as per Chua et al (2019).
-          HFX(I)= CP*0.0010*surface_wind*(TSK(I)-T1D(I))
-       ENDIF
-       ! End changed block.
+            ! Units are:
+            ! W m-2 = kg m-3   * -     * m s-1        * J kg-1 K-1 * K 
+            HFX(I)  = rho1d(I) * 0.001 * surface_wind * CP         * (sst_ideal - T1D(I))
+         else
+            IF(XLAND(I)-1.5.GT.0.)THEN                                           
+               HFX(I)=FLHC(I)*(THGB(I)-THX(I)) 
+            ELSEIF(XLAND(I)-1.5.LT.0.)THEN                                       
+               HFX(I)=FLHC(I)*(THGB(I)-THX(I))                                
+               HFX(I)=AMAX1(HFX(I),-250.)                                       
+            ENDIF
+         endif
+         ! End changed block.
        
   400 CONTINUE                                                                 
 

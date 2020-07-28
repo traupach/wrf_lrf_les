@@ -1,8 +1,8 @@
 # At the present time this file is managed manually and edited by hand.
 
-# Modified by Tim Raupach in May 2020 based on code by Yi-Ling Hwong
-# that implements linear response functions. Also modified by Tim
-# Raupach in 2020 based on code by Maxime Colin that implements "light
+# Modified by Tim Raupach in 2020 based on code by Yi-Ling Hwong that
+# implements linear response functions. Also modified by Tim Raupach
+# in 2020 based on code by Maxime Colin that implements "light
 # nudging" on U and V fields. These modifications are labelled
 # "Changed T. Raupach" and "End changed block".
 
