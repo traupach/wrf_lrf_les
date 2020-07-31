@@ -1693,16 +1693,14 @@ state    real  RQIBLTEN        ikj      misc        1         -      r        "R
 state    real  RQNIBLTEN       ikj      misc        1         -      r        "RQNIBLTEN"             "Q_NI TENDENCY DUE TO PBL PARAMETERIZATION"    "#  kg-1 s-1"
 
 # Changed T. Raupach.
-state  real  RTHFORCETEN             ikj  misc  1  -  rh  "RTHFORCETEN"             "FORCED THETA TENDENCY FOR LRF"          "K s-1"
-state  real  RQVFORCETEN             ikj  misc  1  -  rh  "RQVFORCETEN"             "FORCED Q_V TENDENCY FOR LRF"            "kg kg-1 s-1"
-state  real  RUFORCETEN              ikj  misc  1  -  rh  "RUFORCETEN"              "FORCED U TENDENCY FOR WIND RELAXATION"  "m s-1"
-state  real  RVFORCETEN              ikj  misc  1  -  rh  "RVFORCETEN"              "FORCED V TENDENCY FOR WIND RELAXATION"  "m s-1"
-state  real  RELAX_U_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_U_TARGET_PROFILE"  "TARGET PROFILE FOR U"                   "m s-1"
-state  real  RELAX_V_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_V_TARGET_PROFILE"  "TARGET PROFILE FOR V"                   "m s-1"
-state  real  RELAX_T                 ikj  misc  1  -  rh  "RELAX_T"                 "LRF TEMPERATURE RELAXATION"             "K"
-state  real  RELAX_Q                 ikj  misc  1  -  rh  "RELAX_Q"                 "LRF MOISTURE RELAXATION"                "kg kg-1"
-state  real  RELAX_T_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_T_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR T"             "K"
-state  real  RELAX_Q_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_Q_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR Q"             "kg kg-1"
+state  real  RTHFORCETEN             ikj  misc  1  -  rh  "RTHFORCETEN"             "FORCED THETA TENDENCY"       "K s-1"
+state  real  RQVFORCETEN             ikj  misc  1  -  rh  "RQVFORCETEN"             "FORCED Q_V TENDENCY"         "kg kg-1 s-1"
+state  real  RUFORCETEN              ikj  misc  1  -  rh  "RUFORCETEN"              "FORCED U TENDENCY"           "m s-1"
+state  real  RVFORCETEN              ikj  misc  1  -  rh  "RVFORCETEN"              "FORCED V TENDENCY"           "m s-1"
+state  real  RELAX_U_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_U_TARGET_PROFILE"  "TARGET PROFILE FOR U"        "m s-1"
+state  real  RELAX_V_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_V_TARGET_PROFILE"  "TARGET PROFILE FOR V"        "m s-1"
+state  real  RELAX_T_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_T_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR T"  "K"
+state  real  RELAX_Q_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_Q_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR Q"  "kg kg-1"
 # End changed block.
 
 # For Noah UA changes

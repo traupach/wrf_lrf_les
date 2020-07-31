@@ -206,10 +206,10 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      LOGICAL, INTENT(in), OPTIONAL                           :: IDEAL_EVAP_FLAG
+      LOGICAL, INTENT(in), OPTIONAL                           :: ideal_evap_flag
       REAL, INTENT(in), OPTIONAL                              :: sst_ideal, surface_wind
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN ) :: rho
-      REAL, DIMENSION(its:ite)                                :: rho1d 
+      REAL, DIMENSION(its:ite)                                :: rho1d
       ! End changed block.
       
 ! LOCAL VARS
@@ -371,8 +371,8 @@ CONTAINS
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     SCM_FORCE_FLUX
 
       ! Changed T. Raupach 2020.
-      real, dimension(its:ite), intent(in) :: rho1d
       logical, intent(in), optional        :: ideal_evap_flag
+      real, dimension(its:ite), intent(in) :: rho1d
       real, intent(in), optional           :: surface_wind, sst_ideal
       ! End changed block.
       
@@ -1062,8 +1062,8 @@ CONTAINS
      ENDIF
 
       DO 370 I=its,ite
-        ! Changed T. Raupach 2020.
-        if (ideal_evap_flag .eqv. .true.) then
+         ! Changed T. Raupach 2020.
+         if (ideal_evap_flag .eqv. .true.) then
            ! Use ideal surface fluxes, as per Chua et al. (2019).
 
            ! Based on Equation 2 in Chua et al. 2019, where they suggest a
@@ -1086,8 +1086,8 @@ CONTAINS
            ! kg m-2 s-1 = kg m-3   * -     * m s-1        * kg kg-1      
            QFX(I)       = rho1d(I) * 0.001 * surface_wind * (QSFC(I)-QX(I))
 
-           ! When QFX is multiplied by XLV afterwards the units become:
-           ! J kg-1 kg m-2 s-1 = J s-1 m-2 = W m-2.
+           ! When QFX is multiplied by XLV (L) afterwards the units become: J
+           ! kg-1 kg m-2 s-1 = J s-1 m-2 = W m-2.
         else
            QFX(I)=FLQC(I)*(QSFC(I)-QX(I))           
         endif
@@ -1121,11 +1121,18 @@ CONTAINS
             ! kg-1) for q_a, and CP is WRF's value of c_p. HFX is upward heat
             ! flux at the surface (W m-2).
             !
-            ! For the surface temperature we use the ideal SST (K).
+            ! For the surface temperature we use the ideal SST (K).  Near
+            ! surface temperature is temperature at first model level, corrected
+            ! adiabatically to surface temperature. Variables are:
+            !  - CP          heat capacity at constant pressure for dry air (J/kg/K)
+            !  - R           gas constant for dry air (J/kg/K)
+            !  - ROVCP       R/CP (-)
 
             ! Units are:
-            ! W m-2 = kg m-3   * -     * m s-1        * J kg-1 K-1 * K 
-            HFX(I)  = rho1d(I) * 0.001 * surface_wind * CP         * (sst_ideal - T1D(I))
+            ! W m-2 = kg m-3   * -     * m s-1        * J kg-1 K-1 * 
+            HFX(I)  = rho1d(I) * 0.001 * surface_wind * CP         * &
+                 (sst_ideal - (((PSFCPA(I)/P1D(I))**ROVCP)*T1D(I)))
+            !    (K         - (((Pa       / Pa)   ^(-))   *K     ))
          else
             IF(XLAND(I)-1.5.GT.0.)THEN                                           
                HFX(I)=FLHC(I)*(THGB(I)-THX(I)) 

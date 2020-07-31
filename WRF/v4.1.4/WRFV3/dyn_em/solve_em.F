@@ -140,8 +140,8 @@ SUBROUTINE solve_em ( grid , config_flags  &
    ! Flag for producing diagnostic fields (e.g., radar reflectivity)
    LOGICAL                        :: diag_flag
 
-   ! Added by Tim Raupach 11.05.2020; variable to determine whether debugging
-   ! information should be printed.
+   ! Added by Tim Raupach; variable to determine whether debugging information
+   ! should be printed.
    LOGICAL :: print_info = .TRUE.
    
 #if (WRF_CHEM == 1)
@@ -195,10 +195,6 @@ SUBROUTINE solve_em ( grid , config_flags  &
    INTEGER                                    :: num, den
    TYPE(WRFU_TimeInterval)                    :: dtInterval, intervaltime,restartinterval
 
-   ! Changed T. Raupach.
-   LOGICAL, SAVE :: load_target_tq_profiles = .true.
-   ! End changed block
-   
 ! Define benchmarking timers if -DBENCH is compiled
 #include "bench_solve_em_def.h"
 
@@ -4667,39 +4663,6 @@ BENCH_END(bc_2d_tim)
                             ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
                             imsy, imey, jmsy, jmey, kmsy, kmey,  &
                             ipsy, ipey, jpsy, jpey, kpsy, kpey   )
-
-  ! Changed T. Raupach 2020.
-  if(config_flags%relax_stratosphere .eqv. .true.) then
-
-      ! Load target profiles only on first call.
-      if(load_target_tq_profiles .eqv. .true.) then
-         call read_tq_target_profiles(num_levels=k_end-k_start, &
-              t_profile_file=config_flags%relax_q_profile_file, &
-              q_profile_file=config_flags%relax_t_profile_file, &
-              t_val=grid%relax_t_target_profile,                &
-              q_val=grid%relax_q_target_profile)
-         load_target_tq_profiles = .false.
-      endif
-     
-     !$OMP PARALLEL DO PRIVATE (ij)
-     do ij = 1 , grid%num_tiles
-        call relax_stratospheric_t_qv(t_phy=grid%t_phy,            &
-             qv=moist(ims,kms,jms,P_QV), p_hyd=grid%p_hyd,         &
-             dt=grid%dt,                                           &
-             relax_t=grid%relax_t, relax_q=grid%RELAX_Q,           &
-             target_t=grid%relax_t_target_profile,                 &
-             target_q=grid%relax_q_target_profile,                 &
-             ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
-             ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
-             ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
-             its=grid%i_start(ij), ite=min(grid%i_end(ij), ide-1), &
-             jts=grid%j_start(ij), jte=min(grid%j_end(ij), jde-1), &
-             kts=k_start, kte=min(k_end, kde-1))
-     enddo
-     !$OMP END PARALLEL DO
-     
-  endif
-  ! End changed block.
 
 #ifdef DM_PARALLEL
 !-----------------------------------------------------------------------

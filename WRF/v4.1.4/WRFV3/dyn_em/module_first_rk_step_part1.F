@@ -152,6 +152,7 @@ CONTAINS
    CHARACTER (LEN=1000) :: message
    ! Changed T. Raupach.
    LOGICAL, SAVE :: load_target_uv_profiles = .true.
+   LOGICAL, SAVE :: load_target_tq_profiles = .true.
    ! End changed block
 
    ! End changed block.
@@ -452,12 +453,12 @@ BENCH_START(rad_driver_tim)
       !$OMP PARALLEL DO   &
       !$OMP PRIVATE (ij)
       do ij = 1, grid%num_tiles
-         call fix_radiation(p_hyd=grid%p_hyd, pi_phy=pi_phy, rthraten=grid%rthraten, &
-              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
-              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
-              ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
-              its=grid%i_start(ij), ite=grid%i_end(ij),             &
-              jts=grid%j_start(ij), jte=grid%j_end(ij),             &
+         call fix_radiation(p=grid%p_hyd, pi=pi_phy, rthraten=grid%rthraten, &
+              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+              ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe,          &
+              its=grid%i_start(ij), ite=grid%i_end(ij),                      &
+              jts=grid%j_start(ij), jte=grid%j_end(ij),                      &
               kts=k_start, kte=k_end)
       enddo
       !$OMP END PARALLEL DO
@@ -502,8 +503,9 @@ BENCH_START(surf_driver_tim)
 
       CALL surface_driver(                                                &
            ! Changed T. Raupach.
-           &        ideal_evap_flag=config_flags%ideal_evaporation, & 
-           &        surface_wind=config_flags%surface_wind,       &
+           ideal_evap_flag=config_flags%ideal_evaporation, &
+           sst_ideal=grid%ssttsk,                          &
+           surface_wind=config_flags%surface_wind,         &
            ! End changed block.
      &        HYDRO_dt=HYDRO_dt,  sfcheadrt=grid%sfcheadrt,               &
      &        INFXSRT=grid%INFXSRT,  soldrain=grid%soldrain,              &
@@ -1448,15 +1450,13 @@ BENCH_END(shcu_driver_tim)
 ! Changed T. Raupach.
 !$OMP PARALLEL DO PRIVATE (ij)
 do ij = 1, grid%num_tiles
-
    ! Perturb T and Q for LRF analysis.
    call force_LRF(perturb_t=config_flags%perturb_t,           &
         perturb_q=config_flags%perturb_q,                     &
         p_pert=config_flags%p_pert,                           &
         TtendAmp=config_flags%TtendAmp,                       &
         QtendAmp=config_flags%QtendAmp,                       &
-        p=grid%p_hyd,                                         &
-        pi=pi_phy,                                            &
+        p=grid%p_hyd, pi=pi_phy,                              &
         thten=grid%rthforceten,                               &
         qvten=grid%rqvforceten,                               &
         ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
@@ -1468,7 +1468,6 @@ do ij = 1, grid%num_tiles
 
    ! Relax winds to given profiles?
    if(config_flags%relax_uv_winds .eqv. .true.) then
-
       ! Load target profiles only on first call.
       if(load_target_uv_profiles .eqv. .true.) then
          call read_wind_target_profiles(num_levels=k_end-k_start, &
@@ -1483,8 +1482,7 @@ do ij = 1, grid%num_tiles
       call relax_winds_to_profile(                               &
            uten=grid%ruforceten, vten=grid%rvforceten,           &
            u=grid%u_phy, v=grid%v_phy,                           &
-           relaxation_time=config_flags%wind_relaxation_time,    &
-           dt=grid%dt,                                           &
+           tau=config_flags%wind_relaxation_time,                &
            target_wind_u=grid%relax_u_target_profile,            &
            target_wind_v=grid%relax_v_target_profile,            &
            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
@@ -1493,6 +1491,33 @@ do ij = 1, grid%num_tiles
            its=grid%i_start(ij), ite=grid%i_end(ij),             &
            jts=grid%j_start(ij), jte=grid%j_end(ij),             &
            kts=k_start, kte=k_end)
+   endif
+
+   ! Relax stratospheric T and q?
+   if(config_flags%relax_stratosphere .eqv. .true.) then
+      ! Load target profiles only on first call.
+      if(load_target_tq_profiles .eqv. .true.) then
+         call read_tq_target_profiles(num_levels=k_end-k_start, &
+              t_profile_file=config_flags%relax_q_profile_file, &
+              q_profile_file=config_flags%relax_t_profile_file, &
+              t_val=grid%relax_t_target_profile,                &
+              q_val=grid%relax_q_target_profile)
+         load_target_tq_profiles = .false.
+      endif
+     
+      ! Relax T and q in stratosphere.
+      call relax_stratospheric_t_qv(                             &
+           t_phy=grid%t_phy, qv=moist(ims,kms,jms,P_QV),         &
+           thten=grid%rthforceten, qvten=grid%rqvforceten,       &
+           p=grid%p_hyd, pi=pi_phy,                              &
+           target_t=grid%relax_t_target_profile,                 &
+           target_q=grid%relax_q_target_profile,                 &
+           ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+           ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+           ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+           its=grid%i_start(ij), ite=min(grid%i_end(ij), ide-1), &
+           jts=grid%j_start(ij), jte=min(grid%j_end(ij), jde-1), &
+           kts=k_start, kte=min(k_end, kde-1))
    endif
 enddo
 !$OMP END PARALLEL DO

@@ -194,23 +194,16 @@ CONTAINS
     
     grid%step_number = 0
     
-    ! set up the grid
+    ! Set up the grid
     ! Read eta_levels from namelist.
     DO k=1, kde
        grid%znw(k) = model_config_rec%eta_levels(k)
     ENDDO
     
-    !Check the value of the first and last eta level for our domain,
-    !then check that the vector of eta levels is only decreasing
-    IF (grid%znw(1) .NE. 1.0) THEN
-       CALL wrf_error_fatal("Error with specified eta_levels, first level is not 1.0")
-    ENDIF
-    IF (grid%znw(kde) .NE. 0.0) THEN
-       CALL wrf_error_fatal("Error with specified eta_levels, last level is not 0.0")
-    ENDIF
+    ! Check that the vector of eta levels is only decreasing.
     DO k=2,kde
        IF (grid%znw(k) .GT. grid%znw(k-1)) THEN
-          CALL wrf_error_fatal("Eta_levels are not uniformly decreasing from 1.0 to 0.0")
+          CALL wrf_error_fatal("Eta_levels are not uniformly decreasing.")
        ENDIF
     ENDDO
     

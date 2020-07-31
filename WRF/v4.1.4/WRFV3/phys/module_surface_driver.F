@@ -10,7 +10,7 @@ CONTAINS
 
    SUBROUTINE surface_driver(                                         &
      ! Changed T. Raupach 2020.
-     &           ideal_evap_flag,sst_ideal,surface_wind,              &
+     &           ideal_evap_flag, sst_ideal, surface_wind,            &
      ! End changed block.
      &           HYDRO_dt,sfcheadrt,INFXSRT,soldrain,                 &
      &           acgrdflx,achfx,aclhf                                 &
