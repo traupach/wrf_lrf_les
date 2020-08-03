@@ -1,7 +1,7 @@
 # WRF perturbation studies at LES resolution
 
 This project contains modifications to WRF code, plus runtime and analysis code to investigate the response of WRF to temperature and humidity perturbations. 
-Broadly the idea is follow the linear response function (LRF) approach of [Kuang (2010)](https://doi.org/10.1175/2009JAS3260.1) and to run WRF at large eddy 
+Broadly the idea is follow the linear response function (LRF) approach of [Kuang (2010)](https://doi.org/10.1175/2009JAS3260.1), using WRF run at large eddy 
 simulation (LES) resolutions.
 
 ## Directory structure
@@ -13,9 +13,9 @@ simulation (LES) resolutions.
 
 ## Installation
 
-The script `scripts/sh/install_wrf.sh` makes backup copies of the original version of modified files, then makes symlinks in a WRF installation to the modified 
-versions. The modified files are based on code from the CEOCMS version of WRF designed to run on gadi, version 4.1.4. To install and modify WRF in a directory 
-`<WRFDIR>` when this project is cloned to `<GITDIR>`, use:
+The script `scripts/sh/install_wrf.sh` makes backup copies of the original version of modified WRF source code files, then makes symlinks in a WRF installation to 
+the modified versions. The modified files are based on code from the CEOCMS version of WRF designed to run on gadi, version 4.1.4. To install and modify WRF in a 
+directory `<WRFDIR>` when this project is cloned to `<GITDIR>`, use:
 
 ```
 cd <WRFDIR>
@@ -33,7 +33,7 @@ cd <WRFDIR>/WRF/WRFV3/
 ./run_compile --clean --compile_case em_quarter_ss
 ```
 
-To check compilation, look at the end of the most recent `compile_job.` file.
+To check compilation, look at the end of the most recent `compile_job` file.
 
 ## Scripts
 
@@ -107,6 +107,8 @@ Under `lrf_control`:
 - `QtendAmp` - amplitude of QV perturbation (kg kg-1 day-1).
 
 ### General notes
+
+* For detailed (and mathematical) descriptions of the fixed radiative forcing, relaxation of winds and stratospheric temperature and moisture, and perturbation details, please refer to the [perturbation analysis](analysis/perturbation_analysis.ipynb) Jupyter notebook.
 
 * Many of the changes to the code were adapted from code changes made by Yi-Ling Hwong, Maxime Colin, David Fuchs, or Nidhi Nishant for previous versions of WRF. I 
 have updated the code and applied it to v4.1.4. Previously, perturbations were applied by modifying the humidity, temperature, or wind tendencies for the planetary 
