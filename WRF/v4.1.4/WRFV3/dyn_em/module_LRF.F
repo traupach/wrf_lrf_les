@@ -149,7 +149,7 @@ CONTAINS
     ! NOTE: tendencies thten and qvten are added to by this function.
     !
     ! ---
-    ! t_phy: Temperature (theta) field [K].
+    ! t_phy: Temperature (T) field [K].
     ! qv: Water vapour mixing ratio field [kg kg-1].
     ! thten: Potential temperature (theta) tendency field [K s-1].
     ! qvten: Water vapour tendency field [kg kg-1 s-1].

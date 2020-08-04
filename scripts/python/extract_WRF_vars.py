@@ -98,21 +98,27 @@ def horiz_summary(nc, varname,
 
 # Get all the variables required.
 dat = xarray.merge([
+    # Interpolate the following fields to pressure levels.
     horiz_summary(nc=nc, varname='QVAPOR', rename='q'), # Water vapour mixing ratio [kg kg-1].
     horiz_summary(nc=nc, varname='tk'),                 # Temperature [K]. 
     horiz_summary(nc=nc, varname='T'),                  # Perturbation potential temperature [K].   
     horiz_summary(nc=nc, varname='ua'),                 # Wind U on mass points [m s-1].
     horiz_summary(nc=nc, varname='va'),                 # Wind V on mass points [m s-1].
-    horiz_summary(nc=nc, varname='pw', interp=False),   # Precipitable water [kg m-2].
     horiz_summary(nc=nc, varname='RTHRATEN'),           # Theta tendency due to radiation [K s-1].
     horiz_summary(nc=nc, varname='RTHFORCETEN'),        # Theta forcing for LRF [K s-1].
     horiz_summary(nc=nc, varname='RQVFORCETEN'),        # Moisture forcing for LRF [kg kg-1 s-1].
     horiz_summary(nc=nc, varname='rh'),                 # Relative humidity [%].
+
+    # Fields for which no interpolation is required; return at mass points.
+    horiz_summary(nc=nc, varname='pw', interp=False),   # Precipitable water [kg m-2].
     horiz_summary(nc=nc, varname='z', interp=False),    # Full geopotential height [m].
     
     # Pressure min and max at eta levels [Pa].
     horiz_summary(nc=nc, varname="P_HYD", operation='min', rename='P_HYD_min', interp=False),
     horiz_summary(nc=nc, varname="P_HYD", operation='max', rename='P_HYD_max', interp=False)
+
+    # Temperature at eta levels [Pa].
+    horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False)
 ])
 
 # Check that the time values are the same as XTIME in the original file.
