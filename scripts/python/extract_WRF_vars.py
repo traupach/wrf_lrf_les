@@ -115,7 +115,7 @@ dat = xarray.merge([
     
     # Pressure min and max at eta levels [Pa].
     horiz_summary(nc=nc, varname="P_HYD", operation='min', rename='P_HYD_min', interp=False),
-    horiz_summary(nc=nc, varname="P_HYD", operation='max', rename='P_HYD_max', interp=False)
+    horiz_summary(nc=nc, varname="P_HYD", operation='max', rename='P_HYD_max', interp=False),
 
     # Temperature at eta levels [Pa].
     horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False)
