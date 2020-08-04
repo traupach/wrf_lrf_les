@@ -128,7 +128,8 @@ output into the history file by removing the `h` next to them in `Registry.EM_CO
 `ACSWDNTC`, `ACSWUPB`, `ACSWUPBC`, `ACSWDNB`, `ACSWDNBC`, `ACLWUPT`, `ACLWUPTC`, `ACLWDNT`, `ACLWDNTC`, `ACLWUPB`, `ACLWUPBC`, `ACLWDNB`, `ACLWDNBC`, `I_ACSWUPT`, 
 `I_ACSWUPTC`, `I_ACSWDNT`, `I_ACSWDNTC`, `I_ACSWUPB`, `I_ACSWUPBC`, `I_ACSWDNB`, `I_ACSWDNBC`, `I_ACLWUPT`, `I_ACLWUPTC`, `I_ACLWDNT`, `I_ACLWDNTC`, `I_ACLWUPB`, 
 `I_ACLWUPBC`, `I_ACLWDNB`, `I_ACLWDNBC`, `SWUPT`, `SWUPTC`, `SWUPTCLN`, `SWDNT`, `SWDNTC`, `SWDNTCLN`, `SWUPB`, `SWUPBC`, `SWUPBCLN`, `SWDNB`, `SWDNBC`, 
-`SWDNBCLN`, `LWUPT`, `LWUPTC`, `LWUPTCLN`, `LWDNT`, `LWDNTC`, `LWDNTCLN`, `LWUPB`, `LWUPBC`, `LWUPBCLN`, `LWDNB`, `LWDNBC`, `LWDNBCLN`, `SWCF`, `OLR`.
+`SWDNBCLN`, `LWUPT`, `LWUPTC`, `LWUPTCLN`, `LWDNT`, `LWDNTC`, `LWDNTCLN`, `LWUPB`, `LWUPBC`, `LWUPBCLN`, `LWDNB`, `LWDNBC`, `LWDNBCLN`, `SWCF`, `OLR`. Of these 
+fields, all were disabled or zero anyway (with `const_rad_cooling == 1`), except for `IVGTYP` which has value 16 everywhere.
 
 
 ### Specific changes
