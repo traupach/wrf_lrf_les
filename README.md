@@ -121,17 +121,6 @@ radiation is prescribed. Note this means the following variables, which are comp
 SWDOWN, GLW, ACSWUPT, ACSWUPTC, ACSWDNT, ACSWDNTC, ACSWUPB, ACSWUPBC, ACSWDNB, ACSWDNBC, ACLWUPT, ACLWUPTC, ACLWUPB, ACLWUPBC, ACLWDNB, ACLWDNBC, SWUPT, SWUPTC, 
 SWDNT, SWDNTC, SWUPB, SWUPBC, SWDNB, SWDNBC, LWUPT, LWUPTC, LWUPB, LWUPBC, LWDNB, LWDNBC, OLR`.
 
-* The following variables are output into the history (`wrfout`) file by default, but are not required in our analysis, so I have disabled some fields from being 
-output into the history file by removing the `h` next to them in `Registry.EM_COMMON`: `RAINC`, `RAINSH`, `HFX_FORCE`, `LH_FORCE`, `TSK_FORCE`, `HFX_FORCE_TEND`, 
-`LH_FORCE_TEND`, `TSK_FORCE_TEND`, `SHDMAX`, `SHDMIN`, `SNOALB`, `SEAICE`, `ICEDEPTH`, `XICEM`, `ALBSI`, `SNOWSI`, `SFROFF`, `UDROFF`, `IVGTYP`, `ISLTYP`, 
-`VEGFRA`, `SSTSK`, `IMPERV`, `CANFRA`, `LAI_PX`, `WWLT_PX`, `WFC_PX`, `WSAT_PX`, `CLAY_PX`, `CSAND_PX`, `FMSAND_PX`, `CANWAT`, `ACSWUPT`, `ACSWUPTC`, `ACSWDNT`, 
-`ACSWDNTC`, `ACSWUPB`, `ACSWUPBC`, `ACSWDNB`, `ACSWDNBC`, `ACLWUPT`, `ACLWUPTC`, `ACLWDNT`, `ACLWDNTC`, `ACLWUPB`, `ACLWUPBC`, `ACLWDNB`, `ACLWDNBC`, `I_ACSWUPT`, 
-`I_ACSWUPTC`, `I_ACSWDNT`, `I_ACSWDNTC`, `I_ACSWUPB`, `I_ACSWUPBC`, `I_ACSWDNB`, `I_ACSWDNBC`, `I_ACLWUPT`, `I_ACLWUPTC`, `I_ACLWDNT`, `I_ACLWDNTC`, `I_ACLWUPB`, 
-`I_ACLWUPBC`, `I_ACLWDNB`, `I_ACLWDNBC`, `SWUPT`, `SWUPTC`, `SWUPTCLN`, `SWDNT`, `SWDNTC`, `SWDNTCLN`, `SWUPB`, `SWUPBC`, `SWUPBCLN`, `SWDNB`, `SWDNBC`, 
-`SWDNBCLN`, `LWUPT`, `LWUPTC`, `LWUPTCLN`, `LWDNT`, `LWDNTC`, `LWDNTCLN`, `LWUPB`, `LWUPBC`, `LWUPBCLN`, `LWDNB`, `LWDNBC`, `LWDNBCLN`, `SWCF`, `OLR`. Of these 
-fields, all were disabled or zero anyway (with `const_rad_cooling == 1`), except for `IVGTYP` which has value 16 everywhere.
-
-
 ### Specific changes
 
 Note that theta means potential temperature (K), QV means water vapour mixing ratio (kg kg-1), U and V are horizontal winds (m s-1). 'New tendencies' refers to the 
