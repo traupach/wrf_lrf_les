@@ -83,7 +83,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    ! light-nudging-related changes in this file related to nudging (including
    ! print_info use) are also based on Maxime's nudging code, cleaned and
    ! updated to use module_nudging.F. Further changes (inclusion of rthforceten
-   ! and rqvforceten and ruforceten and rvforceten) are independent.
+   ! and rqvforceten and rurelaxten and rvrelaxten) are independent.
    USE module_nudging, ONLY: apply_light_nudging
 
    ! Also include module_LRF for modified versions of Yi-Ling Hwong's
@@ -3554,7 +3554,8 @@ BENCH_END(advance_ppt_tim)
                         grid%c1h, grid%c2h, grid%c1f, grid%c2f,          &
                         ! Changed T. Raupach 21.05.2020.
                         grid%rthforceten, grid%rqvforceten,              &
-                        grid%ruforceten, grid%rvforceten,                & 
+                        grid%rthrelaxten, grid%rqvrelaxten,              &
+                        grid%rurelaxten, grid%rvrelaxten,                & 
                         ! End changed block.
                         grid%rthraten,                                   &
                         grid%rthblten, grid%rublten, grid%rvblten,       &

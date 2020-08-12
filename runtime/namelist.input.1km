@@ -9,8 +9,8 @@
  start_hour                  = 00,	  
  start_minute                = 00,	  
  start_second                = 00,	  
- history_interval            = 5,         ! Output timestep [min].
- frames_per_outfile          = 288,       ! One file per 24 hours.
+ history_interval            = 60,        ! Output timestep [min].
+ frames_per_outfile          = 24,        ! One file per 24 hours.
  restart                     = .false.,   ! Restart using wrfrst file?
  restart_interval            = 1440,      ! Restart interval [min] (1440=1d).
  io_form_history             = 2,         ! NetCDF format output files.

@@ -1448,8 +1448,42 @@ BENCH_START(shcu_driver_tim)
 BENCH_END(shcu_driver_tim)
 
 ! Changed T. Raupach.
+! Load target T and q profiles for stratospheric relaxation.
+if((config_flags%relax_stratosphere .eqv. .true.) .and. &
+     (load_target_tq_profiles .eqv. .true.)) then
+   call read_tq_target_profiles(num_levels=k_end-k_start, &
+        t_profile_file=config_flags%relax_t_profile_file, &
+        q_profile_file=config_flags%relax_q_profile_file, &
+        t_val=grid%relax_t_target_profile,                &
+        q_val=grid%relax_q_target_profile)
+   load_target_tq_profiles = .false.
+endif
+
+! Load target U and V profiles for wind relaxation.
+if((config_flags%relax_uv_winds .eqv. .true.) .and. &
+     (load_target_uv_profiles .eqv. .true.)) then
+   call read_wind_target_profiles(num_levels=k_end-k_start, &
+        u_profile_file=config_flags%relax_u_profile_file,   &
+        v_profile_file=config_flags%relax_v_profile_file,   &
+        u_val=grid%relax_u_target_profile,                  &
+        v_val=grid%relax_v_target_profile)
+   load_target_uv_profiles = .false.
+endif
+
 !$OMP PARALLEL DO PRIVATE (ij)
 do ij = 1, grid%num_tiles
+   ! Zero tendencies.
+   call zero_tendencies( &
+        thforceten=grid%rthforceten, qvforceten=grid%rqvforceten, &
+        threlaxten=grid%rthrelaxten, qvrelaxten=grid%rqvrelaxten, &
+        urelaxten=grid%rurelaxten, vrelaxten=grid%rvrelaxten,     &
+        ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,     &
+        ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,     &
+        ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe,     &
+        its=grid%i_start(ij), ite=grid%i_end(ij),                 &
+        jts=grid%j_start(ij), jte=grid%j_end(ij),                 &
+        kts=k_start, kte=k_end)        
+
    ! Perturb T and Q for LRF analysis.
    call force_LRF(perturb_t=config_flags%perturb_t,           &
         perturb_q=config_flags%perturb_q,                     &
@@ -1468,19 +1502,8 @@ do ij = 1, grid%num_tiles
 
    ! Relax winds to given profiles?
    if(config_flags%relax_uv_winds .eqv. .true.) then
-      ! Load target profiles only on first call.
-      if(load_target_uv_profiles .eqv. .true.) then
-         call read_wind_target_profiles(num_levels=k_end-k_start, &
-              u_profile_file=config_flags%relax_u_profile_file,   &
-              v_profile_file=config_flags%relax_v_profile_file,   &
-              u_val=grid%relax_u_target_profile,                  &
-              v_val=grid%relax_v_target_profile)
-         load_target_uv_profiles = .false.
-      endif
-
-      ! Relax U and V winds.
       call relax_winds_to_profile(                               &
-           uten=grid%ruforceten, vten=grid%rvforceten,           &
+           uten=grid%rurelaxten, vten=grid%rvrelaxten,           &
            u=grid%u_phy, v=grid%v_phy,                           &
            tau=config_flags%wind_relaxation_time,                &
            target_wind_u=grid%relax_u_target_profile,            &
@@ -1495,20 +1518,10 @@ do ij = 1, grid%num_tiles
 
    ! Relax stratospheric T and q?
    if(config_flags%relax_stratosphere .eqv. .true.) then
-      ! Load target profiles only on first call.
-      if(load_target_tq_profiles .eqv. .true.) then
-         call read_tq_target_profiles(num_levels=k_end-k_start, &
-              t_profile_file=config_flags%relax_q_profile_file, &
-              q_profile_file=config_flags%relax_t_profile_file, &
-              t_val=grid%relax_t_target_profile,                &
-              q_val=grid%relax_q_target_profile)
-         load_target_tq_profiles = .false.
-      endif
-     
       ! Relax T and q in stratosphere.
       call relax_stratospheric_t_qv(                             &
            t_phy=grid%t_phy, qv=moist(ims,kms,jms,P_QV),         &
-           thten=grid%rthforceten, qvten=grid%rqvforceten,       &
+           thten=grid%rthrelaxten, qvten=grid%rqvrelaxten,       &
            p=grid%p_hyd, pi=pi_phy,                              &
            target_t=grid%relax_t_target_profile,                 &
            target_q=grid%relax_q_target_profile,                 &

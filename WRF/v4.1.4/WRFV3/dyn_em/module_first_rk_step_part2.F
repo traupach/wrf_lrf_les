@@ -330,7 +330,8 @@ BENCH_START(cal_phy_tend)
                      grid%rthraten,                                    &
                      ! Changed T. Raupach 21.05.2020.
                      grid%rthforceten, grid%rqvforceten,               &
-                     grid%ruforceten, grid%rvforceten,                 &
+                     grid%rthrelaxten, grid%rqvrelaxten,               &
+                     grid%rurelaxten, grid%rvrelaxten,                 &
                      ! End changed block.
                      grid%rublten,grid%rvblten,grid%rthblten,          &
                      grid%rqvblten,grid%rqcblten,grid%rqiblten,        &
@@ -563,7 +564,7 @@ BENCH_START(phy_bc_tim)
                       grid%rucuten, grid%rvcuten,                  &
                       grid%rushten, grid%rvshten,                  &
                       ! Changed T. Raupach.
-                      grid%ruforceten, grid%rvforceten,            &
+                      grid%rurelaxten, grid%rvrelaxten,            &
                       ! End changed block.
                       ids, ide, jds, jde, kds, kde,                &
                       ims, ime, jms, jme, kms, kme,                &
@@ -698,7 +699,8 @@ BENCH_START(update_phy_ten_tim)
                            ! Changed T. Raupach 21.05.2020.
                            grid%rthraten,                                   &
                            grid%rthforceten, grid%rqvforceten,              &
-                           grid%ruforceten, grid%rvforceten,                &
+                           grid%rthrelaxten, grid%rqvrelaxten,              &
+                           grid%rurelaxten, grid%rvrelaxten,                &
                            grid%rthblten,grid%rthcuten,grid%rthshten,       &
                            ! End changed block.
                            grid%rublten,grid%rucuten,grid%rushten,          &

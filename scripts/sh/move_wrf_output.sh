@@ -25,6 +25,13 @@ cp input_sounding $dir
 cp U_target $dir
 cp V_target $dir
 
+if [ -e T_target ]; then
+    cp T_target $dir
+fi
+if [ -e q_target ]; then
+    cp q_target $dir
+fi
+
 ## Output and restart files.
 mv wrfinput_d01 $dir
 mv wrfout_* $dir

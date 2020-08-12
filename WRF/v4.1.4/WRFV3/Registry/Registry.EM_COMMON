@@ -1695,8 +1695,10 @@ state    real  RQNIBLTEN       ikj      misc        1         -      r        "R
 # Changed T. Raupach.
 state  real  RTHFORCETEN             ikj  misc  1  -  rh  "RTHFORCETEN"             "FORCED THETA TENDENCY"       "K s-1"
 state  real  RQVFORCETEN             ikj  misc  1  -  rh  "RQVFORCETEN"             "FORCED Q_V TENDENCY"         "kg kg-1 s-1"
-state  real  RUFORCETEN              ikj  misc  1  -  rh  "RUFORCETEN"              "FORCED U TENDENCY"           "m s-1"
-state  real  RVFORCETEN              ikj  misc  1  -  rh  "RVFORCETEN"              "FORCED V TENDENCY"           "m s-1"
+state  real  RTHRELAXTEN             ikj  misc  1  -  rh  "RTHRELAXTEN"             "RELAXATION THETA TENDENCY"   "K s-1"
+state  real  RQVRELAXTEN             ikj  misc  1  -  rh  "RQVRELAXTEN"             "RELAXATION Q_V TENDENCY"     "kg kg-1 s-1"
+state  real  RURELAXTEN              ikj  misc  1  -  rh  "RURELAXTEN"              "RELAXATION U TENDENCY"       "m s-1"
+state  real  RVRELAXTEN              ikj  misc  1  -  rh  "RVRELAXTEN"              "RELAXATION V TENDENCY"       "m s-1"
 state  real  RELAX_U_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_U_TARGET_PROFILE"  "TARGET PROFILE FOR U"        "m s-1"
 state  real  RELAX_V_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_V_TARGET_PROFILE"  "TARGET PROFILE FOR V"        "m s-1"
 state  real  RELAX_T_TARGET_PROFILE  k    misc  1  -  rh  "RELAX_T_TARGET_PROFILE"  "TARGET (RCE) PROFILE FOR T"  "K"
