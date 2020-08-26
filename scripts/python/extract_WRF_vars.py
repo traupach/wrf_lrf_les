@@ -104,25 +104,34 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='T'),                  # Perturbation potential temperature [K].   
     horiz_summary(nc=nc, varname='ua'),                 # Wind U on mass points [m s-1].
     horiz_summary(nc=nc, varname='va'),                 # Wind V on mass points [m s-1].
-    horiz_summary(nc=nc, varname='rh'),                 # Relative humidity [%].
     horiz_summary(nc=nc, varname='RTHRATEN'),           # Theta tendency due to radiation [K s-1].
     horiz_summary(nc=nc, varname='RTHFORCETEN'),        # Theta forcing for LRF [K s-1].
     horiz_summary(nc=nc, varname='RQVFORCETEN'),        # Moisture forcing for LRF [kg kg-1 s-1].
-    horiz_summary(nc=nc, varname='RUFORCETEN'),         # U wind relaxation tendency [m s-2].
-    horiz_summary(nc=nc, varname='RVFORCETEN'),         # V wind relaxation tendency [m s-2].
 
-    # Fields for which no interpolation is required.
-    horiz_summary(nc=nc, varname='pw', interp=False),   # Precipitable water [kg m-2].
-    horiz_summary(nc=nc, varname='z', interp=False),    # Mass point full geopotential height [m].
-    
-    # Pressure min and max per eta level [Pa].
-    horiz_summary(nc=nc, varname="P_HYD", operation='min', rename='P_HYD_min', interp=False),
-    horiz_summary(nc=nc, varname="P_HYD", operation='max', rename='P_HYD_max', interp=False),
+    # Fields for which no interpolation is required, return horizontal mean per eta-level.
+    horiz_summary(nc=nc, varname='z', interp=False),                      # Full geopotential height [m].
+    horiz_summary(nc=nc, varname="P_HYD", rename='pres', interp=False),   # Pressure [hPa].
+    horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False),    # Temperature [K].
+    horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False), # Water vapour mixing ratio [kg kg-1].
 
-    # Temperature at eta levels [Pa].
-    horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False),
-    horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False)
+    # 2D fields.
+    horiz_summary(nc=nc, varname='pw', interp=False) # Precipitable water [kg m-2].
 ])
+
+if 'RTHRELAXTEN' in nc.variables.keys():
+    dat = xarray.merge([dat,
+                        horiz_summary(nc=nc, varname='RTHRELAXTEN'),  # Theta stratospheric relaxation [K s-1].
+                        horiz_summary(nc=nc, varname='RQVRELAXTEN')]) # Moisture stratospheric relaxation [kg kg-1 s-1].
+
+if 'RURELAXTEN' in nc.variables.keys():
+    dat = xarray.merge([dat,
+                        horiz_summary(nc=nc, varname='RURELAXTEN'),  # U wind relaxation tendency [m s-2].
+                        horiz_summary(nc=nc, varname='RVRELAXTEN')]) # V wind relaxation tendency [m s-2].
+else:
+    # If older version of input file, rename RUFORCETEN to RURELAXTEN in the output.
+    dat = xarray.merge([dat,
+                        horiz_summary(nc=nc, varname='RUFORCETEN', rename='RURELAXTEN'),  
+                        horiz_summary(nc=nc, varname='RVFORCETEN', rename='RVRELAXTEN')]) 
 
 # Check that the time values are the same as XTIME in the original file.
 assert all(nc.variables['XTIME'][:] == dat.time.values), "Times do not match input file."
