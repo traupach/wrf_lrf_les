@@ -66,6 +66,8 @@ cp $gitdir/runtime/namelist.input.$config namelist.input
 cp $gitdir/runtime/input_sounding.$config input_sounding
 cp $gitdir/runtime/U_target.$config U_target
 cp $gitdir/runtime/V_target.$config V_target
+cp $gitdir/runtime/RCEMIP_T.$config RCEMIP_T
+cp $gitdir/runtime/RCEMIP_q.$config RCEMIP_q
 
 echo 'Remember to edit namelist.input and run_wrf.sh.'
 cd $dir
