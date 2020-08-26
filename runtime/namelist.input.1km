@@ -57,8 +57,8 @@
  relax_uv_winds              = .true.,    ! Relax U, V winds to a profile?
  wind_relaxation_time        = 345600     ! Wind relaxation time [s].
  relax_stratosphere          = .false.,   ! Relax T and q in stratosphere.
- relax_t_profile_file        = 'T_target' ! T target profile file.
- relax_q_profile_file        = 'q_target' ! q target profile file.
+ relax_t_profile_file        = 'RCEMIP_T' ! T target profile file.
+ relax_q_profile_file        = 'RCEMIP_q' ! q target profile file.
  relax_u_profile_file        = 'U_target' ! U target profile file.
  relax_v_profile_file        = 'V_target' ! V target profile file.
  /
