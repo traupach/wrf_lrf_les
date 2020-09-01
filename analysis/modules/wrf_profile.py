@@ -4,6 +4,7 @@
 
 import xarray
 import numpy as np
+import modules.atmosphere as atm
 
 # A note on full and half levels: WRF has staggered coordinates. Full levels refer to 
 # grid boundaries or layer boundaries, while half levels are the centre of each grid point.
@@ -13,31 +14,10 @@ import numpy as np
 #    x   - half level height 
 #  ----- - level bottom height, full level
 #
-# Data structures in this code are assumed to be xarray types.
-
-def density(p, theta, q_v, R_d=287, R_v=461.6, p_0=100000):
-    """
-    Calculate density rho [kg m-3] using Equation 5.2 from the WRF tech note.
-    
-    Arguments:
-    p: Pressure [hPa]
-    theta: Dry potential temperature [K].
-    q_v: Mixing ratio for water vapour [kg kg-1].
-    p_0: Reference sea-level pressure [Pa].
-    R_d: Gas constant for dry air [J kg-1 K-1].
-    R_v: Gas constant for water vapour [J kg-1 K-1].
-    """
-    
-    p = p * 100 # Convert pressure from hPa to Pa.
-    c_p = 7 * R_d/2 # Specific heat of dry air at constant pressure [J kg-1 K-1].
-    c_v = c_p - R_d # Specific heat of dry air at constant volume [J kg-1 K-1].
-    
-    # Calculate moist potential temperature.
-    theta_m = theta * (1 + (R_v/R_d)*q_v)
-    
-    # Calculate density.
-    rho = 1 / (((R_d * theta_m) / p_0) * (p/p_0)**(-c_v/c_p)) 
-    return(rho)
+# NOTE: Most data structures in this code are assumed to be simple np.arrays. Some 
+# xarray objects are used, but arithmetic operations between xarray structures 
+# use automatic broadcasting to match coordinates, which can silently produce
+# unexpected results if the operations are supposed to be across coordinates.
 
 def integrate_moist_wrf(rho_bottom, p_bottom, q_bottom, q_top, theta_top, dz, it=10, g=9.81, **kwargs):
     """
@@ -52,14 +32,14 @@ def integrate_moist_wrf(rho_bottom, p_bottom, q_bottom, q_top, theta_top, dz, it
     dz: Upward distance to integrate above z [m].
     it: Number of iterations to use in estimation.
     g: Gravitational constant [m s-2].
-    **kwargs: Arguments to density().
+    **kwargs: Arguments to atm.density().
     """
 
     rho_top = rho_bottom
     for i in range(it):
-        # Note p_s in hPa, and density() expects hPa, hence /100 compared to WRF code.
+        # Note p_s is in hPa, and density() expects hPa, hence /100 compared to WRF code.
         p_top = p_bottom - (0.5 * dz * (rho_bottom + rho_top)*g*(1 + (q_bottom + q_top)/2))/100 
-        rho_top = density(p=p_top, theta=theta_top, q_v=q_top, **kwargs)
+        rho_top = atm.density(p=p_top, theta=theta_top, q_v=q_top, **kwargs)
     return(p_top, rho_top)
 
 def integrate_dry_wrf(p_top, rho_top, rho_bottom, dz, g=9.81):
@@ -76,13 +56,14 @@ def integrate_dry_wrf(p_top, rho_top, rho_bottom, dz, g=9.81):
     """
     return(p_top + (0.5*dz*(rho_bottom+rho_top)*g)/100)
 
-def compute_wrf_profile(p_s, T_s, z, theta, q_v, dry=False, verbose=True):
+def compute_wrf_profile(p_s, T_s, q_s, z, theta, q_v, dry=False, verbose=True):
     """
     Compute and return pressure and density for each sounding point using WRF equations.
-    To calculate a dry sounding, set q_s = 0 and q_v = 0 to ignore moisture.
+    To calculate a dry sounding, set q_v = 0 to ignore moisture.
     
     p_s: Surface pressure [hPa].
     T_s: Surface temperature [K].
+    q_s: Surface water vapour mixing ratio [kg kg-1].
     z: The input sounding heights above the surface [m].
     theta: Input sounding dry potential temperatures for each height [K].
     q_v: Input sounding water vapour mixing ratios for each height [kg kg-1].
@@ -93,11 +74,10 @@ def compute_wrf_profile(p_s, T_s, z, theta, q_v, dry=False, verbose=True):
     # Calculate surface potential temperature.
     theta_s = T_s * (1000/p_s)**(2/7) 
     
-    # Add the surface values into the profile arrays; copy the WRF code by using the 
-    # first sounding value of q_v as the surface q_v.
-    z = np.insert(z.values, 0, 0)
-    theta = np.insert(theta.values, 0, theta_s)
-    q_v = np.insert(q_v.values, 0, q_v[0])
+    # Add the surface values into the profile arrays.
+    z = np.insert(z, 0, 0)
+    theta = np.insert(theta, 0, theta_s)
+    q_v = np.insert(q_v, 0, q_s)
     
     if dry:
         q_v = np.zeros(len(q_v))
@@ -109,7 +89,7 @@ def compute_wrf_profile(p_s, T_s, z, theta, q_v, dry=False, verbose=True):
 
     # Set surface values.
     p_moist[0] = p_s
-    rho[0] = density(p=p_s, theta=theta_s, q_v=q_v[0])
+    rho[0] = atm.density(p=p_s, theta=theta_s, q_v=q_v[0])
 
     # Integrate up the column finding moist profile values.
     for l in range(len(z)-1):
@@ -167,9 +147,9 @@ def interpolate(v, z, h, verbose=True):
     """
 
     increasing = None
-    if np.all(z.values[1:] > z.values[:-1]):
+    if np.all(z[1:] > z[:-1]):
         increasing = True
-    elif np.all(z.values[1:] < z.values[:-1]):
+    elif np.all(z[1:] < z[:-1]):
         increasing = False
         
     assert increasing is not None, 'z must be monotone increasing or decreasing.'
@@ -190,41 +170,18 @@ def interpolate(v, z, h, verbose=True):
     else:
         # Interpolate within profile.
         if increasing:
-            k = np.searchsorted(z.values, h) 
+            k = np.searchsorted(z, h) 
+            kp = k-1
         else:
-            k = len(z) - np.searchsorted(np.flip(z.values), h)    
+            k = len(z) - np.searchsorted(np.flip(z), h) - 1
+            kp = k+1
 
-        assert z[k] <= h and z[k-1] >= h, 'Error in searchsorted result.'
-        w2 = (h - z[k]) / (z[k-1] - z[k])
+        assert z[kp] <= h and z[k] >= h, 'Error in searchsorted result' 
+        w2 = (z[k]-h) / (z[k] - z[kp])
         w1 = 1 - w2
-        return(w1*v[k] + w2*v[k-1])
+        return(w1*v[k] + w2*v[kp])
 
-def eta_for_pressure(p_surface, p_top, p):
-    """ 
-    Calculate eta values for given values of pressure.
-    
-    Arguments:
-    p: Dry hydrostatic pressures for which to calculate eta values.
-    p_surface: The dry surface pressure.
-    p_top: The dry model-top pressure.
-    """
-
-    return((p - p_top)/(p_surface - p_top))
-
-def pressure_for_eta(eta, p_surface, p_top):
-    """
-    Return the dry hydrostatic pressure for a given eta level in the same units 
-    surface/top pressures.
-    
-    Arguments:
-    eta: Eta value(s) to calculate pressure for.
-    p_surface: The dry surface pressure.
-    p_top: The dry model-top pressure.
-    """
-
-    return(eta * (p_surface - p_top) + p_top)
-
-def base_state_pressures(p, z, ztop, verbose=True):
+def base_state_pressures(p, z, ztop, verbose=True, unit='hPa'):
     """
     Interpolate pressure profile to find model-top and surface pressures and 
     column mass.
@@ -234,23 +191,17 @@ def base_state_pressures(p, z, ztop, verbose=True):
     z: Heights for each profile value [m].
     ztop: Model-top height [m].
     verbose: Print output information? (Default: True).
+    unit: Unit for display.
     """
     
     top_p = interpolate(v=p, z=z, h=ztop)
     surface_p = interpolate(v=p, z=z, h=0)
-    
-    top_p.attrs['name'] = 'Interpolated model-top pressure'
-    top_p.attrs['units'] = p.attrs['units']
-    surface_p.attrs['name'] = 'Interpolated surface pressure'
-    surface_p.attrs['units'] = p.attrs['units']
-    
-    with xarray.set_options(keep_attrs=True):
-        p_c = surface_p - top_p
+    p_c = surface_p - top_p
     
     if(verbose):
-        print('Interpolated model-top pressure:\t' + str(top_p.values) + ' ' + top_p.attrs['units'])
-        print('Interpolated surface pressure:\t\t' + str(surface_p.values) + ' ' + surface_p.attrs['units'])
-        print('Column mass:\t\t\t\t' + str(p_c.values) + ' ' + p_c.attrs['units'])
+        print('Interpolated model-top pressure:\t' + str(top_p) + ' ' + unit)
+        print('Interpolated surface pressure:\t\t' + str(surface_p) + ' ' + unit)
+        print('Column mass:\t\t\t\t' + str(p_c) + ' ' + unit)
     
     return(top_p, surface_p, p_c)
        
@@ -305,19 +256,19 @@ def base_state_geopotential(eta, dry_profile, moist_profile, p_surface_dry, p_su
     column_mass_perturb = column_mass_moist - column_mass_dry
 
     if verbose:
-        print('Model-top pressure:\t\t' + str(p_top.values) + ' Pa')
-        print('Dry column mass:\t\t' + str(column_mass_dry.values) + ' Pa')
-        print('Moist column mass:\t\t' + str(column_mass_moist.values) + ' Pa')
-        print('Perturbation column mass:\t' + str(column_mass_perturb.values) + ' Pa')
+        print('Model-top pressure:\t\t' + str(p_top) + ' Pa')
+        print('Dry column mass:\t\t' + str(column_mass_dry) + ' Pa')
+        print('Moist column mass:\t\t' + str(column_mass_moist) + ' Pa')
+        print('Perturbation column mass:\t' + str(column_mass_perturb) + ' Pa')
         
     for k in range(len(eta_half)):
         # Calculate dry density at each half eta level.
-        theta_dry = interpolate(v=dry_profile.theta, z=dry_profile.p_dry*100, h=p_level_dry[k])
-        rho_dry[k] = density(p=p_level_dry[k]/100, theta=theta_dry, q_v=0)
+        theta_dry = interpolate(v=dry_profile.theta.values, z=dry_profile.p_dry.values*100, h=p_level_dry[k])
+        rho_dry[k] = atm.density(p=p_level_dry[k]/100, theta=theta_dry, q_v=0)
 
         # Interpolate theta and q_v at each half eta level.
-        theta[k] = interpolate(v=moist_profile.theta, z=moist_profile.p_dry*100, h=p_level_moist[k])
-        q_v[k] = interpolate(v=moist_profile.q_v, z=moist_profile.p_dry*100, h=p_level_moist[k])
+        theta[k] = interpolate(v=moist_profile.theta.values, z=moist_profile.p_dry.values*100, h=p_level_moist[k])
+        q_v[k] = interpolate(v=moist_profile.q_v.values, z=moist_profile.p_dry.values*100, h=p_level_moist[k])
         
     # Calculate perturbation (including moisture) geopotentials, down the column.
     for l in reversed(range(len(eta_half))):
@@ -333,7 +284,7 @@ def base_state_geopotential(eta, dry_profile, moist_profile, p_surface_dry, p_su
             pert_pressure[l] = pert_pressure[l+1] - (column_mass_perturb+(q_v_half/(1+q_v_half))*
                                                      (column_mass_dry))/(1/delta_eta)/(1/(1+q_v_half))
         
-        rho_moist[l] = density(p=(p_level_dry[l]+pert_pressure[l])/100, theta=theta[l], q_v=q_v[l])
+        rho_moist[l] = atm.density(p=(p_level_dry[l]+pert_pressure[l])/100, theta=theta[l], q_v=q_v[l])
         pert_alpha[l] = (1/rho_moist[l]) - (1/rho_dry[l])
    
     # Up the column to calculate geopotentials.
@@ -383,17 +334,21 @@ def heights(eta, phi_base, phi_pert, g=9.81):
     
 def destagger_etas(half):
     """
-    Destagger staggered eta values defined at mass points to get full-level values.
+    Destagger staggered eta values defined at mass point to get full-level values.
+    Produce an error if eta values that are monotonically decreasing cannot be found.
     
     Arguments:
-    eta: Staggered eta values.
+    half: Staggered eta values.
     """
-
+    
     etas = np.ones(len(half)+1)
 
     # Iterate from surface to top, making the first value 1 for the surface.
     for l in range(1,len(etas)):
         etas[l] = etas[l-1] - 2*(etas[l-1] - half[l-1])
+        
+        if l < len(half):
+            assert etas[l] > half[l], 'Impossible to create monotonically decreasing etas.'
 
     return(etas)
 
@@ -415,6 +370,19 @@ def compare_arrays(x, ref, unit, digits=2):
     print('Bias:\t\t\t\t\t' + str(np.round(np.mean(diffs), digits)) + ' ' + unit)
     print('Maximum relative absolute difference:\t' + 
           str(np.round(np.max(np.abs(rel_diffs)), digits)) + '%')
+    
+def pressure_for_eta(eta, p_surface, p_top):
+    """
+    Return the dry hydrostatic pressure for a given eta level in the same units 
+    surface/top pressures.
+    
+    Arguments:
+    eta: Eta value(s) to calculate pressure for.
+    p_surface: The dry surface pressure.
+    p_top: The dry model-top pressure.
+    """
+
+    return(eta * (p_surface - p_top) + p_top)
         
 def eta_for_pressure(p_dry, p_top):
     """
@@ -428,4 +396,7 @@ def eta_for_pressure(p_dry, p_top):
 
     eta_half = (p_dry[1:] - p_top) / (p_dry[0] - p_top)
     eta = destagger_etas(eta_half)
+    
+    assert np.all(eta[1:] - eta[:-1] < 0), "eta values are not monotonic decreasing."
     return(eta)
+    
