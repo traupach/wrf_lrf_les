@@ -5,8 +5,8 @@
 #PBS -q normal
 #PBS -P up6
 #PBS -l storage=gdata/up6
-#PBS -l ncpus=17
-#PBS -l walltime=02:00:00
+#PBS -l ncpus=19
+#PBS -l walltime=03:00:00
 #PBS -l mem=192gb
 #PBS -j oe
 #PBS -W umask=0022

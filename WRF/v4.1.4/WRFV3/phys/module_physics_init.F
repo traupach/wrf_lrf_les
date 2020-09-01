@@ -28,7 +28,8 @@ CONTAINS
                          p_top, TSK,RADT,BLDT,CUDT,MPDT,         &
                          ! Changed T. Raupach 21.05.2020.
                          rthforceten, rqvforceten,               &
-                         ruforceten, rvforceten,                 & 
+                         rthrelaxten, rqvrelaxten,               &
+                         rurelaxten, rvrelaxten,                 & 
                          ! End changed block.
                          RUCUTEN, RVCUTEN,                       &
                          RTHCUTEN, RQVCUTEN, RQRCUTEN,           &
@@ -450,7 +451,8 @@ CONTAINS
              RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,RQCBLTEN,RQIBLTEN,EXCH_H,TKE_PBL
 
   ! Changed T. Raupach 21.05.2020.
-  REAL,     DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: rthforceten, rqvforceten, ruforceten, rvforceten
+  REAL,     DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: rthforceten, rqvforceten, &
+       rthrelaxten, rqvrelaxten, rurelaxten, rvrelaxten
   ! End changed block.
 
   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT), OPTIONAL :: QKE
@@ -844,20 +846,22 @@ CONTAINS
 ! End of Noah-mosaic 
 !-------------------------------------------------  
 
-   ! Changed T. Raupach 21.05.2020.
-   ! Initialize LRF tendencies to zero.
-   IF (.not. restart) THEN
-      DO j=jts, min(jte, jde-1)
-         DO k=kts, min(kte, kde-1)
-            DO i=its, min(ite, ide-1)
-               rthforceten(i,k,j) = 0.
-               rqvforceten(i,k,j) = 0.
-               ruforceten(i,k,j) = 0.
-               rvforceten(i,k,j) = 0.
-            ENDDO
+   ! Changed T. Raupach.
+   ! Initialize LRF tendencies to zero. Do this regardless of restart value
+   ! since these tendencies should be zero at the start of every time stamp. And
+   ! may be added or removed between restarts.
+   DO j=jts, min0(jte, jde-1)
+      DO k=kts, min0(kte, kde-1)
+         DO i=its, min0(ite, ide-1)
+            rthforceten(i,k,j) = 0.
+            rqvforceten(i,k,j) = 0.
+            rthrelaxten(i,k,j) = 0.
+            rqvrelaxten(i,k,j) = 0.
+            rurelaxten(i,k,j) = 0.
+            rvrelaxten(i,k,j) = 0.
          ENDDO
       ENDDO
-   ENDIF
+   ENDDO
    ! End changed block.
    
 !-----------------------------------------------------------------

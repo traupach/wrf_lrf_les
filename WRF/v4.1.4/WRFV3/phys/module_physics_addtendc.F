@@ -30,7 +30,8 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       ! Changed T. Raupach 21.05.2020.
                       RTHRATEN,                                             &
                       rthforceten, rqvforceten,                             &
-                      ruforceten, rvforceten,                               &
+                      rthrelaxten, rqvrelaxten,                             &
+                      rurelaxten, rvrelaxten,                               &
                       RTHBLTEN,RTHCUTEN,RTHSHTEN,                           & 
                       ! End changed block.
                       RUBLTEN,RUCUTEN,RUSHTEN,                              &
@@ -79,8 +80,10 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                                                        ! Updated T. Raupach 21.05.2020.
                                                        rthforceten, &
                                                        rqvforceten, &
-                                                       ruforceten,  &
-                                                       rvforceten,  &
+                                                       rthrelaxten, &
+                                                       rqvrelaxten, &
+                                                       rurelaxten,  &
+                                                       rvrelaxten,  &
                                                        ! End changed block.
                                                        RTHBLTEN, &
                                                        RTHCUTEN, &
@@ -135,14 +138,14 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
    ! Changed T. Raupach 22.05.2020.
    ! If forcing T or QV for LRF, add the perturbation amounts to temperature
    ! and moisture tendencies.
-   if(config_flags%perturb_t .gt. 0) then
+   if(config_flags%perturb_t .eqv. .true.) then
       CALL add_a2a(rt_tendf,rthforceten,config_flags,          &
            ids, ide, jds, jde, kds, kde,                       &
            ims, ime, jms, jme, kms, kme,                       &
            its, ite, jts, jte, kts, kte                        )
    end if
 
-   if(config_flags%perturb_q .gt. 0) then
+   if(config_flags%perturb_q .eqv. .true.) then
       if(P_QV .ge. PARAM_FIRST_SCALAR) then
          CALL add_a2a(moist_tendf(ims,kms,jms,P_QV),           &
               rqvforceten, config_flags,                       &
@@ -152,13 +155,26 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
       endif
    endif
 
-   if(config_flags%relax_uv_winds .gt. 0) then
-      CALL add_a2c_u(ru_tendf, ruforceten, config_flags,       &
+   if(config_flags%relax_stratosphere .eqv. .true.) then
+      call add_a2a(rt_tendf, rthrelaxten, config_flags,        &
+           ids, ide, jds, jde, kds, kde,                       &
+           ims, ime, jms, jme, kms, kme,                       &
+           its, ite, jts, jte, kts, kte                        )
+
+      call add_a2a(moist_tendf(ims,kms,jms,P_QV),              &
+           rqvrelaxten, config_flags,                          &
+           ids, ide, jds, jde, kds, kde,                       &
+           ims, ime, jms, jme, kms, kme,                       &
+           its, ite, jts, jte, kts, kte                        )
+   endif
+      
+   if(config_flags%relax_uv_winds .eqv. .true.) then
+      CALL add_a2c_u(ru_tendf, rurelaxten, config_flags,       &
            ids, ide, jds, jde, kds, kde,                       &
            ims, ime, jms, jme, kms, kme,                       &
            its, ite, jts, jte, kts, kte                        )
       
-      CALL add_a2c_v(rv_tendf, rvforceten, config_flags,       &
+      CALL add_a2c_v(rv_tendf, rvrelaxten, config_flags,       &
            ids, ide, jds, jde, kds, kde,                       &
            ims, ime, jms, jme, kms, kme,                       &
            its, ite, jts, jte, kts, kte                        )

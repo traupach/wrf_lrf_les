@@ -9,8 +9,8 @@
  start_hour                  = 00,	  
  start_minute                = 00,	  
  start_second                = 00,	  
- history_interval            = 5,         ! Output timestep [min].
- frames_per_outfile          = 288,       ! One file per 24 hours.
+ history_interval            = 60,        ! Output timestep [min].
+ frames_per_outfile          = 24,        ! One file per 24 hours.
  restart                     = .false.,   ! Restart using wrfrst file?
  restart_interval            = 1440,      ! Restart interval [min] (1440=1d).
  io_form_history             = 2,         ! NetCDF format output files.
@@ -28,42 +28,45 @@
  time_step_fract_den         = 1,         ! Fractional time step denominator.
  max_dom                     = 1,         ! Number of domains.
  s_we                        = 1,         ! W-E starting grid num.
- e_we                        = 101,       ! W-E ending grid num.
+ e_we                        = 51,        ! W-E ending grid num.
  s_sn                        = 1,         ! S-N starting grid num.
- e_sn                        = 101,       ! S-N ending grid num.
+ e_sn                        = 51,        ! S-N ending grid num.
  s_vert                      = 1,         ! Vertical starting grid num.
  e_vert                      = 75,        ! Vertical ending grid num.
  dx                          = 1000,      ! Grid spacing W-E [m].
  dy                          = 1000,      ! Grid spacing S-N [m].
  ztop                        = 33250,     ! Top of domain [m].
- eta_levels		     = 1.000000, 0.991738, 0.983335, 0.973640, 0.962746, 0.950408, 0.935878,
- 			       0.919184, 0.899021, 0.874113, 0.844846, 0.808833, 0.770664, 0.726680,
-			       0.684175, 0.643323, 0.604718, 0.567640, 0.532683, 0.499129, 0.467574,
-			       0.437300, 0.408905, 0.381672, 0.356201, 0.331778, 0.309005, 0.287170,
-			       0.266877, 0.247418, 0.229399, 0.212116, 0.196176, 0.180877, 0.166832,
-			       0.153340, 0.141016, 0.129162, 0.118397, 0.108188, 0.099119, 0.090468,
-			       0.082832, 0.075498, 0.069073, 0.062852, 0.057449, 0.052169, 0.047630,
-			       0.043144, 0.039336, 0.035521, 0.032330, 0.029082, 0.026412, 0.023643,
-			       0.021413, 0.019048, 0.017190, 0.015168, 0.013624, 0.011890, 0.010612,
-			       0.009122, 0.008068, 0.006785, 0.005920, 0.004810, 0.004106, 0.003143,
-			       0.002573, 0.001735, 0.001280, 0.000546, 0.000187
+ eta_levels		     = 1.000000, 0.991739, 0.983335, 0.973641, 0.962746, 0.950409, 0.935878,
+  			       0.919185, 0.899021, 0.874114, 0.844846, 0.808834, 0.770664, 0.726681,
+			       0.684175, 0.643324, 0.604718, 0.567640, 0.532683, 0.499130, 0.467574,
+			       0.437301, 0.408905, 0.381673, 0.356201, 0.331779, 0.309005, 0.287171,
+			       0.266877, 0.247419, 0.229399, 0.212116, 0.196175, 0.180878, 0.166831,
+			       0.153340, 0.141015, 0.129163, 0.118397, 0.108188, 0.099118, 0.090469,
+			       0.082831, 0.075499, 0.069072, 0.062853, 0.057449, 0.052169, 0.047630,
+			       0.043145, 0.039336, 0.035522, 0.032329, 0.029082, 0.026411, 0.023643,
+			       0.021412, 0.019049, 0.017190, 0.015168, 0.013624, 0.011891, 0.010612,
+			       0.009123, 0.008068, 0.006785, 0.005919, 0.004811, 0.004105, 0.003144,
+			       0.002573, 0.001736, 0.001279, 0.000547, 0.000187
 
  &rce_control
- ssttsk                      = 300,       ! Starting surface temperature [K].
- use_light_nudging           = 0          ! Light nudging on U and V fields?
- ideal_evap_flag             = 1,         ! Use ideal evaporation?
- surface_wind                = 4.8,       ! Surface wind for fluxes [m s-1].
- const_rad_cooling           = 1, 	  ! Constant radiative cooling.
- relax_uv_winds              = 1,         ! Relax U, V winds to a profile?
+ ssttsk                      = 301.15,    ! Starting surface temperature [K].
+ light_nudging               = .false.,   ! Light nudging on U and V fields?
+ ideal_evaporation           = .true.,    ! Use ideal evaporation?
+ surface_wind                = 4.8,       ! Surface U wind for fluxes [m s-1].
+ const_rad_cooling           = .true., 	  ! Constant radiative cooling.
+ relax_uv_winds              = .true.,    ! Relax U, V winds to a profile?
  wind_relaxation_time        = 345600     ! Wind relaxation time [s].
+ relax_stratosphere          = .true.,    ! Relax T and q in stratosphere.
+ relax_t_profile_file        = 'RCEMIP_T' ! T target profile file.
+ relax_q_profile_file        = 'RCEMIP_q' ! q target profile file.
  relax_u_profile_file        = 'U_target' ! U target profile file.
  relax_v_profile_file        = 'V_target' ! V target profile file.
  /
 
  &lrf_control
- perturb_t                   = 0,         ! Perturb temperature?
- perturb_q                   = 0,         ! Perturb humidity?
- k_pert           	     = 11,        ! eta level index (k) to perturb.
+ perturb_t                   = .false.,   ! Perturb temperature?
+ perturb_q                   = .false.,   ! Perturb humidity?
+ p_pert           	     = 850,       ! Pressure (level) for maximum perturbation [hPa].
  TtendAmp                    = 0.5,       ! T tendency amplitude [K day-1].
  QtendAmp                    = 0.0002,    ! QV tend. amplitude [kg kg-1 day-1].
  /

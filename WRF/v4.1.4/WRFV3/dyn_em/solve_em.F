@@ -80,11 +80,15 @@ SUBROUTINE solve_em ( grid , config_flags  &
    USE module_cpl, ONLY : coupler_on, cpl_settime, cpl_store_input
 
    ! Changed by T. Raupach to include light nudging code by Maxime Colin; other
-   ! nudging-related changes in this file related to nudging (including
+   ! light-nudging-related changes in this file related to nudging (including
    ! print_info use) are also based on Maxime's nudging code, cleaned and
    ! updated to use module_nudging.F. Further changes (inclusion of rthforceten
-   ! and rqvforceten and ruforceten and rvforceten) are independent.
-   USE module_nudging
+   ! and rqvforceten and rurelaxten and rvrelaxten) are independent.
+   USE module_nudging, ONLY: apply_light_nudging
+
+   ! Also include module_LRF for modified versions of Yi-Ling Hwong's
+   ! code for relaxation of stratospheric T and q fields.
+   USE module_LRF, ONLY : read_tq_target_profiles, relax_stratospheric_t_qv
    ! End changed block.
    
    IMPLICIT NONE
@@ -136,8 +140,8 @@ SUBROUTINE solve_em ( grid , config_flags  &
    ! Flag for producing diagnostic fields (e.g., radar reflectivity)
    LOGICAL                        :: diag_flag
 
-   ! Added by Tim Raupach 11.05.2020; variable to determine whether debugging
-   ! information should be printed.
+   ! Added by Tim Raupach; variable to determine whether debugging information
+   ! should be printed.
    LOGICAL :: print_info = .TRUE.
    
 #if (WRF_CHEM == 1)
@@ -876,13 +880,13 @@ BENCH_END(rk_tend_tim)
      ENDIF
 
      ! Changed T. Raupach 21.05.2020.
-     ! Start of nudging section ------------------------------------------------------------
 
-     ! Perform light nudging on U and V, for stability reasons. Maxime noted: moved (inside
-     ! solve_em) from after_all_rk_steps to just before the beginning of the RK steps (here):
+     ! If light_nudging is true, then perform light nudging on U and V, for
+     ! stability reasons. Maxime noted: moved (inside solve_em) from
+     ! after_all_rk_steps to just before the beginning of the RK steps (here).
 
-     ! If use_light_nudging is set, then run nudging on the last Runge-Kutta step.
-     if(config_flags%use_light_nudging .eqv. .TRUE.) then
+     ! If light_nudging is set, then run nudging on the last Runge-Kutta step.
+     if(config_flags%light_nudging .eqv. .TRUE.) then
      
         !$OMP PARALLEL DO   &
         !$OMP PRIVATE ( ij )
@@ -3550,7 +3554,8 @@ BENCH_END(advance_ppt_tim)
                         grid%c1h, grid%c2h, grid%c1f, grid%c2f,          &
                         ! Changed T. Raupach 21.05.2020.
                         grid%rthforceten, grid%rqvforceten,              &
-                        grid%ruforceten, grid%rvforceten,                & 
+                        grid%rthrelaxten, grid%rqvrelaxten,              &
+                        grid%rurelaxten, grid%rvrelaxten,                & 
                         ! End changed block.
                         grid%rthraten,                                   &
                         grid%rthblten, grid%rublten, grid%rvblten,       &
@@ -4659,8 +4664,6 @@ BENCH_END(bc_2d_tim)
                             ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
                             imsy, imey, jmsy, jmey, kmsy, kmey,  &
                             ipsy, ipey, jpsy, jpey, kpsy, kpey   )
-
-
 
 #ifdef DM_PARALLEL
 !-----------------------------------------------------------------------

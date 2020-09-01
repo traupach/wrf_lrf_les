@@ -976,7 +976,8 @@ endif
                       grid%p_top, grid%tsk, grid%RADT,grid%BLDT,grid%CUDT, MPDT, &
                       ! Changed T. Raupach 21.05.2020.
                       grid%rthforceten, grid%rqvforceten,                    &
-                      grid%ruforceten, grid%rvforceten,                      &
+                      grid%rthrelaxten, grid%rqvrelaxten,                    &
+                      grid%rurelaxten, grid%rvrelaxten,                      &
                       ! End changed block.
                       grid%rucuten, grid%rvcuten, grid%rthcuten,             &
                       grid%rqvcuten, grid%rqrcuten, grid%rqccuten,           &

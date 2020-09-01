@@ -1855,7 +1855,8 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
                      RTHRATEN,                                         &
                      ! Changed T. Raupach 21.05.2020.
                      rthforceten, rqvforceten,                         &
-                     ruforceten, rvforceten,                           &
+                     rthrelaxten, rqvrelaxten,                         &
+                     rurelaxten, rvrelaxten,                           &
                      ! End changed block.
                      RUBLTEN,RVBLTEN,RTHBLTEN,                         &
                      RQVBLTEN,RQCBLTEN,RQIBLTEN,                       &
@@ -1929,8 +1930,10 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
                                                               ! Changed T. Raupach 21.05.2020
                                                               rthforceten, &
                                                               rqvforceten, &
-                                                              ruforceten, &
-                                                              rvforceten, &
+                                                              rthrelaxten, &
+                                                              rqvrelaxten, &
+                                                              rurelaxten,  &
+                                                              rvrelaxten,  &
                                                               ! End changed block.
                                                              RTHBLTEN, &
                                                              RQVBLTEN, &
@@ -2112,7 +2115,7 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
    ENDIF
 
    ! Changed T. Raupach 22.05.2020.
-   if(config_flags%perturb_t .gt. 0) then
+   if(config_flags%perturb_t .eqv. .true.) then
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
@@ -2122,7 +2125,7 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
       ENDDO
    endif
    
-   if(config_flags%perturb_q .gt. 0 .and. P_QV .ge. PARAM_FIRST_SCALAR) THEN
+   if((config_flags%perturb_q .eqv. .true.) .and. (P_QV .ge. PARAM_FIRST_SCALAR)) THEN
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
@@ -2132,12 +2135,23 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
       ENDDO
    endif
 
-   if(config_flags%relax_uv_winds .gt. 0) then
+   if(config_flags%relax_stratosphere .eqv. .true.) then
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
-               ruforceten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*ruforceten(I,K,J)
-               rvforceten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*rvforceten(I,K,J)
+               rthrelaxten(I,K,J)=(c1(k)*mut(I,J)+c2(k))*rthrelaxten(I,K,J)
+               rqvrelaxten(I,K,J)=(c1(k)*mut(I,J)+c2(k))*rqvrelaxten(I,K,J)
+            ENDDO
+         ENDDO
+      ENDDO
+   endif      
+   
+   if(config_flags%relax_uv_winds .eqv. .true.) then
+      DO J=jts,jtf
+         DO K=kts,ktf
+            DO I=its,itf
+               rurelaxten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*rurelaxten(I,K,J)
+               rvrelaxten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*rvrelaxten(I,K,J)
             ENDDO
          ENDDO
       ENDDO

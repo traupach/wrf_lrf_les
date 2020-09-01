@@ -4888,7 +4888,7 @@ SUBROUTINE phy_bc ( config_flags,div,defor11,defor22,defor33,              &
                     RUCUTEN, RVCUTEN,                                      &
                     RUSHTEN, RVSHTEN,                                      &
                     ! Changed T. Raupach
-                    ruforceten, rvforceten,                                &
+                    rurelaxten, rvrelaxten,                                &
                     ! End changed block.
                     ids, ide, jds, jde, kds, kde,                          &
                     ims, ime, jms, jme, kms, kme,                          &
@@ -4914,8 +4914,8 @@ SUBROUTINE phy_bc ( config_flags,div,defor11,defor22,defor33,              &
                                                                  RUSHTEN, &
                                                                  RVSHTEN, &
                                                                  ! Changed T. Raupach.
-                                                                 ruforceten, &
-                                                                 rvforceten, &
+                                                                 rurelaxten, &
+                                                                 rvrelaxten, &
                                                                  ! End changed block.
                                                                  defor11, &
                                                                  defor22, &
@@ -4951,14 +4951,14 @@ SUBROUTINE phy_bc ( config_flags,div,defor11,defor22,defor33,              &
    ENDIF
 
    ! Changed T. Raupach.
-   if(config_flags%relax_uv_winds .gt. 0) then
-      call set_physical_bc3d(ruforceten, 't', config_flags, &
+   if(config_flags%relax_uv_winds .eqv. .true.) then
+      call set_physical_bc3d(rurelaxten, 't', config_flags, &
            ids, ide, jds, jde, kds, kde,                    &
            ims, ime, jms, jme, kms, kme,                    &
            ips, ipe, jps, jpe, kps, kpe,                    &
            its, ite, jts, jte, kts, kte)
 
-      call set_physical_bc3d(rvforceten, 't', config_flags, &
+      call set_physical_bc3d(rvrelaxten, 't', config_flags, &
            ids, ide, jds, jde, kds, kde,                    &
            ims, ime, jms, jme, kms, kme,                    &
            ips, ipe, jps, jpe, kps, kpe,                    &

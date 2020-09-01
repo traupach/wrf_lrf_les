@@ -101,6 +101,10 @@
 
     LOGICAL, EXTERNAL :: wrf_dm_on_monitor
 
+    ! Changed T. Raupach.
+    integer :: tmpint
+    ! End changed block.
+    
     WRITE(wrf_err_message,*)'output_wrf: begin, fid = ',fid
     CALL wrf_debug( 300 , wrf_err_message )
 
@@ -618,16 +622,38 @@ endif
           CALL wrf_put_dom_ti_char ( fid , 'GRIDTYPE',  'C' , ierr )
 #endif
 
-          ! Changed T. Raupach 21.05.2020.
-          call wrf_put_dom_ti_integer(fid, "IDEAL_EVAP_FLAG", config_flags%ideal_evap_flag, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "CONST_RAD_COOLING", config_flags%const_rad_cooling, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "USE_LIGHT_NUDGING", config_flags%use_light_nudging, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "RELAX_UV_WINDS", config_flags%relax_uv_winds, 1, ierr)
-          call wrf_put_dom_ti_real(fid, "WIND_RELAXATION_TIME", config_flags%wind_relaxation_time, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "PERTURB_T", config_flags%perturb_t, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "PERTURB_Q", config_flags%perturb_q, 1, ierr)
-          call wrf_put_dom_ti_integer(fid, "K_PERT", config_flags%k_pert, 1, ierr)
-          call wrf_put_dom_ti_real(fid, "SURFACE_WIND", config_flags%surface_wind, 1, ierr)
+          ! Changed T. Raupach.
+          call wrf_put_dom_ti_real(fid, "SSTTSK", config_flags%ssttsk, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%light_nudging)
+          call wrf_put_dom_ti_integer(fid, "LIGHT_NUDGING", tmpint, 1, ierr)
+          call wrf_put_dom_ti_real(fid, "LIGHT_NUDGING_TIME", &
+               config_flags%light_nudging_time, 1, ierr)
+          
+          tmpint = merge(1.d0, 0.d0, config_flags%ideal_evaporation)
+          call wrf_put_dom_ti_integer(fid, "IDEAL_EVAPORATION", tmpint, 1, ierr)
+
+          call wrf_put_dom_ti_real(fid, "SURFACE_WIND", &
+               config_flags%surface_wind, 1, ierr)
+          
+          tmpint = merge(1.d0, 0.d0, config_flags%const_rad_cooling)
+          call wrf_put_dom_ti_integer(fid, "CONST_RAD_COOLING", tmpint, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%relax_uv_winds)
+          call wrf_put_dom_ti_integer(fid, "RELAX_UV_WINDS", tmpint, 1, ierr)
+          call wrf_put_dom_ti_real(fid, "WIND_RELAXATION_TIME", &
+               config_flags%wind_relaxation_time, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%relax_stratosphere)
+          call wrf_put_dom_ti_integer(fid, "RELAX_STRATOSPHERE", tmpint, 1, ierr)
+          
+          tmpint = merge(1.d0, 0.d0, config_flags%perturb_t)
+          call wrf_put_dom_ti_integer(fid, "PERTURB_T", tmpint, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%perturb_q)
+          call wrf_put_dom_ti_integer(fid, "PERTURB_Q", tmpint, 1, ierr)
+
+          call wrf_put_dom_ti_real(fid, "P_PERT", config_flags%p_pert, 1, ierr)
           call wrf_put_dom_ti_real(fid, "TTENDAMP", config_flags%TtendAmp, 1, ierr)
           call wrf_put_dom_ti_real(fid, "QTENDAMP", config_flags%QtendAmp, 1, ierr)
           ! End changed block.
