@@ -678,6 +678,9 @@ CONTAINS
        do k=1,nl
           qv_input(k) = 0.
        enddo
+       ! Changed T. Raupach 2020.
+       qv_surf = 0.
+       ! End changed block.
     endif
     
     if(debug) write(6,*) ' number of input levels = ',nl
@@ -695,7 +698,12 @@ CONTAINS
     enddo
     
     p_surf = 100.*p_surf  ! convert to pascals
-    qvf = 1. + rvovrd*qv_input(1)
+
+    ! Changed T. Raupach 2020: default code used first-level value of qv as
+    ! surface value. Updated to use read-in qv_surf.
+    !qvf = 1. + rvovrd*qv_input(1)
+    qvf = 1. + rvovrd*(0.001*qv_surf)
+    ! End changed block.
     rho_surf = 1./((r/p1000mb)*th_surf*qvf*((p_surf/p1000mb)**cvpm))
     pi_surf = (p_surf/p1000mb)**(r/cp)
     
@@ -707,8 +715,16 @@ CONTAINS
     !  integrate moist sounding hydrostatically, starting from the
     !  specified surface pressure
     !  -> first, integrate from surface to lowest level
-    qvf = 1. + rvovrd*qv_input(1)
-    qvf1 = 1. + qv_input(1)
+
+    ! Changed T. Raupach 2020: default code used first-level value of qv as
+    ! surface value. Updated to use read-in qv_surf.
+    !qvf = 1. + rvovrd*qv_input(1)
+    !qvf1 = 1. + qv_input(1)
+
+    qvf = 1. + rvovrd*(0.001*qv_surf)
+    qvf1 = 1. + 0.001*qv_surf
+    ! End changed block.
+    
     rho_input(1) = rho_surf
     dz = h_input(1)
     do it=1,10
