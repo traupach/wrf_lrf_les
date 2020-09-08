@@ -238,7 +238,7 @@ CONTAINS
                    ! at 160 hPa to 0.5 day-1 at 100 hPa.
                    inv_tau = 0.5*(16000 - p(i,k,j))/6000
                 endif
-                
+
                 ! Convert inv_tau from day-1 to s-1.                
                 inv_tau = inv_tau/(24*3600)
 
@@ -246,9 +246,12 @@ CONTAINS
                 relax_t = inv_tau * -(t_phy(i,k,j) - target_t(k))
                 relax_q = inv_tau * -(qv(i,k,j) - target_q(k))
                 
+                ! Convert from temperature to potential temperature.
+                relax_t = relax_t / pi(i,k,j)
+                
                 ! Relax the variables by the relaxation amount. Convert temperature
                 ! to potential temperature (theta) for tendency.
-                thten(i,k,j) = thten(i,k,j) + (relax_t / pi(i,k,j))
+                thten(i,k,j) = thten(i,k,j) + relax_t
                 qvten(i,k,j) = qvten(i,k,j) + relax_q
              endif
           enddo

@@ -1,5 +1,5 @@
 &time_control
- run_days                    = 150,       ! Length of time to simulate.
+ run_days                    = 45,        ! Length of time to simulate.
  run_hours                   = 0,	  
  run_minutes                 = 0,	  
  run_seconds                 = 0,	  
@@ -92,8 +92,8 @@
  diff_opt                    = 2,         ! Full 3D diffusion.
  km_opt                      = 2,         ! 3D TKE diffusion as per em_quarter_ss
  			       		  ! and em_les ideal cases.
- damp_opt                    = 2,         ! Rayleigh relaxation layer damping.
- dampcoef                    = .003,      ! Damping coefficient.
+ damp_opt                    = 3,         ! Implicit damping of w in top layer.
+ dampcoef                    = 0.2,       ! Damping coefficient.
  zdamp                       = 5000.,     ! Damping depth from model top.
  khdif                       = 250,       ! Horizontal. diffusion constant.
  kvdif                       = 250,       ! Vertical. diffusion constant.
