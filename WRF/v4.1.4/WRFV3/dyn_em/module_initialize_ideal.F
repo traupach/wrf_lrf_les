@@ -628,13 +628,9 @@ CONTAINS
     ! Use constant SST set from namelist option ssttsk.
     DO J = jts, min(jde-1,jte)
        DO I = its, min(ide-1,ite)
-          !grid%sst(i,j) = config_flags%ssttsk ! Sea-surface temperature.
-          !grid%tsk(i,j) = config_flags%ssttsk ! Skin (surface) temperature. 
-          !grid%tmn(i,j) = config_flags%ssttsk ! Min. soil temperature.
-
           grid%sst(i,j) = config_flags%ssttsk ! Sea-surface temperature.
-          grid%tsk(i,j) = theta_surf * (p_surf/p1000mb)**rcp ! Skin temperature, set as per convrad ideal case.
-          grid%tmn(i,j) = grid%tsk(i,j) ! Min. soil temperature.
+          grid%tsk(i,j) = config_flags%ssttsk ! Skin (surface) temperature. 
+          grid%tmn(i,j) = config_flags%ssttsk ! Min. soil temperature.
        ENDDO
     ENDDO
     

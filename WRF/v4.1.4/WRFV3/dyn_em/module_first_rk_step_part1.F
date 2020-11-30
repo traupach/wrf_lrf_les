@@ -504,7 +504,6 @@ BENCH_START(surf_driver_tim)
       CALL surface_driver(                                                &
            ! Changed T. Raupach.
            ideal_evap_flag=config_flags%ideal_evaporation,                &
-           sst_ideal=config_flags%ssttsk,                                 &
            surface_wind=config_flags%surface_wind,                        &
            ! End changed block.
      &        HYDRO_dt=HYDRO_dt,  sfcheadrt=grid%sfcheadrt,               &

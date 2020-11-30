@@ -10,7 +10,7 @@ CONTAINS
 
    SUBROUTINE surface_driver(                                         &
      ! Changed T. Raupach 2020.
-     &           ideal_evap_flag, sst_ideal, surface_wind,            &
+     &           ideal_evap_flag, surface_wind,                       &
      ! End changed block.
      &           HYDRO_dt,sfcheadrt,INFXSRT,soldrain,                 &
      &           acgrdflx,achfx,aclhf                                 &
@@ -1011,7 +1011,7 @@ CONTAINS
 
    ! Changed T. Raupach 2020.
    logical, INTENT(in), OPTIONAL :: ideal_evap_flag
-   real   , INTENT(in), OPTIONAL :: sst_ideal, surface_wind
+   real   , INTENT(in), OPTIONAL :: surface_wind
    ! End changed block.
    
 !
@@ -1992,7 +1992,7 @@ CONTAINS
                  ! Changed T. Raupach 2020.
                  sf_surface_physics,                                 &
                  scm_force_flux,                                     & 
-                 rho, ideal_evap_flag, sst_ideal, surface_wind       )
+                 rho, ideal_evap_flag, surface_wind       )
                  ! End changed block.
          ELSE
          CALL SFCLAYREV(u_phytmp,v_phytmp,t_phy,qv_curr,&
@@ -2008,7 +2008,7 @@ CONTAINS
                i_start(ij),i_end(ij), j_start(ij),j_end(ij), kts,kte,    &
                ! Changed T. Raupach 2020.
                ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,scm_force_flux, &
-               rho, ideal_evap_flag, sst_ideal, surface_wind       )
+               rho, ideal_evap_flag, surface_wind       )
                ! End changed block.
 #if ( EM_CORE==1)
            DO j = j_start(ij),j_end(ij)
@@ -5581,7 +5581,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                      ! Changed T. Raupach 2020.
                      sf_surface_physics,                           &
                      scm_force_flux,                               &
-                     rho, ideal_evap_flag, sst_ideal, surface_wind )
+                     rho, ideal_evap_flag, surface_wind )
                      ! End changed block.
 
      USE module_sf_sfclayrev
@@ -5661,7 +5661,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
 
      ! Changed T. Raupach 2020.
      logical, INTENT(in), OPTIONAL :: IDEAL_EVAP_FLAG
-     REAL, INTENT(in), OPTIONAL    :: sst_ideal, surface_wind
+     REAL, INTENT(in), OPTIONAL    :: surface_wind
      INTEGER, INTENT(in), OPTIONAL :: scm_force_flux
      REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN ):: rho
      ! End changed block.
@@ -5839,7 +5839,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                  ! Changed T. Raupach 2020.
                  ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,          &
                  scm_force_flux,                               &
-                 rho, ideal_evap_flag, sst_ideal, surface_wind )
+                 rho, ideal_evap_flag, surface_wind )
                  ! End changed block.
 !
 !Restore land-point values calculated by SSiB (fds 12/2010)
@@ -5933,7 +5933,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                  ! Changed T. Raupach 2020.
                  ustm_sea,ck_sea,cka_sea,cd_sea,cda_sea,isftcflx,iz0tlnd, &
                  scm_force_flux,                                          &
-                 rho, ideal_evap_flag, sst_ideal, surface_wind            )
+                 rho, ideal_evap_flag, surface_wind            )
                  ! End changed block.
 !
      DO j = JTS , JTE
