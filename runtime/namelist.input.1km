@@ -1,5 +1,5 @@
 &time_control
- run_days                    = 45,        ! Length of time to simulate.
+ run_days                    = 91,        ! Length of time to simulate.
  run_hours                   = 0,	  
  run_minutes                 = 0,	  
  run_seconds                 = 0,	  
@@ -28,9 +28,9 @@
  time_step_fract_den         = 1,         ! Fractional time step denominator.
  max_dom                     = 1,         ! Number of domains.
  s_we                        = 1,         ! W-E starting grid num.
- e_we                        = 51,        ! W-E ending grid num.
+ e_we                        = 21,        ! W-E ending grid num.
  s_sn                        = 1,         ! S-N starting grid num.
- e_sn                        = 51,        ! S-N ending grid num.
+ e_sn                        = 21,        ! S-N ending grid num.
  s_vert                      = 1,         ! Vertical starting grid num.
  e_vert                      = 75,        ! Vertical ending grid num.
  dx                          = 1000,      ! Grid spacing W-E [m].
@@ -57,8 +57,8 @@
  relax_uv_winds              = .true.,    ! Relax U, V winds to a profile?
  wind_relaxation_time        = 345600     ! Wind relaxation time [s].
  relax_stratosphere          = .true.,    ! Relax T and q in stratosphere.
- relax_t_profile_file        = 'RCEMIP_T' ! T target profile file.
- relax_q_profile_file        = 'RCEMIP_q' ! q target profile file.
+ relax_t_profile_file        = 'RCE_T'    ! T target profile file.
+ relax_q_profile_file        = 'RCE_q'    ! q target profile file.
  relax_u_profile_file        = 'U_target' ! U target profile file.
  relax_v_profile_file        = 'V_target' ! V target profile file.
  /
