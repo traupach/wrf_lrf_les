@@ -27,13 +27,15 @@ if [ ! -d $dir/runs/$run ]; then
 fi
 
 ## Settings.
-cp namelist.input $dir/runs/$run
+cp -i namelist.input $dir/runs/$run
 mv -i namelist.output $dir/runs/$run
 
 ## Ask whether to over-write profiles.
 cp -i input_sounding $dir
 cp -i U_target $dir
 cp -i V_target $dir
+cp -i RCE_T $dir
+cp -i RCE_q $dir
 
 if [ -e T_target ]; then
     cp -i T_target $dir
