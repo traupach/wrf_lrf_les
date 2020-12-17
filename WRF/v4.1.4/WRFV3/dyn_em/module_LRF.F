@@ -109,7 +109,7 @@ CONTAINS
 
     ! The forcing form is from the one used in Appendix A of Kuang 2012. Their
     ! forcing is around a vertical level and is the mean of a delta function and
-    ! gamma function. We adapr the form to use only use the gamma function part
+    ! gamma function. We adapt the form to use only use the gamma function part
     ! and perturb around a pressure, not a level. This is because the pressure
     ! levels in the model may not exactly align with the pressure around which
     ! we want to perturb.
