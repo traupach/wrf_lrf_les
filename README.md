@@ -156,9 +156,9 @@ q		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V win
 	- load wind profiles and assign relaxation tendencies to U and V if required.
 	- load T and q profiles and relax in stratosphere if required.
 - `WRFV3/dyn_em/module_first_rk_step_part2.F` - updated function calls:
-	- added include statements so that halo and periodic communications are calculated for `RURELAXTEN` and `RVRELAXTEN` fields.
 	- updated call to `calculate_phy_tend` to pass new tendencies.
 	- updated call to `phy_bc` to pass new (wind) tendencies.
+	- added include statements so that halo and periodic communications are calculated for `RURELAXTEN` and `RVRELAXTEN` fields before call to `update_phy_ten`
 	- updated call to `update_phy_ten` to pass new tendencies.
 - `WRFV3/dyn_em/module_initialize_ideal.F` - reduced file to only include code relevant to our ideal case.
 	- set `mminlu2` to `USGS` and water land-use code to 16.
