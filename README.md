@@ -112,9 +112,9 @@ Under `lrf_control`:
 
 * Many of the changes to the code were adapted from code changes made by Yi-Ling Hwong, Maxime Colin, David Fuchs, or Nidhi Nishant for previous versions of WRF. I 
 have updated the code and applied it to v4.1.4. Previously, perturbations were applied by modifying the humidity, temperature, or wind tendencies for the planetary 
-boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables called `*FORCETEN` that are treated in the 
-same way as other tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model, and that 
-stratospheric relaxation of T and q fields are done to the fields directly without the use of tendency variables.
+boundary layer (PBL) scheme; at LES resolution the PBL scheme will be turned off, so I have made new tendency variables called `*FORCETEN` (for temperature and humidity) and `*RELAXTEN` (for horizontal winds) that are treated in the same way as other tendencies in the model. Note that the perturbations are added **without** explicitly hydrostatically rebalancing the model, and that stratospheric relaxation of T and q fields are done to the fields directly without the use of tendency variables.
+
+* The horizontal wind fields `U` and `V` are staggered in the x and y directions respectively, but the per-scheme tendencies are calculated on mass points not staggered points. In `module_physics_addtendc.F` the functions `add_a2c_u` and `add_a2c_v` are used to add the unstaggered tendencies to the (staggered) overall wind tendency field. For this function to work properly the relaxation tendancy fields need to be defined as halo and periodic fields in the registry and have the correct `include` statements included in the code before they are used in a tiled manner.
 
 * The radiative cooling profile is prescribed when `const_rad_cooling == 1`. In this case the radiation driver is not called, and instead the theta tendancy due to 
 radiation is prescribed. Note this means the following variables, which are computed by the radiation driver, will not be calculated: `COSZEN, CLDFRA, 
@@ -133,7 +133,7 @@ Changes are made to the following files:
 	- made `RTHRATEN` (potential temperature tendency due to radiation scheme) an output variable.
 	- added new grid variables:
 		- `RTHFORCETEN`, `RQVFORCETEN` - tendency due to perturbation forcing in U and V respectively.
-		- `RUFORCETEN`, `RVFORCETEN` - tendency due to wind relaxation in U and V respectively.
+		- `RURELAXTEN`, `RVRELAXTEN` - tendency due to wind relaxation in U and V respectively.
 q		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V wind profiles for wind relaxation.
 		- `RELAX_T_TARGET_PROFILE`, `RELAX_Q_TARGET_PROFILE` - the target T and q profiles, used in the stratosphere.
 	- added new namelist options. 
@@ -156,6 +156,7 @@ q		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V win
 	- load wind profiles and assign relaxation tendencies to U and V if required.
 	- load T and q profiles and relax in stratosphere if required.
 - `WRFV3/dyn_em/module_first_rk_step_part2.F` - updated function calls:
+	- added include statements so that halo and periodic communications are calculated for `RURELAXTEN` and `RVRELAXTEN` fields.
 	- updated call to `calculate_phy_tend` to pass new tendencies.
 	- updated call to `phy_bc` to pass new (wind) tendencies.
 	- updated call to `update_phy_ten` to pass new tendencies.
