@@ -56,7 +56,7 @@
  surface_wind                = 4.8,       ! Surface U wind for fluxes [m s-1].
  const_rad_cooling           = .true., 	  ! Constant radiative cooling.
  relax_uv_winds              = .true.,    ! Relax U, V winds to a profile?
- wind_relaxation_time        = 345600     ! Wind relaxation time [s].
+ wind_relaxation_time        = 10800,     ! Wind relaxation time [s].
  relax_stratosphere          = .true.,    ! Relax T and q in stratosphere.
  relax_t_profile_file        = 'RCE_T'    ! T target profile file.
  relax_q_profile_file        = 'RCE_q'    ! q target profile file.
