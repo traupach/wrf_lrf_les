@@ -28,13 +28,13 @@
  time_step_fract_den         = 1,         ! Fractional time step denominator.
  max_dom                     = 1,         ! Number of domains.
  s_we                        = 1,         ! W-E starting grid num.
- e_we                        = 21,        ! W-E ending grid num.
+ e_we                        = 11,        ! W-E ending grid num.
  s_sn                        = 1,         ! S-N starting grid num.
- e_sn                        = 21,        ! S-N ending grid num.
+ e_sn                        = 11,        ! S-N ending grid num.
  s_vert                      = 1,         ! Vertical starting grid num.
  e_vert                      = 75,        ! Vertical ending grid num.
- dx                          = 1000,      ! Grid spacing W-E [m].
- dy                          = 1000,      ! Grid spacing S-N [m].
+ dx                          = 4000,      ! Grid spacing W-E [m].
+ dy                          = 4000,      ! Grid spacing S-N [m].
  ztop                        = 33250,     ! Top of domain [m].
  eta_levels		     = 1.000000, 0.991782, 0.983421, 0.973777, 0.962937, 0.950661, 0.936201,
  			       0.919588, 0.899517, 0.874724, 0.845583, 0.809718, 0.771695, 0.727870,

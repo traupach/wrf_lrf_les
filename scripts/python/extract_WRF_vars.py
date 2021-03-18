@@ -25,7 +25,7 @@ if(os.path.exists(outfile)):
     print("ERROR: output file already exists: " + outfile)
     sys.exit(1)
 
-# Get gull pressure at each 3D model point, to determine interpolation.
+# Get full pressure at each 3D model point, to determine interpolation.
 nc = Dataset(infile)
 pres = wrf.getvar(nc, "pres", timeidx=wrf.ALL_TIMES, units="hPa")
 
@@ -108,8 +108,9 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='RTHFORCETEN'),        # Theta forcing for LRF [K s-1].
     horiz_summary(nc=nc, varname='RQVFORCETEN'),        # Moisture forcing for LRF [kg kg-1 s-1].
 
-    # Fields for which no interpolation is required, return horizontal mean per eta-level.
+    # Fields for which no interpolation is required, return horizontal mean per (mass-point) eta-level.
     horiz_summary(nc=nc, varname='z', interp=False),                      # Full geopotential height [m].
+    horiz_summary(nc=nc, varname='T', rename='eta_T', interp=False),      # Perturbation potential temp [K].
     horiz_summary(nc=nc, varname="P_HYD", rename='pres', interp=False),   # Pressure [hPa].
     horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False),    # Temperature [K].
     horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False), # Water vapour mixing ratio [kg kg-1].

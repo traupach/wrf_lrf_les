@@ -847,21 +847,22 @@ CONTAINS
 !-------------------------------------------------  
 
    ! Changed T. Raupach.
-   ! Initialize LRF tendencies to zero. Do this regardless of restart value
-   ! since these tendencies should be zero at the start of every time stamp. And
-   ! may be added or removed between restarts.
-   DO j=jts, min0(jte, jde-1)
-      DO k=kts, min0(kte, kde-1)
-         DO i=its, min0(ite, ide-1)
-            rthforceten(i,k,j) = 0.
-            rqvforceten(i,k,j) = 0.
-            rthrelaxten(i,k,j) = 0.
-            rqvrelaxten(i,k,j) = 0.
-            rurelaxten(i,k,j) = 0.
-            rvrelaxten(i,k,j) = 0.
+   ! Initialize LRF tendencies to zero if not a restart. Note that even in a restart
+   ! the tendencies will be overwritten at each time stamp anyway.
+   if (.not. restart) then 
+      DO j=jts, min0(jte, jde-1)
+         DO k=kts, min0(kte, kde-1)
+            DO i=its, min0(ite, ide-1)
+               rthforceten(i,k,j) = 0.
+               rqvforceten(i,k,j) = 0.
+               rthrelaxten(i,k,j) = 0.
+               rqvrelaxten(i,k,j) = 0.
+               rurelaxten(i,k,j) = 0.
+               rvrelaxten(i,k,j) = 0.
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   end if
    ! End changed block.
    
 !-----------------------------------------------------------------

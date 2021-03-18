@@ -503,9 +503,8 @@ BENCH_START(surf_driver_tim)
 
       CALL surface_driver(                                                &
            ! Changed T. Raupach.
-           ideal_evap_flag=config_flags%ideal_evaporation, &
-           sst_ideal=grid%ssttsk,                          &
-           surface_wind=config_flags%surface_wind,         &
+           ideal_evap_flag=config_flags%ideal_evaporation,                &
+           surface_wind=config_flags%surface_wind,                        &
            ! End changed block.
      &        HYDRO_dt=HYDRO_dt,  sfcheadrt=grid%sfcheadrt,               &
      &        INFXSRT=grid%INFXSRT,  soldrain=grid%soldrain,              &
@@ -1504,7 +1503,7 @@ do ij = 1, grid%num_tiles
    if(config_flags%relax_uv_winds .eqv. .true.) then
       call relax_winds_to_profile(                               &
            uten=grid%rurelaxten, vten=grid%rvrelaxten,           &
-           u=grid%u_phy, v=grid%v_phy,                           &
+           u=grid%u_phy, v=grid%v_phy, p=grid%p_hyd,             &
            tau=config_flags%wind_relaxation_time,                &
            target_wind_u=grid%relax_u_target_profile,            &
            target_wind_v=grid%relax_v_target_profile,            &

@@ -42,6 +42,9 @@ CONTAINS
     USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, &
                           wrf_dm_maxval, wrf_err_message, local_communicator_x, local_communicator_y
     USE module_comm_dm, ONLY : halo_em_tke_c_sub,halo_em_tke_d_sub,halo_em_tke_e_sub            &
+         ! Changed T. Raupach
+         ,halo_em_phys_windrelax_sub,period_bdy_em_phy_windrelax_sub &
+         ! End changed block
             ,halo_em_phys_pbl_sub,halo_em_phys_shcu_sub &
             ,halo_em_fdda_sub,halo_em_phys_diffusion_sub,halo_em_tke_3_sub &
             ,halo_em_tke_5_sub,halo_obs_nudge_sub,period_bdy_em_a1_sub,period_bdy_em_phy_bc_sub &
@@ -547,6 +550,9 @@ BENCH_END(calc_tke_tim)
 #      include "PERIOD_BDY_EM_FDDA_BC.inc"
        ENDIF
 #      include "PERIOD_BDY_EM_CHEM.inc"
+       if (config_flags%relax_uv_winds .eqv. .true.) then
+#      include "PERIOD_BDY_EM_PHY_WINDRELAX.inc"
+       endif
 #endif
 
 BENCH_START(phy_bc_tim)
@@ -636,6 +642,11 @@ ENDIF
        IF ( config_flags%bl_pbl_physics .ge. 1 ) THEN
 #      include "HALO_EM_PHYS_PBL.inc"
        ENDIF
+       ! Changed T. Raupach
+       if (config_flags%relax_uv_winds .eqv. .true.) then
+#      include "HALO_EM_PHYS_WINDRELAX.inc"
+       endif
+       ! End changed block
        IF ( config_flags%shcu_physics .gt. 1 ) THEN
 #      include "HALO_EM_PHYS_SHCU.inc"
        ENDIF

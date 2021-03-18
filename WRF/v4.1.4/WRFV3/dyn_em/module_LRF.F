@@ -109,7 +109,7 @@ CONTAINS
 
     ! The forcing form is from the one used in Appendix A of Kuang 2012. Their
     ! forcing is around a vertical level and is the mean of a delta function and
-    ! gamma function. We adapr the form to use only use the gamma function part
+    ! gamma function. We adapt the form to use only use the gamma function part
     ! and perturb around a pressure, not a level. This is because the pressure
     ! levels in the model may not exactly align with the pressure around which
     ! we want to perturb.
@@ -139,7 +139,7 @@ CONTAINS
   end subroutine force_LRF
 
   subroutine relax_winds_to_profile( &
-       uten, vten, u, v, tau,        &
+       uten, vten, u, v, p, tau,        &
        target_wind_u, target_wind_v, &
        ids, ide, jds, jde, kds, kde, &
        ims, ime, jms, jme, kms, kme, &
@@ -150,6 +150,7 @@ CONTAINS
     ! ---
     ! uten, vten: The U and V wind tendency fields [m s-2].
     ! u, v: The U and V wind fields (at mass points) [m s-1].
+    ! p: Hydrostatic pressure [Pa].
     ! tau: Relaxation time, over which a full relaxation is made [s].
     ! target_wind_u: The target profile for U [m s-1].
     ! target_wind_v: The target profile for V [m s-1].
@@ -160,7 +161,7 @@ CONTAINS
 
     implicit none
  
-    real, dimension(ims:ime, kms:kme, jms:jme), intent(in)    :: u, v
+    real, dimension(ims:ime, kms:kme, jms:jme), intent(in)    :: u, v, p
     real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: uten, vten
     real, intent(in)                 :: tau
     real, dimension(kte), intent(in) :: target_wind_u, target_wind_v
@@ -171,13 +172,27 @@ CONTAINS
          its, ite, jts, jte, kts, kte
 
     integer :: i,j,k
+    real :: inv_tau
 
     ! Relax U and V winds. 
     do j=jts,min(jte, jde-1)
        do k=kts,min(kte, kde-1)
           do i=its,min(ite, ide-1)
-             uten(i,k,j) = uten(i,k,j) + ((1/tau) * -(u(i,k,j) - target_wind_u(k)))
-             vten(i,k,j) = vten(i,k,j) + ((1/tau) * -(v(i,k,j) - target_wind_v(k)))
+             ! Relax winds only above 160 hPa.
+             if (p(i,k,j) .lt. 16000) then
+                if (p(i,k,j) .le. 10000) then
+                   ! Above 100 hPa, use the full inverse relaxation time, ie the
+                   ! specified tau value.
+                   inv_tau = 1/tau
+                else
+                   ! Between 160 hPa and 100 hPa, vary 1/tau linearly from 0 s-1
+                   ! at 160 hPa to 1/tau s-1 at 100 hPa.
+                   inv_tau = (1/tau)*(16000 - p(i,k,j))/6000
+                endif
+
+                uten(i,k,j) = uten(i,k,j) + (inv_tau * -(u(i,k,j) - target_wind_u(k)))
+                vten(i,k,j) = vten(i,k,j) + (inv_tau * -(v(i,k,j) - target_wind_v(k)))
+             endif
           enddo
        enddo
     enddo
@@ -228,7 +243,7 @@ CONTAINS
              ! Below 160 hPa, don't do any relaxation of T or q. 
              if (p(i,k,j) .lt. 16000) then
                 if (p(i,k,j) .le. 10000) then
-                   ! Above 100 hPa, use the full relaxation time. The minimum
+                   ! Above 100 hPa, use the full inverse relaxation time. The minimum
                    ! value of tau is two days in seconds, meaning the maximum
                    ! inverse relaxation constant (1/tau = inv_tau) is 0.5 day-1
                    ! as per Herman and Kuang 2013.
@@ -238,7 +253,7 @@ CONTAINS
                    ! at 160 hPa to 0.5 day-1 at 100 hPa.
                    inv_tau = 0.5*(16000 - p(i,k,j))/6000
                 endif
-                
+
                 ! Convert inv_tau from day-1 to s-1.                
                 inv_tau = inv_tau/(24*3600)
 
@@ -246,9 +261,12 @@ CONTAINS
                 relax_t = inv_tau * -(t_phy(i,k,j) - target_t(k))
                 relax_q = inv_tau * -(qv(i,k,j) - target_q(k))
                 
+                ! Convert from temperature to potential temperature.
+                relax_t = relax_t / pi(i,k,j)
+                
                 ! Relax the variables by the relaxation amount. Convert temperature
                 ! to potential temperature (theta) for tendency.
-                thten(i,k,j) = thten(i,k,j) + (relax_t / pi(i,k,j))
+                thten(i,k,j) = thten(i,k,j) + relax_t
                 qvten(i,k,j) = qvten(i,k,j) + relax_q
              endif
           enddo

@@ -2763,11 +2763,11 @@ rconfig   integer     ideal_case          namelist,ideal        1              0
 rconfig  real      ssttsk                namelist,rce_control  1  302.        -  "ssttsk"                "Surface temperature (K) in the initial condition"             "K"
 rconfig  logical   light_nudging         namelist,rce_control  1  .false.     -  "light_nudging"         "Use light nudging to push U and V towards grid means?"        ""
 rconfig  real      light_nudging_time    namelist,rce_control  1  7200.       -  "light_nudging_time"    "Time scale for light nudging."                                "s"
-rconfig  logical   ideal_evaporation     namelist,rce_control  1  .false.     -  "ideal_evaporation"       "Make evaporation only depend on rho,u_lowest,qsfac,q_lowest?" ""
+rconfig  logical   ideal_evaporation     namelist,rce_control  1  .false.     -  "ideal_evaporation"     "Make evaporation only depend on rho,u_lowest,qsfac,q_lowest?" ""
 rconfig  real      surface_wind          namelist,rce_control  1  0           -  "surface_wind"          "Surface wind for surface fluxes calculation"                  "m s-1"
 rconfig  logical   const_rad_cooling     namelist,rce_control  1  .false.     -  "const_rad_cooling"     "Use a constant radiative cooling profile as per Huang 2013?"  ""
 rconfig  logical   relax_uv_winds        namelist,rce_control  1  .false.     -  "relax_uv_winds"        "Relax U and V winds towards target profiles?"                 ""
-rconfig  real      wind_relaxation_time  namelist,rce_control  1  7200.       -  "wind_relaxation_time"  "Time scale for wind relaxation."                              "s"
+rconfig  real      wind_relaxation_time  namelist,rce_control  1  10800.      -  "wind_relaxation_time"  "Time scale for stratospheric wind relaxation."                "s"
 rconfig  logical   relax_stratosphere    namelist,rce_control  1  .false.     -  "relax_stratosphere"    "Relax T and q to target profile in stratosphere?"             ""
 rconfig  character relax_t_profile_file  namelist,rce_control  1  "t_profile" -  "relax_t_profile_file"  "Target profile file for T."                                   ""
 rconfig  character relax_q_profile_file  namelist,rce_control  1  "q_profile" -  "relax_q_profile_file"  "Target profile file for q."                                   ""
@@ -3149,6 +3149,11 @@ halo      HALO_EM_VINTERP_UV_1 dyn_em 48:pd_gc,pb,pmaxw,ptrop,pmaxwnn,ptropnn
 halo      HALO_EM_A dyn_em  8:ru,rv,rw,ww,php,alt,al,p,muu,muv,mut
 halo      HALO_EM_PHYS_A  dyn_em 4:u_2,v_2
 halo      HALO_EM_PHYS_PBL dyn_em        4:rublten,rvblten
+
+# Changed T. Raupach
+halo      HALO_EM_PHYS_WINDRELAX dyn_em  4:rurelaxten,rvrelaxten
+# End changed block
+
 halo      HALO_EM_PHYS_CU dyn_em         4:rucuten,rvcuten
 halo      HALO_EM_PHYS_SHCU dyn_em       4:rushten,rvshten
 halo      HALO_EM_FDDA dyn_em            4:rundgdten,rvndgdten
@@ -3263,6 +3268,11 @@ period    PERIOD_EM_HYDRO_UV dyn_em 1:u_2,v_2
 period    PERIOD_BDY_EM_A dyn_em 2:ru,rv,rw,ww,php,alt,p,muu,muv,mut,ph_2,al
 period    PERIOD_BDY_EM_A1  dyn_em 3:rdzw,rdz,z,zx,zy,ustm,ust
 period    PERIOD_BDY_EM_PHY_BC dyn_em 2:rublten,rvblten,rucuten,rvcuten,xkmh,xkmv,xkhh,xkhv,div,defor11,defor22,defor12,defor13,defor23,defor33,tke_2,rho
+
+# Changed T. Raupach
+period    PERIOD_BDY_EM_PHY_WINDRELAX dyn_em 2:rurelaxten,rvrelaxten
+# End changed block
+
 period    PERIOD_BDY_EM_FDDA_BC dyn_em 2:rundgdten,rvndgdten
 period    PERIOD_BDY_EM_B dyn_em 2:ru_tend,rv_tend,ph_2,al,p,t_1,t_save,u_save,v_save,mu_1,mu_2,mudf,php,alt,pb
 period    PERIOD_BDY_EM_B3 dyn_em 2:ph_2,al,p,mu_2,muts,mudf

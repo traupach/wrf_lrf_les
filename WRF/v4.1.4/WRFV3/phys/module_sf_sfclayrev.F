@@ -31,7 +31,7 @@ CONTAINS
                      its,ite, jts,jte, kts,kte,                    &
                      ! Changed T. Raupach 2020
                      ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,scm_force_flux,   &
-                     rho, ideal_evap_flag, sst_ideal, surface_wind )
+                     rho, ideal_evap_flag, surface_wind )
                      ! End changed block.
 !-------------------------------------------------------------------
       IMPLICIT NONE
@@ -124,7 +124,6 @@ CONTAINS
 ! Changed T. Raupach 2020.
 !-- rho               near-surface air density [kg m-3].
 !-- ideal_evap_flag   use constant surface fluxes, as per Chua et al. (2019).
-!-- sst_ideal         sea-surface temperature assumed [K].
 !-- surface_wind      surface wind for surface fluxes calculation [m s-1].      
 ! End changed block.
 !-------------------------------------------------------------------
@@ -207,7 +206,7 @@ CONTAINS
 
       ! Changed T. Raupach 2020.
       LOGICAL, INTENT(in), OPTIONAL                           :: ideal_evap_flag
-      REAL, INTENT(in), OPTIONAL                              :: sst_ideal, surface_wind
+      REAL, INTENT(in), OPTIONAL                              :: surface_wind
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN ) :: rho
       REAL, DIMENSION(its:ite)                                :: rho1d
       ! End changed block.
@@ -261,7 +260,7 @@ CONTAINS
                 ims,ime, jms,jme, kms,kme,                         &
                 its,ite, jts,jte, kts,kte                          &
                 ! Changed T. Raupach 2020.
-                ,rho1d, ideal_evap_flag, sst_ideal, surface_wind   &
+                ,rho1d, ideal_evap_flag, surface_wind              &
                 ! End changed block.
 #if ( EM_CORE == 1 )
                 ,isftcflx,iz0tlnd,scm_force_flux,                               &
@@ -289,8 +288,8 @@ CONTAINS
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte,                    &
                      ! Changed T. Raupach 2020.
-                     rho1d, ideal_evap_flag, sst_ideal, surface_wind, &
-                     isftcflx, iz0tlnd,scm_force_flux,                      &
+                     rho1d, ideal_evap_flag, surface_wind,         &
+                     isftcflx, iz0tlnd,scm_force_flux,             &
                      ustm,ck,cka,cd,cda)
                      ! End changed block.
 !-------------------------------------------------------------------
@@ -373,7 +372,7 @@ CONTAINS
       ! Changed T. Raupach 2020.
       logical, intent(in), optional        :: ideal_evap_flag
       real, dimension(its:ite), intent(in) :: rho1d
-      real, intent(in), optional           :: surface_wind, sst_ideal
+      real, intent(in), optional           :: surface_wind
       ! End changed block.
       
 ! LOCAL VARS
@@ -1131,8 +1130,8 @@ CONTAINS
             ! Units are:
             ! W m-2 = kg m-3   * -     * m s-1        * J kg-1 K-1 * 
             HFX(I)  = rho1d(I) * 0.001 * surface_wind * CP         * &
-                 (sst_ideal - (((PSFCPA(I)/P1D(I))**ROVCP)*T1D(I)))
-            !    (K         - (((Pa       / Pa)   ^(-))   *K     ))
+                 (TSK(I) - (((PSFCPA(I)/P1D(I))**ROVCP)*T1D(I)))
+            !    (K      - (((Pa       / Pa)   ^(-))   *K     ))
          else
             IF(XLAND(I)-1.5.GT.0.)THEN                                           
                HFX(I)=FLHC(I)*(THGB(I)-THX(I)) 

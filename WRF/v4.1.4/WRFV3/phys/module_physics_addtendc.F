@@ -2349,11 +2349,18 @@ SUBROUTINE add_a2c_v(lvar,rvar,config_flags,                &
         config_flags%nested) j_start = MAX(jds+1,jts)
    IF ( config_flags%specified .or. &
         config_flags%nested) j_end   = MIN(jde-1,jte)
-      IF ( config_flags%periodic_x ) i_start = its
-      IF ( config_flags%periodic_x ) i_end = MIN( ite, ide-1 )
 
+   ! Changed T. Raupach
+   !IF ( config_flags%periodic_x ) i_start = its
+   !IF ( config_flags%periodic_x ) i_end = MIN( ite, ide-1 )
+   IF ( config_flags%periodic_y ) j_start = jts
+   IF ( config_flags%periodic_y ) j_end = jte
+   ! End changed block.
+      
    DO j = j_start,j_end
-   DO k = kts,kte
+   ! Changed T. Raupach
+   DO k = kts,ktf
+   ! End changed block.
    DO i = i_start,i_end
       lvar(i,k,j) = lvar(i,k,j) + &
                      0.5*(rvar(i,k,j)+rvar(i,k,j-1))
