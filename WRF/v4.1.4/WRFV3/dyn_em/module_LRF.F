@@ -140,12 +140,16 @@ CONTAINS
 
   subroutine relax_winds_to_profile( &
        uten, vten, u, v, p, tau,        &
-       target_wind_u, target_wind_v, &
+       target_wind_u, target_wind_v, extend_relaxation, &
        ids, ide, jds, jde, kds, kde, &
        ims, ime, jms, jme, kms, kme, &
        ips, ipe, jps, jpe, kps, kpe, &
        its, ite, jts, jte, kts, kte)
-    ! Relax U and V winds towards profiles read from file.
+    ! Relax U and V winds towards profiles read from file. If extend_relaxation
+    ! is .false. then relax winds above 160 hPa to maximum relaxation at/above
+    ! 100 hPa.  If 'extend_relaxation' is .true. then relax the whole
+    ! profile. Targets should be given for the whole profile regardless of the
+    ! value of extend_relaxation.
     !
     ! ---
     ! uten, vten: The U and V wind tendency fields [m s-2].
@@ -154,6 +158,7 @@ CONTAINS
     ! tau: Relaxation time, over which a full relaxation is made [s].
     ! target_wind_u: The target profile for U [m s-1].
     ! target_wind_v: The target profile for V [m s-1].
+    ! extend_relaxation: Extend relaxation to cover whole profile?
     ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
     ! ims, ime, jms, jme, kms, kme: Memory dimensions.
     ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
@@ -165,6 +170,7 @@ CONTAINS
     real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: uten, vten
     real, intent(in)                 :: tau
     real, dimension(kte), intent(in) :: target_wind_u, target_wind_v
+    logical, intent(in)              :: extend_relaxation
     integer, intent(in) :: &
          ids, ide, jds, jde, kds, kde, &
          ims, ime, jms, jme, kms, kme, &
@@ -178,18 +184,18 @@ CONTAINS
     do j=jts,min(jte, jde-1)
        do k=kts,min(kte, kde-1)
           do i=its,min(ite, ide-1)
-             ! Relax winds only above 160 hPa.
-             if (p(i,k,j) .lt. 16000) then
-                if (p(i,k,j) .le. 10000) then
-                   ! Above 100 hPa, use the full inverse relaxation time, ie the
-                   ! specified tau value.
+             ! Relax winds only above 160 hPa, or everywhere if extend_relaxation is true.
+             if ((extend_relaxation .eqv. .true.) .or. (p(i,k,j) .lt. 16000)) then
+                if ((extend_relaxation .eqv. .true.) .or. (p(i,k,j) .le. 10000)) then
+                   ! Above 100 hPa, or if extend_relaxation is true, use the
+                   ! full inverse relaxation time, ie the specified tau value.
                    inv_tau = 1/tau
                 else
                    ! Between 160 hPa and 100 hPa, vary 1/tau linearly from 0 s-1
                    ! at 160 hPa to 1/tau s-1 at 100 hPa.
                    inv_tau = (1/tau)*(16000 - p(i,k,j))/6000
                 endif
-
+                
                 uten(i,k,j) = uten(i,k,j) + (inv_tau * -(u(i,k,j) - target_wind_u(k)))
                 vten(i,k,j) = vten(i,k,j) + (inv_tau * -(v(i,k,j) - target_wind_v(k)))
              endif

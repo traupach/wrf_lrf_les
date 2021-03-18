@@ -1507,6 +1507,7 @@ do ij = 1, grid%num_tiles
            tau=config_flags%wind_relaxation_time,                &
            target_wind_u=grid%relax_u_target_profile,            &
            target_wind_v=grid%relax_v_target_profile,            &
+           extend_relaxation=config_flags%extend_wind_relax,     &
            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &

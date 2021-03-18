@@ -91,7 +91,8 @@ Under `rce_control`:
 - `ideal_evap_flag` - use ideal evaporation approach of [Chua et al., 2019](http://dx.doi.org/10.1029/2019GL082408)?
 - `surface_wind` - surface wind value for flux calculations (m s-1).
 - `const_rad_cooling` - use fixed radiative cooling profile as per [Herman and Kuang (2013)](https://doi.org/10.1002/jame.20037)?
-- `relax_uv_winds` - relax U and V winds to target profiles?
+- `relax_uv_winds` - relax U and V winds to target profiles in the stratosphere above 160 hPa?
+- `extend_wind_relax` - extend the U and V wind relaxation to the whole vertical profile?
 - `wind_relaxation_time` - wind relaxation time (s).
 - `relax_stratosphere` - relax stratospheric T and q to target profiles as per [Herman and Kuang (2013)](https://doi.org/10.1002/jame.20037)?
 - `relax_u_profile_file` - filename for target U wind profile.
