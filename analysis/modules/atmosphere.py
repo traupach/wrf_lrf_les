@@ -42,7 +42,6 @@ def saturation_vapour_pressure(T, T_0=273.15, over='water', method='wexler'):
     assert (method == 'bolton' or method == 'wexler' or
             method == 'flatau' or method == 'murphy'), 'invalid method name.'
     
-  
     if method == 'bolton':
         es = saturation_vapour_pressure_bolton(T, T_0=T_0, over=over)
     elif method == 'wexler':
@@ -69,7 +68,7 @@ def saturation_vapour_pressure_bolton(T, T_0=273.15, over='water'):
     
     assert over == 'water', 'saturation_vapour_pressure_bolton: \'over\' must be \'water\'.'          
                 
-    if np.any(T < 238.15) or np.any(T > 308.15):
+    if np.nanmin(T) < 238.15 or np.nanmax(T) > 308.15:
         print('saturation_vapour_pressure_bolton: warning T outside valid range.')
         
     es = 6.112 * np.exp(17.67*(T - T_0)/(T - T_0 + 243.5))
@@ -100,7 +99,7 @@ def saturation_vapour_pressure_flatau(T, T_0=273.15, over='water', const=True):
     T_C = T-T_0
     
     if over == 'water':
-        if np.any(T < 188.15) or np.any(T > 343.15):
+        if np.nanmin(T) < 188.15 or np.nanmax(T) > 343.15:
             print('saturation_vapour_pressure_flatau: warning T outside valid range.')
         
         coefs = [6.11239921, 
@@ -117,7 +116,7 @@ def saturation_vapour_pressure_flatau(T, T_0=273.15, over='water', const=True):
             T_C = np.maximum(-80, T_C)
 
     elif over == 'ice':
-        if np.any(T < 183.15) or np.any(T > 273.15):
+        if np.nanmin(T) < 183.15 or np.nanmax(T) > 273.15:
             print('saturation_vapour_pressure_flatau: warning T outside valid range.')
         
         coefs = [6.11147274,
@@ -192,7 +191,7 @@ def saturation_vapour_pressure_murphy(T, over='water'):
     assert over == 'water' or over == 'ice', 'parameter \'over\' must be \'water\' or \'ice.\''
     
     if over == 'water':
-        if np.any(T <= 123) or np.any(T >= 332):
+        if np.nanmin(T) <= 123 or np.nanmin(T) >= 332:
             print('saturation_vapour_pressure_murphy: warning T outside valid range.')
         
         es = np.exp(54.842763 - 6763.22/T - 4.210*np.log(T) + 0.000367*T + 
@@ -200,7 +199,7 @@ def saturation_vapour_pressure_murphy(T, over='water'):
                      (53.878 - 1331.22/T - 9.44523*np.log(T) + 0.014025*T))
      
     if over == 'ice':
-        if np.any(T <= 110):
+        if np.nanmin(T) <= 110:
             print('saturation_vapour_pressure_murphy: warning T outside valid range.')
         
         es = np.exp(9.550426 - 5723.265/T + 3.53068*np.log(T) - 0.00728332*T)
@@ -229,6 +228,22 @@ def temp_from_theta(theta, p, R=287, P_0=1000):
         temp.attrs = {'long_name': 'Temperature', 'units': 'K'}
         
     return(temp)
+
+def potential_temp(T, p, p_0=1000, R_d=287):
+    """
+    Calculate potential temperature using Poisson's equation.
+    
+    Arguments:
+    
+    T: Temperature [K].
+    p: Pressure [hPa].
+    p_0: Reference pressure [hPa].
+    R_d: Gas constant for dry air [J kg-1 K-1].
+    """
+    
+    c_p = 7 * R_d/2 # Specific heat of dry air at constant pressure [J kg-1 K-1].
+    theta = T * (p_0/p)**(R_d/c_p)
+    return(theta)
 
 def specific_humidity(es, p):
     """
@@ -262,16 +277,24 @@ def saturation_mixing_ratio(es, p):
        
     return(ws)
 
-def relative_humidity(theta, p, w, es_method='murphy'):
-
+def relative_humidity(theta, p, q, es_method='murphy'):
+    """
+    Calculate relative humidity [%].
+    
+    Arguments:
+    theta: Potential temperature [K].
+    p: Pressure [hPa].
+    q: Water vapour mixing ratio [kg kg-1].
+    es_method: Method to use for calculation of saturation vapour pressure.
+    """
+    
     T = temp_from_theta(theta=theta, p=p)              
     es = saturation_vapour_pressure(T=T, over='water', method=es_method)
     ws = saturation_mixing_ratio(es=es, p=p)
     
-    rh = w/ws * 100
+    rh = q/ws * 100
     
     if isinstance(rh, xarray.DataArray):
         rh.attrs = {'long_name': 'Relative humidity', 'units': '%'}
         
     return(rh)
-

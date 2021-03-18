@@ -2,8 +2,10 @@
 # (https://www2.mmm.ucar.edu/wrf/users/docs/technote/contents.html).
 # Author: Tim Raupach <t.raupach@unsw.edu.au>.
 
+import os
 import xarray
 import numpy as np
+import pandas as pd
 import modules.atmosphere as atm
 
 # A note on full and half levels: WRF has staggered coordinates. Full levels refer to 
@@ -391,7 +393,7 @@ def eta_for_pressure(p_dry, p_top):
     
     Arguments:
     p_dry: Dry hydrostatic pressure per half eta level from the surface upwards (hPa).
-    top_p_dry: Model-top pressure (hPa).
+    top_p_dry: Model-top pressure [hPa].
     """
 
     eta_half = (p_dry[1:] - p_top) / (p_dry[0] - p_top)
@@ -399,4 +401,40 @@ def eta_for_pressure(p_dry, p_top):
     
     assert np.all(eta[1:] - eta[:-1] < 0), "eta values are not monotonic decreasing."
     return(eta)
+
+def write_input_sounding(out_dir, surface_p, surface_T, surface_q, profile, indexed=True):
+    """
+    Write an input_sounding file to a given output directory.
     
+    Arguments:
+    out_dir: Output directory.
+    surface_p: Surface pressure [hPa].
+    surface_T: Surface temperature [K].
+    surface_q: Surface specific humidity [kg kg-1].
+    profile: Profile to write, must contain z, theta, q (U and V are (re)set to zeros).
+    indexed: Is the profile indexed (argument 'index' to pandas.to_csv().
+    """
+    
+    assert not os.path.exists(out_dir + '/input_sounding'), 'Output file already exists.'
+    
+    # Calculate surface potential temperature.
+    # Note R_d constant value used here is from RCEMIP specification (Wing et al 2018), not WRF.
+    surface_theta = atm.potential_temp(T=surface_T, p=surface_p, R_d=287.04)
+    
+    # Write surface information to the first line. q is converted from kg kg-1 to g kg-1.
+    surf = pd.DataFrame(data={'p': [surface_p], 'theta': [surface_theta], 'q': [surface_q*1000]})
+    surf.to_csv(out_dir+'/input_sounding', sep='\t', header=False, index=False)
+    
+    # Append profile.
+    sounding_file = open(out_dir+'/input_sounding', mode='a', newline='')
+    prof = profile[['z', 'theta', 'q']]
+    
+    # Convert q from kg kg-1 to g kg-1.
+    assert prof.q.attrs['units'] == 'kg kg-1'
+    prof['q'] = prof.q * 1000
+    
+    prof['U'] = 0
+    prof['V'] = 0
+    prof.to_dataframe().to_csv(sounding_file, sep='\t', header=False, index=indexed)
+    sounding_file.close()
+

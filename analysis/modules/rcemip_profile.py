@@ -3,12 +3,14 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy as sp
+import scipy.interpolate
 import xarray
 
 # Define default analytic sounding parameters, from Wing et al 2018, Table 2 and text.
 z_t_def = 15000    ## Height of the tropopause [m].
 q_0_def = 0.01865  ## Surface specific humidity (for SST = 300 K) [kg kg-1].
-q_t_def = 1e-13    ## Specific humidity in the upper atmosphere [kg kg-1].
+q_t_def = 1e-14    ## Specific humidity in the upper atmosphere [kg kg-1].
 z_q1_def = 4000    ## Constant 1 for specific humidity calculation [m].
 z_q2_def = 7500    ## Constant 2 for specific humidity calculation [m].
 T_0_def = 300      ## Sea surface temperature (SST) [K].
@@ -17,24 +19,25 @@ p_0_def = 1014.8   ## Surface pressure [hPa].
 g_def = 9.79764    ## Mean surface gravity [m s-2].
 R_d_def = 287.04   ## Gas constant for dry air [J kg-1 K-1].
 
-def specific_humidity(z, q_0=q_0_def, z_q1=z_q1_def, z_q2=z_q2_def, z_t=z_t_def, q_t=q_t_def):
+def specific_humidity(z, q_0=q_0_def, z_q1=z_q1_def, z_q2=z_q2_def, z_t=z_t_def, q_t=q_t_def, **kwargs):
     """
     Return specific humidity q [kg kg-1] for height as per Wing et al 2018, Equation 2.
     
     Arguments:
-    z:    Heights at which to calculate as np.array [m].
-    q_0:  Surface specific humidity [kg kg-1].
-    z_q1: Constant altitude 1 [m].
-    z_q2: Constant altitude 2 [m].
-    z_t:  Height of the tropopause [m].
-    q_t:  Specific humidity in the upper atmosphere [kg kg-1].
+    z:        Heights at which to calculate as np.array [m].
+    q_0:      Surface specific humidity [kg kg-1].
+    z_q1:     Constant altitude 1 [m].
+    z_q2:     Constant altitude 2 [m].
+    z_t:      Height of the tropopause [m].
+    q_t:      Specific humidity in the upper atmosphere [kg kg-1].
+    **kwargs: Extra arguments (ignored).
     """
     
     q_z = q_0 * np.exp(-z/z_q1) * np.exp(-(z/z_q2)**2)
     q_z[np.where(z > z_t)] = q_t
     return(q_z)
     
-def virtual_temperature(z, T_0=T_0_def, q_0=q_0_def, Gamma=Gamma_def, z_t=z_t_def):
+def virtual_temperature(z, T_0=T_0_def, q_0=q_0_def, Gamma=Gamma_def, z_t=z_t_def, **kwargs):
     """
     Return the initial virtual temperature T_z [K] for height as per Wing et al 2018, Equation 3.
     
@@ -44,6 +47,7 @@ def virtual_temperature(z, T_0=T_0_def, q_0=q_0_def, Gamma=Gamma_def, z_t=z_t_de
     T_0:   Sea surface temperature (SST) [K].  
     Gamma: Virtual temperature lapse rate [K m-1].
     z_t:  Height of the tropopause [m].
+    **kwargs: Extra arguments (ignored).
     """
     
     T_v0 = T_0 * (1 + 0.608*q_0) # Virtual temperature at the surface [K].
@@ -137,7 +141,7 @@ def default_profile(**kwargs):
     **kwargs: Optional arguments to initial_profile().
     """
     
-    return(initial_profile(suggested_heights(), **kwargs))
+    return(initial_profile(z=suggested_heights(), **kwargs))
 
 def plot_default_profile(z_max=18600, **kwargs):
     """
@@ -151,7 +155,7 @@ def plot_default_profile(z_max=18600, **kwargs):
     profile = default_profile(**kwargs)
     fig, ax = plt.subplots(ncols=3)
     profile.T.sel(z=slice(0,z_max)).plot(ax=ax[0], y='z')
-    (profile.q*1000).sel(z=slice(0,z_max)).plot(ax=ax[1], y='z') # Convert to g kg-1.
+    profile.q.sel(z=slice(0,z_max)).plot(ax=ax[1], y='z') 
     profile.p.sel(z=slice(0,z_max)).plot(ax=ax[2], y='z')
 
     for i in np.arange(1, len(ax)):
@@ -159,4 +163,24 @@ def plot_default_profile(z_max=18600, **kwargs):
         
     plt.tight_layout()
     plt.show()
+    
+def surface_q_interp(surface_T):
+    """
+    Use a simple linear interpolation to determine a surface value for specific humidity for a given 
+    surface temperature, based on values given in Wing et al 2018.
+    
+    Arguments:
+    surface_T: The surface temperature to interpolate for [K].
+    """
+    
+    Ts = np.array([295, 300, 305])
+    qs = np.array([0.012, 0.01865, 0.024])
+    
+
+    Ts = np.array([295, 300, 305])
+    qs = np.array([0.012, 0.01865, 0.024])
+
+    interp = sp.interpolate.interp1d(Ts, qs, fill_value='extrapolate' )
+    return(interp(surface_T))
+    
     
