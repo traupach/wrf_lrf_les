@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Stop after any error.
-set -e
-
 if [ $# -ne 2 ]; then
     echo "move_wrf_output.sh: Move all WRF output after a run to a specified directory.";
     echo "Logs and run-specific information will be moved to <dir>/runs/<runname>."
@@ -52,9 +49,6 @@ if [ -e wrfinput_d01 ]; then
     mv -i wrfinput_d01 $dir
 fi
 
-mv -i wrfout_* $dir
-mv -i wrfrst_* $dir
-
 ## Log files.
 if [ -e ideal.error.0000 ]; then
     mv -i ideal.error.0000 $dir
@@ -63,3 +57,6 @@ fi
 mv -i rsl* $dir/runs/$run
 mv -i wrf_job.* $dir/runs/$run
 mv -i run_environment.txt $dir/runs/$run
+
+mv -i wrfout_* $dir
+mv -i wrfrst_* $dir
