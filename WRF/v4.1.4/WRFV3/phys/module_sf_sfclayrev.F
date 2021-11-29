@@ -1066,11 +1066,11 @@ CONTAINS
            ! Use ideal surface fluxes, as per Chua et al. (2019).
 
            ! Based on Equation 2 in Chua et al. 2019, where they suggest a
-           ! constant of 0.005 kg m-1 s-1 composed of:
+           ! constant of 0.005 kg m-2 s-1 composed of:
            !   - drag coefficient of 0.001
            !   - near-surface air density of 1 kg m-3
            !   - constant near-surface wind speed of 5 m s-1
-           ! multiplying to 0.001 * 1 * 5 = 0.005 kg m-1 s-1.
+           ! multiplying to 0.001 * 1 * 5 = 0.005 kg m-2 s-1.
            !
            ! Here we use variable surface wind speed and near-surface density
            ! and only assume the drag coefficient of 0.001. The other terms are
