@@ -141,6 +141,7 @@ CONTAINS
   subroutine relax_winds_to_profile( &
        uten, vten, u, v, p, tau,        &
        target_wind_u, target_wind_v, extend_relaxation, &
+       apply_u, apply_v, relax_mean_wind, &
        ids, ide, jds, jde, kds, kde, &
        ims, ime, jms, jme, kms, kme, &
        ips, ipe, jps, jpe, kps, kpe, &
@@ -161,6 +162,7 @@ CONTAINS
     ! extend_relaxation: Extend relaxation to cover whole profile?
     ! apply_u: Apply relaxation to u winds?
     ! apply_v: Apply relaxation to v winds?
+    ! relax_mean_wind: Relax the mean of each layer, instead of point-by-point?
     ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
     ! ims, ime, jms, jme, kms, kme: Memory dimensions.
     ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
@@ -172,7 +174,8 @@ CONTAINS
     real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: uten, vten
     real, intent(in)                 :: tau
     real, dimension(kte), intent(in) :: target_wind_u, target_wind_v
-    logical, intent(in)              :: extend_relaxation, apply_u, apply_v
+    logical, intent(in)              :: extend_relaxation
+    logical, intent(in)              :: apply_u, apply_v, relax_mean_wind
     integer, intent(in) :: &
          ids, ide, jds, jde, kds, kde, &
          ims, ime, jms, jme, kms, kme, &
