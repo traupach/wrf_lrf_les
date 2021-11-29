@@ -2146,11 +2146,20 @@ SUBROUTINE calculate_phy_tend (config_flags,c1,c2,                     &
       ENDDO
    endif      
    
-   if(config_flags%relax_uv_winds .eqv. .true.) then
+   if(config_flags%relax_u_winds .eqv. .true.) then
       DO J=jts,jtf
          DO K=kts,ktf
             DO I=its,itf
                rurelaxten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*rurelaxten(I,K,J)
+            ENDDO
+         ENDDO
+      ENDDO
+   endif
+
+   if(config_flags%relax_v_winds .eqv. .true.) then
+      DO J=jts,jtf
+         DO K=kts,ktf
+            DO I=its,itf
                rvrelaxten(I,K,J) =(c1(k)*mut(I,J)+c2(k))*rvrelaxten(I,K,J)
             ENDDO
          ENDDO

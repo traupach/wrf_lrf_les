@@ -1459,7 +1459,8 @@ if((config_flags%relax_stratosphere .eqv. .true.) .and. &
 endif
 
 ! Load target U and V profiles for wind relaxation.
-if((config_flags%relax_uv_winds .eqv. .true.) .and. &
+if(((config_flags%relax_u_winds .eqv. .true.) .or. &
+     (config_flags%relax_v_winds .eqv. .true.)) .and. &
      (load_target_uv_profiles .eqv. .true.)) then
    call read_wind_target_profiles(num_levels=k_end-k_start, &
         u_profile_file=config_flags%relax_u_profile_file,   &
@@ -1500,7 +1501,8 @@ do ij = 1, grid%num_tiles
         kts=k_start, kte=k_end)
 
    ! Relax winds to given profiles?
-   if(config_flags%relax_uv_winds .eqv. .true.) then
+   if((config_flags%relax_u_winds .eqv. .true.) .or. &
+      (config_flags%relax_v_winds .eqv. .true.)) then
       call relax_winds_to_profile(                               &
            uten=grid%rurelaxten, vten=grid%rvrelaxten,           &
            u=grid%u_phy, v=grid%v_phy, p=grid%p_hyd,             &
@@ -1508,6 +1510,8 @@ do ij = 1, grid%num_tiles
            target_wind_u=grid%relax_u_target_profile,            &
            target_wind_v=grid%relax_v_target_profile,            &
            extend_relaxation=config_flags%extend_wind_relax,     &
+           apply_u=config_flags%relax_u_winds,                   &
+           apply_v=config_flags%relax_v_winds,                   &
            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &

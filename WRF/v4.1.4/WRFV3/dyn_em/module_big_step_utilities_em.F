@@ -5261,11 +5261,20 @@ END SUBROUTINE phy_prep
       ENDDO
    endif
          
-   if(config_flags%relax_uv_winds .eqv. .true.) then
+   if(config_flags%relax_u_winds .eqv. .true.) then
       DO J=j_start,j_end
          DO K=k_start,k_end
             DO I=i_start,i_end
                rurelaxten(I,K,J) = rurelaxten(I,K,J)/(c1(k)*MUT(I,J)+c2(k))
+            ENDDO
+         ENDDO
+      ENDDO
+   endif
+
+   if(config_flags%relax_v_winds .eqv. .true.) then
+      DO J=j_start,j_end
+         DO K=k_start,k_end
+            DO I=i_start,i_end
                rvrelaxten(I,K,J) = rvrelaxten(I,K,J)/(c1(k)*MUT(I,J)+c2(k))
             ENDDO
          ENDDO

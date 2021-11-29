@@ -159,6 +159,8 @@ CONTAINS
     ! target_wind_u: The target profile for U [m s-1].
     ! target_wind_v: The target profile for V [m s-1].
     ! extend_relaxation: Extend relaxation to cover whole profile?
+    ! apply_u: Apply relaxation to u winds?
+    ! apply_v: Apply relaxation to v winds?
     ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
     ! ims, ime, jms, jme, kms, kme: Memory dimensions.
     ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
@@ -170,7 +172,7 @@ CONTAINS
     real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: uten, vten
     real, intent(in)                 :: tau
     real, dimension(kte), intent(in) :: target_wind_u, target_wind_v
-    logical, intent(in)              :: extend_relaxation
+    logical, intent(in)              :: extend_relaxation, apply_u, apply_v
     integer, intent(in) :: &
          ids, ide, jds, jde, kds, kde, &
          ims, ime, jms, jme, kms, kme, &
@@ -195,9 +197,14 @@ CONTAINS
                    ! at 160 hPa to 1/tau s-1 at 100 hPa.
                    inv_tau = (1/tau)*(16000 - p(i,k,j))/6000
                 endif
-                
-                uten(i,k,j) = uten(i,k,j) + (inv_tau * -(u(i,k,j) - target_wind_u(k)))
-                vten(i,k,j) = vten(i,k,j) + (inv_tau * -(v(i,k,j) - target_wind_v(k)))
+
+                if(apply_u .eqv. .true.) then
+                   uten(i,k,j) = uten(i,k,j) + (inv_tau * -(u(i,k,j) - target_wind_u(k)))
+                endif
+
+                if(apply_v .eqv. .true.) then
+                   vten(i,k,j) = vten(i,k,j) + (inv_tau * -(v(i,k,j) - target_wind_v(k)))
+                endif
              endif
           enddo
        enddo

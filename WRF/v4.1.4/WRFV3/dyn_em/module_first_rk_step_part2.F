@@ -550,7 +550,8 @@ BENCH_END(calc_tke_tim)
 #      include "PERIOD_BDY_EM_FDDA_BC.inc"
        ENDIF
 #      include "PERIOD_BDY_EM_CHEM.inc"
-       if (config_flags%relax_uv_winds .eqv. .true.) then
+       if ((config_flags%relax_u_winds .eqv. .true.) .or. &
+            (config_flags%relax_v_winds .eqv. .true.)) then
 #      include "PERIOD_BDY_EM_PHY_WINDRELAX.inc"
        endif
 #endif
@@ -643,7 +644,8 @@ ENDIF
 #      include "HALO_EM_PHYS_PBL.inc"
        ENDIF
        ! Changed T. Raupach
-       if (config_flags%relax_uv_winds .eqv. .true.) then
+       if ((config_flags%relax_u_winds .eqv. .true.) .or. &
+            (config_flags%relax_v_winds .eqv. .true.)) then
 #      include "HALO_EM_PHYS_WINDRELAX.inc"
        endif
        ! End changed block

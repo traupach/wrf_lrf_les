@@ -168,12 +168,14 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
            its, ite, jts, jte, kts, kte                        )
    endif
       
-   if(config_flags%relax_uv_winds .eqv. .true.) then
+   if(config_flags%relax_u_winds .eqv. .true.) then
       CALL add_a2c_u(ru_tendf, rurelaxten, config_flags,       &
            ids, ide, jds, jde, kds, kde,                       &
            ims, ime, jms, jme, kms, kme,                       &
            its, ite, jts, jte, kts, kte                        )
-      
+   endif
+
+   if(config_flags%relax_v_winds .eqv. .true.) then   
       CALL add_a2c_v(rv_tendf, rvrelaxten, config_flags,       &
            ids, ide, jds, jde, kds, kde,                       &
            ims, ime, jms, jme, kms, kme,                       &

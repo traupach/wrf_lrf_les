@@ -639,8 +639,15 @@ endif
           tmpint = merge(1.d0, 0.d0, config_flags%const_rad_cooling)
           call wrf_put_dom_ti_integer(fid, "CONST_RAD_COOLING", tmpint, 1, ierr)
 
-          tmpint = merge(1.d0, 0.d0, config_flags%relax_uv_winds)
-          call wrf_put_dom_ti_integer(fid, "RELAX_UV_WINDS", tmpint, 1, ierr)
+          tmpint = merge(1.d0, 0.d0, config_flags%relax_u_winds)
+          call wrf_put_dom_ti_integer(fid, "RELAX_U_WINDS", tmpint, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%relax_v_winds)
+          call wrf_put_dom_ti_integer(fid, "RELAX_V_WINDS", tmpint, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%extend_wind_relax)
+          call wrf_put_dom_ti_integer(fid, "EXTEND_WIND_RELAX", tmpint, 1, ierr)
+          
           call wrf_put_dom_ti_real(fid, "WIND_RELAXATION_TIME", &
                config_flags%wind_relaxation_time, 1, ierr)
 
