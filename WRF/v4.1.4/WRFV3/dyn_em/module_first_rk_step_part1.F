@@ -1512,6 +1512,7 @@ do ij = 1, grid%num_tiles
            extend_relaxation=config_flags%extend_wind_relax,     &
            apply_u=config_flags%relax_u_winds,                   &
            apply_v=config_flags%relax_v_winds,                   &
+           relax_mean_wind=config_flags%relax_mean_wind,         &
            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
