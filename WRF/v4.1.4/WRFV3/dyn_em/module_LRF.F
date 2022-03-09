@@ -114,7 +114,7 @@ CONTAINS
     ! levels in the model may not exactly align with the pressure around which
     ! we want to perturb.
 
-    ! Loop over staggered grid.
+    ! Loop over unstaggered grid.
     do i = its, min(ite, ide-1)
        do k = kts, min(kte, kde-1)
           do j = jts, min(jte, jde-1)
@@ -139,8 +139,9 @@ CONTAINS
   end subroutine force_LRF
 
   subroutine relax_winds_to_profile( &
-       uten, vten, u, v, p, tau,        &
-       target_wind_u, target_wind_v, extend_relaxation, &
+       uten, vten, u, v, p, tau,     &
+       target_wind_u, target_wind_v, &
+       extend_relaxation_u, extend_relaxation_v, &
        apply_u, apply_v, relax_mean_wind, &
        ids, ide, jds, jde, kds, kde, &
        ims, ime, jms, jme, kms, kme, &
@@ -174,7 +175,7 @@ CONTAINS
     real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: uten, vten
     real, intent(in)                 :: tau
     real, dimension(kte), intent(in) :: target_wind_u, target_wind_v
-    logical, intent(in)              :: extend_relaxation
+    logical, intent(in)              :: extend_relaxation_u, extend_relaxation_v
     logical, intent(in)              :: apply_u, apply_v, relax_mean_wind
     integer, intent(in) :: &
          ids, ide, jds, jde, kds, kde, &
@@ -184,12 +185,90 @@ CONTAINS
 
     integer :: i,j,k
     real :: inv_tau
+    real, dimension(kms:kme) :: u_means, v_means
 
-    ! Relax U and V winds. 
+    ! Relax u winds.
+    if(apply_u .eqv. .true.) then
+       call relax_wind_to_profile(ten=uten, wind=u, p=p, tau=tau, &
+            target_wind=target_wind_u, extend_relaxation=extend_relaxation_u, &
+            relax_mean_wind=relax_mean_wind, &
+            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+            its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte)
+    endif
+    
+    ! Relax v winds.
+    if(apply_v .eqv. .true.) then
+       call relax_wind_to_profile(ten=vten, wind=v, p=p, tau=tau, &
+            target_wind=target_wind_v, extend_relaxation=extend_relaxation_v, &
+            relax_mean_wind=relax_mean_wind, &
+            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+            its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte)
+    endif
+  end subroutine relax_winds_to_profile
+
+  subroutine relax_wind_to_profile(    &
+       ten, wind, p, tau,              &
+       target_wind, extend_relaxation, &
+       relax_mean_wind,                &
+       ids, ide, jds, jde, kds, kde,   &
+       ims, ime, jms, jme, kms, kme,   &
+       ips, ipe, jps, jpe, kps, kpe,   &
+       its, ite, jts, jte, kts, kte)
+    ! Relax winds toward a profiles read from file. If extend_relaxation
+    ! is .false. then relax winds above 160 hPa to maximum relaxation at/above
+    ! 100 hPa.  If 'extend_relaxation' is .true. then relax the whole
+    ! profile. Targets should be given for the whole profile regardless of the
+    ! value of extend_relaxation.
+    !
+    ! ---
+    ! ten: The wind tendency field [m s-2].
+    ! wind: The wind field (at mass points) [m s-1].
+    ! p: Hydrostatic pressure [Pa].
+    ! tau: Relaxation time, over which a full relaxation is made [s].
+    ! target_wind: The target profile [m s-1].
+    ! extend_relaxation: Extend relaxation to cover whole profile?
+    ! relax_mean_wind: Relax the mean of each layer, instead of point-by-point?
+    ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
+    ! ims, ime, jms, jme, kms, kme: Memory dimensions.
+    ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
+    ! its, ite, jts, jte, kts, kte: Tile dimensions.
+
+    implicit none
+ 
+    real, dimension(ims:ime, kms:kme, jms:jme), intent(in)    :: wind, p
+    real, dimension(ims:ime, kms:kme, jms:jme), intent(inout) :: ten
+    real, intent(in)                 :: tau
+    real, dimension(kte), intent(in) :: target_wind
+    logical, intent(in)              :: extend_relaxation
+    logical, intent(in)              :: relax_mean_wind
+    integer, intent(in) :: &
+         ids, ide, jds, jde, kds, kde, &
+         ims, ime, jms, jme, kms, kme, &
+         ips, ipe, jps, jpe, kps, kpe, &
+         its, ite, jts, jte, kts, kte
+
+    integer :: i,j,k
+    real :: inv_tau
+    real, dimension(kms:kme) :: means
+    
+    if(relax_mean_wind .eqv. .true.) then
+       call horizontal_means(v=wind, out=means, &
+            ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+            ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
+            ips=ips, ipe=ipe, jps=jps, jpe=jpe, kps=kps, kpe=kpe, &
+            its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte)
+    endif
+    
+    ! Relax winds. 
     do j=jts,min(jte, jde-1)
        do k=kts,min(kte, kde-1)
           do i=its,min(ite, ide-1)
-             ! Relax winds only above 160 hPa, or everywhere if extend_relaxation is true.
+             ! Relax winds only above 160 hPa, or everywhere if
+             ! extend_relaxation is true.
              if ((extend_relaxation .eqv. .true.) .or. (p(i,k,j) .lt. 16000)) then
                 if ((extend_relaxation .eqv. .true.) .or. (p(i,k,j) .le. 10000)) then
                    ! Above 100 hPa, or if extend_relaxation is true, use the
@@ -201,19 +280,74 @@ CONTAINS
                    inv_tau = (1/tau)*(16000 - p(i,k,j))/6000
                 endif
 
-                if(apply_u .eqv. .true.) then
-                   uten(i,k,j) = uten(i,k,j) + (inv_tau * -(u(i,k,j) - target_wind_u(k)))
-                endif
-
-                if(apply_v .eqv. .true.) then
-                   vten(i,k,j) = vten(i,k,j) + (inv_tau * -(v(i,k,j) - target_wind_v(k)))
+                if(relax_mean_wind .eqv. .true.) then
+                   ! Apply relaxation to shift horizontal means to reference point.
+                   ten(i,k,j) = ten(i,k,j) + (inv_tau * -(means(k) - target_wind(k)))
+                else
+                   ! Apply relaxation point-to-point.
+                   ten(i,k,j) = ten(i,k,j) + (inv_tau * -(wind(i,k,j) - target_wind(k)))
                 endif
              endif
           enddo
        enddo
     enddo
-  end subroutine relax_winds_to_profile
+  end subroutine relax_wind_to_profile
+  
+  subroutine horizontal_means(v, out, &
+       ids, ide, jds, jde, kds, kde, &
+       ims, ime, jms, jme, kms, kme, &
+       ips, ipe, jps, jpe, kps, kpe, &
+       its, ite, jts, jte, kts, kte)
+    ! Calculate horizontal mean values per level.
+    !
+    ! v: The variable for which to find horizontal means.
+    ! out: Output array, one value per level in v.
+    ! ids, ide, jds, jde: kds, kde: Horizontal domain dimensions.
+    ! ims, ime, jms, jme, kms, kme: Memory dimensions.
+    ! ips, ipe, jps, jpe, kps, kpe: Patch dimensions.
+    ! its, ite, jts, jte, kts, kte: Tile dimensions.
 
+    USE module_dm, ONLY: wrf_dm_sum_real
+    
+    implicit none
+ 
+    real, dimension(ims:ime, kms:kme, jms:jme), intent(in) :: v
+    real, dimension(kms:kme), intent(inout) :: out
+    integer, intent(in) :: &
+         ids, ide, jds, jde, kds, kde, &
+         ims, ime, jms, jme, kms, kme, &
+         ips, ipe, jps, jpe, kps, kpe, &
+         its, ite, jts, jte, kts, kte
+    
+    integer :: i, j, k
+    integer :: stag_x, stag_y
+    integer :: i_from, i_to, j_from, j_to, k_from, k_to
+    real :: sum, count
+
+    do k = kts, min(kte, kde-1)
+       sum = 0
+       count = 0
+       
+       do j = jts, min(jte, jde-1)
+          do i = its, min(ite, ide-1)
+             sum = sum + v(i,k,j)
+             count = count + 1
+          enddo
+       enddo
+       
+       ! Compute count and sum over whole layer in parallel.
+       sum = wrf_dm_sum_real(sum)
+       count = wrf_dm_sum_real(count)
+       
+       ! Check that all domain points have been counted.
+       if(.not. count .eq. (ide-ids) * (jde-jds)) then
+          call wrf_error_fatal("Wind nudging grid mean domain size mismatch.")
+       endif
+
+       out(k) = sum / count
+    enddo
+  end subroutine horizontal_means
+  
   subroutine relax_stratospheric_t_qv(     &
        t_phy, qv, thten, qvten, p, pi,     &
        target_t, target_q,                 &

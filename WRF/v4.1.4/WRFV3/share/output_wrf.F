@@ -645,8 +645,11 @@ endif
           tmpint = merge(1.d0, 0.d0, config_flags%relax_v_winds)
           call wrf_put_dom_ti_integer(fid, "RELAX_V_WINDS", tmpint, 1, ierr)
 
-          tmpint = merge(1.d0, 0.d0, config_flags%extend_wind_relax)
-          call wrf_put_dom_ti_integer(fid, "EXTEND_WIND_RELAX", tmpint, 1, ierr)
+          tmpint = merge(1.d0, 0.d0, config_flags%extend_wind_relax_u)
+          call wrf_put_dom_ti_integer(fid, "EXTEND_WIND_RELAX_U", tmpint, 1, ierr)
+
+          tmpint = merge(1.d0, 0.d0, config_flags%extend_wind_relax_v)
+          call wrf_put_dom_ti_integer(fid, "EXTEND_WIND_RELAX_V", tmpint, 1, ierr)
           
           call wrf_put_dom_ti_real(fid, "WIND_RELAXATION_TIME", &
                config_flags%wind_relaxation_time, 1, ierr)
