@@ -1,3 +1,19 @@
+# Paper bits and pieces
+paper/*template
+paper/*.cls
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.pdf
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.gz
+paper/*.tex
+
+*.ipynb_checkpoints*
+*__pycache__*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
