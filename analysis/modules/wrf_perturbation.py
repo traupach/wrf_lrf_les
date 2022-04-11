@@ -15,7 +15,7 @@ import glob
 
 FIGURE_SIZE = [15, 4]   # Default figure size [horizontal, vertical]. 
 
-def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True):
+def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=False):
     """
     Read all wrfvars files in multiple datasets.
     
@@ -25,6 +25,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True):
         resample: If defined, resample each dataset using no tolerance (use e.g. "1H" to keep only hourly records).
         drop_vars: If defined, drop selected variables if they exist in any dataset.
         calc_rh: Calculate relative humidity?
+        quiet: Be quiet.
         
     Returns: an xarray.DataArray with all data from wrfvars*.nc files, labelled by dataset.
     """
@@ -37,7 +38,8 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True):
 
         for setname, directory in inputs[res].items():
             
-            print('Reading ' + res + ' dataset: ' + setname + '...')
+            if not quiet:
+                print('Reading ' + res + ' dataset: ' + setname + '...')
             
             datasets.append(xarray.open_mfdataset(directory+"/wrfvars*.nc", combine="nested", concat_dim="time"))
             if not resample is None:
@@ -56,7 +58,8 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True):
             assert len(keydiffs) == 0, ('Dataset keys have differences: ' + 
                                         str(keydiffs) + '. Consider using drop_vars.')
 
-        dat = xarray.combine_nested(datasets, concat_dim='Dataset')
+        dat = xarray.combine_nested(datasets, concat_dim='Dataset', compat='equals', 
+                                    combine_attrs='drop_conflicts')
         dat = prettify_long_names(dat)
 
         dat['rh'] = atm.relative_humidity(theta=dat.T+300, p=dat.level, q=dat.q)
@@ -140,6 +143,9 @@ def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profile
     print('\tLand-surface:\t\t\t\t' + wrf_sf_surface_scheme(wrfin))
     print('\tPBL:\t\t\t\t\t' + wrf_pbl_scheme(wrfin))
     print('\tCumulus:\t\t\t\t' + wrf_cu_scheme(wrfin))
+    print('Turbulence options:')
+    print('\tDiffusion (diff_opt):\t\t\t' + wrf_diff_opt(wrfin))
+    print('\tEddy coefficient (km_opt):\t\t' + wrf_km_opt(wrfin))
     
     if plot_profiles:
         plot_wrfinput_profiles(wrfin=wrfin, sounding_file=sounding_file)
@@ -324,8 +330,8 @@ def rewrap_labels(axes, length_x=20, length_y=24):
         ax.set_xlabel('\n'.join(textwrap.wrap(ax.get_xlabel().replace('\n',' '), length_x)))
         ax.set_ylabel('\n'.join(textwrap.wrap(ax.get_ylabel().replace('\n',' '), length_y)))
             
-def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], figsize=FIGURE_SIZE,
-                     title='', neg=[]):
+def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], xlims=None,
+                     figsize=FIGURE_SIZE, title='', neg=[], loc='best'):
     """
     Find temporal means of water vapour mixing ratio (q) and temperature (tk), and plot the differences
     between them by pressure level.
@@ -334,9 +340,11 @@ def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], f
         profs: Profiles to compare.
         control_name: Name for control values of 'Dataset' in dat.  
         variables: The variables to compare.
+        xlims: Limits for the x axis (dict with limits per variable).
         figsize: Figure size [width, height].
         title: Plot title.
         neg: Which values of Dataset should have their differences multiplied by -1?
+        loc: Loc argument to plt.legend.
     """
     
     diffs = diff_means(profs=profs, control_name=control_name)
@@ -344,7 +352,8 @@ def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], f
     neg_diffs = -1 * diffs.sel(Dataset=neg)
     diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
     
-    plot_profiles(profs=diffs, variables=variables, figsize=figsize, vline=0, title=title)
+    return plot_profiles(profs=diffs, variables=variables, figsize=figsize, 
+                         vline=0, title=title, xlims=xlims, loc=loc)
         
 def diff_means(profs, control_name='Control'):
     """
@@ -418,7 +427,8 @@ def plot_pairwise_diffs(dat, start, end, comp_pairs, variables=['tk','q','ua','v
     diffs = pairwise_diffs(dat=dat, start=start, end=end, comp_pairs=comp_pairs, relative=relative)
     plot_profiles(profs=diffs, variables=variables, figsize=figsize, vline=0, title=title)
     
-def plot_profiles(profs, variables=['tk','q','ua','va','rh'], figsize=FIGURE_SIZE, vline=None, title=''):
+def plot_profiles(profs, variables=['tk','q','ua','va','rh'], ylims=[1000, 200], 
+                  xlims=None, figsize=FIGURE_SIZE, vline=None, title='', loc='best'):
     """
     Plot simple profiles by Dataset.
     
@@ -426,25 +436,33 @@ def plot_profiles(profs, variables=['tk','q','ua','va','rh'], figsize=FIGURE_SIZ
         profs: Profiles by dataset.
         variables: The variables to plot.
         figsize: Figure size [width, height].
+        xlims: Limits for the x axis (dictionary with limits per variable).
+        ylims: Limits for the y axis (list applied to all plots).
         vline: x coordinate for a vertical line in red.
         title: Plot title.
+        loc: Loc argument to plt.legend.
+        
+    Returns: fig, ax for plot.
     """
     
     fig, ax = plt.subplots(ncols=len(variables), sharey=True, figsize=figsize)
     for i, var in enumerate(variables):
-        plot = profs[var].plot(hue='Dataset', y='level', ax=ax[i], yincrease=False, add_legend=False)
+        plot = profs[var].plot(hue='Dataset', y='level', ax=ax[i], ylim=ylims, 
+                               xlim=xlims[var] if xlims is not None else None,
+                               yincrease=False, add_legend=False)
         ax[i].set_title('')
         if vline is not None:
             ax[i].axvline(x=vline, color='red')
         
-    plt.legend(labels=profs.Dataset.values, bbox_to_anchor=(1.05, 1))
+    plt.legend(labels=profs.Dataset.values, bbox_to_anchor=(1.05, 1), loc=loc)
     keep_left_axis(axes=ax)
-    rewrap_labels(axes=ax, length_x=12)
+    rewrap_labels(axes=ax, length_x=30)
     plt.suptitle(title)
-    plt.tight_layout()
-    plt.show()
     
-def mean_profiles(dat, start, end, variables=['tk','q','ua','va','rh'], plot=True, figsize=FIGURE_SIZE, title=''):
+    return fig, ax
+    
+def mean_profiles(dat, start, end, variables=['tk','q','ua','va','rh'], 
+                  plot=True, figsize=FIGURE_SIZE, title=''):
     """
     Calculate temporal means of variables by Dataset.
    
@@ -865,6 +883,35 @@ def wrf_sf_surface_scheme(wrfin):
         
     return(str(wrfin.SF_SURFACE_PHYSICS) + ' (' + schemes[wrfin.SF_SURFACE_PHYSICS] + ')')   
 
+def wrf_diff_opt(wrfin):
+    """
+    Report the diff_opt value in the wrfinput file. 
+    
+    Arguments:
+        wrfin: The open wrfinput file as an xarray object.
+    """
+    
+    schemes = {0: 'No turbulence',
+               1: 'Simple diffusion',
+               2: 'Full diffusion'}
+    
+    return(str(wrfin.DIFF_OPT) + ' (' + schemes[wrfin.DIFF_OPT] + ')') 
+
+def wrf_km_opt(wrfin):
+    """
+    Report the km_opt value in the wrfinput file. 
+    
+    Arguments:
+        wrfin: The open wrfinput file as an xarray object.
+    """
+    
+    schemes = {1: 'Constant K',
+               2: '3D TKE',
+               3: '3D Smagorinsky',
+               4: '2D (horiz) Smagorinsky'}
+    
+    return(str(wrfin.KM_OPT) + ' (' + schemes[wrfin.KM_OPT] + ')')
+
 def wrf_pbl_scheme(wrfin):
     """
     Lookup the PBL scheme information in a wrfinput file and return a description string.
@@ -1245,4 +1292,33 @@ def shear_profile(z, z_s=3000, U_s=22):
     
     wind = U_s * np.tanh(z/z_s)
     return wind
+
+def add_mass_flux(wrfvars):
+    """
+    Add mass flux to the datasets.
+    
+    Arguments:
+        wrfvars: Data to add to (dictionary by resolution).
+        
+    Returns:
+        wrfvars with mass flux added.
+    """
+    
+    for res in wrfvars.keys():
+        wrfvars[res]['level_pressure'], _ = xarray.broadcast(wrfvars[res].level, wrfvars[res].wa)
+        wrfvars[res]['air_density'] = atm.density(p=wrfvars[res].level_pressure, 
+                                                  q_v=wrfvars[res].q, 
+                                                  theta=wrfvars[res].T+300)
+        wrfvars[res]['conv_mass_flux'] = (wrfvars[res].air_density * 
+                                          wrfvars[res].updraft_proportion * 
+                                          wrfvars[res].mean_updraft)
+        
+        wrfvars[res] = wrfvars[res].drop('level_pressure')
+        wrfvars[res].air_density.attrs['long_name'] = 'Density of air'
+        wrfvars[res].air_density.attrs['units'] = 'kg m-3'
+        
+        wrfvars[res].conv_mass_flux.attrs['long_name'] = 'Convective mass flux'
+        wrfvars[res].conv_mass_flux.attrs['units'] = 'kg m-2 s-1'
+        
+    return wrfvars
     
