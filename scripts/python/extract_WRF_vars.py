@@ -149,12 +149,10 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False), # Water vapour mixing ratio [kg kg-1].
 
     # 2D fields.
-    horiz_summary(nc=nc, varname='pw', interp=False) # Precipitable water [kg m-2].
+    horiz_summary(nc=nc, varname='pw', interp=False), # Precipitable water [kg m-2].
     horiz_summary(nc=nc, varname='pw', interp=False, # Scaled variance of PW as % of mean.
                   operation='scaled_var', rename='pw_scaled_var', 
                   long_name='Variance/mean of precipitable water.')
-    
-    
 ])
 
 
