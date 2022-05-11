@@ -41,7 +41,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
             if not quiet:
                 print('Reading ' + res + ' dataset: ' + setname + '...')
             
-            datasets.append(xarray.open_mfdataset(directory+"/wrfvars*.nc", combine="nested", concat_dim="time"))
+            datasets.append(xarray.open_mfdataset(directory+'/wrfvars*.nc', combine='nested', concat_dim='time', parallel=True))
             if not resample is None:
                 datasets[-1] = datasets[-1].resample(time=resample).nearest(tolerance=0)
 
@@ -132,9 +132,15 @@ def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profile
         print('Surface wind for ideal surface fluxes:\t\t' + str(wrfin.SURFACE_WIND) + ' m s-1')
     print('Constant radiative cooling profile:\t\t' + true_false(wrfin.CONST_RAD_COOLING))
     print('Relax stratsopheric T and q profiles?\t\t' + true_false(wrfin.RELAX_STRATOSPHERE))
-    print('Relax U and V to set profiles?\t\t\t' + true_false(wrfin.RELAX_UV_WINDS))
-    if wrfin.RELAX_UV_WINDS > 0:
-        print('Wind relaxation time:\t\t\t\t' + str(wrfin.WIND_RELAXATION_TIME) + ' s')
+    if 'RELAX_UV_WINDS' in wrfin.attrs:
+        print('Relax U and V to set profiles?\t\t\t' + true_false(wrfin.RELAX_UV_WINDS))
+        if wrfin.RELAX_UV_WINDS > 0:
+            print('Wind relaxation time:\t\t\t\t' + str(wrfin.WIND_RELAXATION_TIME) + ' s')
+    elif 'RELAX_U_WINDS' in wrfin.attrs:
+        print('Relax U to set profile?\t\t\t\t' + true_false(wrfin.RELAX_U_WINDS))
+        print('RELAX V to set profile?\t\t\t\t' + true_false(wrfin.RELAX_V_WINDS))
+        if wrfin.RELAX_U_WINDS > 0 or wrfin.RELAX_V_WINDS > 0:
+            print('Wind relaxation time:\t\t\t\t' + str(wrfin.WIND_RELAXATION_TIME) + ' s')
     print('Physics schemes:')
     print('\tMicrophysics:\t\t\t\t' + wrf_mp_scheme(wrfin))
     print('\tRadiation (longwave):\t\t\t' + wrf_ra_lw_scheme(wrfin))

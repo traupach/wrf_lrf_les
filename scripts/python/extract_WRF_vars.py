@@ -70,6 +70,8 @@ def horiz_summary(nc, varname,
         horiz = var.max(['south_north', 'west_east'])
     elif operation == 'min':
         horiz = var.min(['south_north', 'west_east'])
+    elif operation == 'scaled_var':
+        horiz = var.var(['south_north', 'west_east']) / var.mean(['south_north', 'west_east'])
     elif operation == 'positive_prop':
         # Determine proportion of region with positive values.
         horiz = xarray.ones_like(var).where(var > 0,
@@ -78,6 +80,7 @@ def horiz_summary(nc, varname,
     elif operation == 'positive_mean':
         # Determine mean of only positive values.
         horiz = var.where(var > 0).mean(['south_north', 'west_east'])
+    #elif operation == 'mass_weighted_
     else:
         print('ERROR: horiz_summary: unknown operation ' + operation + '.')
         sys.exit(1)    
@@ -137,17 +140,23 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='wa', operation='positive_mean',      # Mean updraft.
                   rename='mean_updraft',
                   long_name='Mean vertical wind on updraft points.'),
-
+    
     # Fields for which no interpolation is required, return horizontal mean per (mass-point) eta-level.
     horiz_summary(nc=nc, varname='z', interp=False),                      # Full geopotential height [m].
     horiz_summary(nc=nc, varname='T', rename='eta_T', interp=False),      # Perturbation potential temp [K].
-    horiz_summary(nc=nc, varname="P_HYD", rename='pres', interp=False),   # Pressure [hPa].
+    horiz_summary(nc=nc, varname='P_HYD', rename='pres', interp=False),   # Pressure [hPa].
     horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False),    # Temperature [K].
     horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False), # Water vapour mixing ratio [kg kg-1].
 
     # 2D fields.
     horiz_summary(nc=nc, varname='pw', interp=False) # Precipitable water [kg m-2].
+    horiz_summary(nc=nc, varname='pw', interp=False, # Scaled variance of PW as % of mean.
+                  operation='scaled_var', rename='pw_scaled_var', 
+                  long_name='Variance/mean of precipitable water.')
+    
+    
 ])
+
 
 if 'RTHRELAXTEN' in nc.variables.keys():
     dat = xarray.merge([dat,
