@@ -91,7 +91,7 @@ def horiz_summary(nc, varname,
 
     # Rename the Time dimension to lower case, and rename XTIME
     # coordinates to have the same name.
-    horiz = horiz.rename({'Time': 'time', 'XTIME': 'time'})
+    horiz = horiz.rename({'XTIME': 'time'})
 
     # Assign metadata.
     if(interp):
