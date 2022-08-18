@@ -125,14 +125,19 @@ def horiz_summary(nc, varname,
 # Get all the variables required.
 dat = xarray.merge([
     # Interpolate the following fields to even pressure levels.
-    horiz_summary(nc=nc, varname='QVAPOR', rename='q'), # Water vapour mixing ratio [kg kg-1].
-    horiz_summary(nc=nc, varname='tk'),                 # Temperature [K]. 
-    horiz_summary(nc=nc, varname='T'),                  # Perturbation potential temperature [K].   
-    horiz_summary(nc=nc, varname='ua'),                 # Wind U on mass points [m s-1].
-    horiz_summary(nc=nc, varname='va'),                 # Wind V on mass points [m s-1].
-    horiz_summary(nc=nc, varname='RTHRATEN'),           # Theta tendency due to radiation [K s-1].
-    horiz_summary(nc=nc, varname='RTHFORCETEN'),        # Theta forcing for LRF [K s-1].
-    horiz_summary(nc=nc, varname='RQVFORCETEN'),        # Moisture forcing for LRF [kg kg-1 s-1].
+    horiz_summary(nc=nc, varname='QVAPOR', rename='q'),      # Water vapour mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='QCLOUD', rename='qcloud'), # Cloud water mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='QRAIN', rename='qrain'),   # Rain mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='QICE', rename='qice'),     # Ice mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='QSNOW', rename='qsnow'),   # Snow mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='QGRAUP', rename='qgraup'), # Graupel mixing ratio [kg kg-1].
+    horiz_summary(nc=nc, varname='tk'),                      # Temperature [K]. 
+    horiz_summary(nc=nc, varname='T'),                       # Perturbation potential temperature [K].   
+    horiz_summary(nc=nc, varname='ua'),                      # Wind U on mass points [m s-1].
+    horiz_summary(nc=nc, varname='va'),                      # Wind V on mass points [m s-1].
+    horiz_summary(nc=nc, varname='RTHRATEN'),                # Theta tendency due to radiation [K s-1].
+    horiz_summary(nc=nc, varname='RTHFORCETEN'),             # Theta forcing for LRF [K s-1].
+    horiz_summary(nc=nc, varname='RQVFORCETEN'),             # Moisture forcing for LRF [kg kg-1 s-1].
 
     horiz_summary(nc=nc, varname='wa'),                                # Mean vertical wind on mass points [m s-1].
     horiz_summary(nc=nc, varname='wa', operation='positive_prop',      # Proportion of points with updraft.
@@ -148,7 +153,7 @@ dat = xarray.merge([
     horiz_summary(nc=nc, varname='P_HYD', rename='pres', interp=False),   # Pressure [hPa].
     horiz_summary(nc=nc, varname='tk', rename='eta_tk', interp=False),    # Temperature [K].
     horiz_summary(nc=nc, varname='QVAPOR', rename='eta_q', interp=False), # Water vapour mixing ratio [kg kg-1].
-
+    
     # 2D fields.
     horiz_summary(nc=nc, varname='pw', interp=False), # Precipitable water [kg m-2].
     horiz_summary(nc=nc, varname='pw', interp=False, # Scaled variance of PW as % of mean.
