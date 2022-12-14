@@ -39,7 +39,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
         for setname, directory in inputs[res].items():
             
             if not quiet:
-                print('Reading ' + res + ' dataset: ' + setname + '...')
+                print(f'Reading {res} dataset ({directory}): ' + setname + '...')
             
             datasets.append(xarray.open_mfdataset(directory+'/wrfvars*.nc', combine='nested', concat_dim='time', parallel=True))
             if not resample is None:
