@@ -691,8 +691,8 @@ def plot_radiative_cooling_by_level(dat, plot_levels, figsize=FIGURE_SIZE, title
         
     levplot = levdata.plot(col='level', hue='Dataset', sharey=False, col_wrap=2,
                            figsize=figsize).set_titles('{value} hPa')
-    for ax in levplot.axes:
-        rewrap_labels(axes=ax, length_y=12)
+    #for ax in levplot.axes:
+    #    rewrap_labels(axes=ax, length_y=12)
         
     plt.suptitle(title)
     plt.show()
