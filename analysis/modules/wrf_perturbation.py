@@ -6,6 +6,8 @@
 
 import matplotlib.pyplot as plt
 import modules.atmosphere as atm
+from matplotlib.ticker import ScalarFormatter
+import seaborn as sns
 import pandas as pd
 import numpy as np
 import textwrap
@@ -1327,4 +1329,52 @@ def add_mass_flux(wrfvars):
         wrfvars[res].conv_mass_flux.attrs['units'] = 'kg m-2 s-1'
         
     return wrfvars
+
+def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', resolutions=['4 km', '1 km', '100 m'], ylim=(1000,200), relabel={}, retick={}, file=None):
+    """
+    Plot mean profiles for a given dataset, by resolution.
     
+    Arguments:
+        profs: Mean profiles to plot.
+        variables: List of variables to plot.
+        figsize: Figure size.
+        dataset: The dataset to plot.
+        resolutions: The resolutions to plot.
+        ylim: Y limits.
+        relabel: {variable: label} dictionary with new labels for x axes.
+        retick: {variable: ticks} dictionary with new ticks for x axes.
+        file: File to save plot to.
+    """
+    
+    fig, axs = plt.subplots(ncols=len(variables), nrows=1, figsize=figsize, gridspec_kw={'wspace': 0.1})
+    
+    for res in resolutions:
+        for i, variable in enumerate(variables):
+
+            p = profs[res][variable]
+            p.sel(Dataset=dataset).plot(ax=axs[i], y='level', yincrease=False, hue=res, label=f'{res} (WRF)')
+            axs[i].set_title('')
+            axs[i].set_ylabel('')
+            if i > 0:
+                axs[i].set_yticks([])
+
+            if variable in retick:
+                axs[i].set_xticks(retick[variable])
+
+            if variable in relabel:
+                axs[i].set_xlabel(relabel[variable])
+
+            axs[i].set_ylim(ylim)
+            axs[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
+            
+
+    axs[-1].legend()
+    axs[0].set_ylabel('Pressure [hPa]')
+    sns.move_legend(axs[-1], "upper left", bbox_to_anchor=(1, 1))
+
+    if file is not None:
+        plt.savefig(file, bbox_inches='tight')
+        plt.show()
+        plt.close()
+    else:
+        plt.show()
