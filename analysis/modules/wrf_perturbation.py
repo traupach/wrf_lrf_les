@@ -14,6 +14,7 @@ import textwrap
 import datetime
 import xarray
 import glob
+import os
 
 FIGURE_SIZE = [15, 4]   # Default figure size [horizontal, vertical]. 
 
@@ -337,11 +338,18 @@ def rewrap_labels(axes, length_x=20, length_y=24):
     for ax in axes:
         ax.set_xlabel('\n'.join(textwrap.wrap(ax.get_xlabel().replace('\n',' '), length_x)))
         ax.set_ylabel('\n'.join(textwrap.wrap(ax.get_ylabel().replace('\n',' '), length_y)))
-            
+
+def calc_profile_diffs(profs, control_name='Control', variables=['tk','q','rh'], neg=[]):
+    diffs = diff_means(profs=profs, control_name=control_name)
+    pos_diffs = diffs.drop_sel(Dataset=neg)
+    neg_diffs = -1 * diffs.sel(Dataset=neg)
+    diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
+    return diffs
+        
 def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], xlims=None,
                      figsize=FIGURE_SIZE, title='', neg=[], loc='best'):
     """
-    Find temporal means of water vapour mixing ratio (q) and temperature (tk), and plot the differences
+    Find temporal means of variables, and plot the differences
     between them by pressure level.
     
     Arguments:
@@ -355,10 +363,7 @@ def compare_profiles(profs, control_name='Control', variables=['tk','q','rh'], x
         loc: Loc argument to plt.legend.
     """
     
-    diffs = diff_means(profs=profs, control_name=control_name)
-    pos_diffs = diffs.drop_sel(Dataset=neg)
-    neg_diffs = -1 * diffs.sel(Dataset=neg)
-    diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
+    diffs = calc_profile_diffs(profs=profs, control_name=control_name, neg=neg)
     
     return plot_profiles(profs=diffs, variables=variables, figsize=figsize, 
                          vline=0, title=title, xlims=xlims, loc=loc)
@@ -1280,10 +1285,14 @@ def input_map(perts, basedir):
         for level in perts['levels']:        
             for T in perts['T']: 
                 pert_name = 'T ' + T + ' @' + level
-                inputs[res][pert_name] = basedir + perts['dir'][i] + '/pert_' + level + 'hPa_T_' + T + 'K/'
+                d = basedir + perts['dir'][i] + '/pert_' + level + 'hPa_T_' + T + 'K/'
+                if os.path.exists(d):
+                    inputs[res][pert_name] = d
             for q in perts['q']:
                 pert_name = 'q ' + q + ' @' + level
-                inputs[res][pert_name] = basedir + perts['dir'][i] + '/pert_' + level + 'hPa_q_' + q + 'kgkg-1/'
+                d = basedir + perts['dir'][i] + '/pert_' + level + 'hPa_q_' + q + 'kgkg-1/'
+                if os.path.exists(d):
+                    inputs[res][pert_name] = d
     
     return(inputs)
 
@@ -1378,3 +1387,99 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', reso
         plt.close()
     else:
         plt.show()
+        
+def MONC_data(path='analysis/data/',
+              files={'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_415_hPa.csv': ['T -0.5 @412', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_500_hPa.csv': ['T -0.5 @500', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_600_hPa.csv': ['T -0.5 @600', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_730_hPa.csv': ['T -0.5 @730', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_850_hPa.csv': ['T -0.5 @850', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q -0.0002 @412', '1 km'], 
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q -0.0002 @500', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q -0.0002 @600', '1 km'], 
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q -0.0002 @730', '1 km'], 
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q -0.0002 @850', '1 km'], 
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q 0.0002 @412', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q 0.0002 @500', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q 0.0002 @600', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q 0.0002 @730', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q 0.0002 @850', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_415_hPa.csv': ['T 0.5 @412', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa.csv': ['T 0.5 @500', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa.csv': ['T 0.5 @600', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa.csv': ['T 0.5 @730', '1 km'],
+                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa.csv': ['T 0.5 @850', '1 km'],
+                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa_HorRes_of_250m.csv': ['T 0.5 @500', '250 m'], 
+                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa_HorRes_of_250m.csv': ['T 0.5 @600', '250 m'],
+                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa_HorRes_of_250m.csv': ['T 0.5 @730', '250 m'],
+                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_250m.csv': ['T 0.5 @850', '250 m'],
+                     'Chimene_MONC_500m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_500m.csv': ['T 0.5 @850', '500 m']}):
+    all_dat = []
+    for file, [level, res] in files.items():
+        dat = pd.read_csv(f'{path}/{file}')
+        dat['pert'] = level
+        dat['res'] = res
+        all_dat.append(dat.reset_index())
+
+    monc = pd.concat(all_dat).reset_index()
+    monc = monc.rename(columns={'Pressure (hPa)': 'pressure',
+                                'Delta_theta (K)': 'T',
+                                'Delta_Temp (K)': 'tk',
+                                'Delta_qv (g/kg)': 'q',
+                                'Delta_qliq (g/kg)': 'qcloud',
+                                'Delta_qice (g/kg)': 'qice',
+                                'Delta_qsnow (g/kg)': 'qsnow',
+                                'Delta_qrain (g/kg)': 'qrain',
+                                'Delta_qgraupel (g/kg)': 'qgraup'})
+    monc = monc.drop(columns=['level_0', 'index'])
+    return monc
+
+def responses_grid(diffs, comp, pos_perts, neg_perts, variables, figsize=(20,20), lims={'tk': [-0.2, 1.2], 
+                                                                                        'q': [-0.1, 0.55],
+                                                                                        'T': [-0.2, 1.2],
+                                                                                        'qcloud': np.array([-1.5, 1.4])*1e-3,
+                                                                                        'qice': np.array([-0.6, 0.2])*1e-3,
+                                                                                        'qsnow': np.array([-20, 20])*1e-3,
+                                                                                        'qrain': np.array([-1, 1.8])*1e-3,
+                                                                                        'qgraup': np.array([-2.5, 1])*1e-3}):
+    """
+    Plot a grid of responses with perturbations in rows, variables in columns.
+    
+    Arguments:
+        diff: 
+    """
+    
+    # Perts in rows, variables in columns.
+    fig, axs = plt.subplots(nrows=len(pos_perts), 
+                            ncols=len(variables), figsize=figsize,
+                            gridspec_kw={'hspace':0.35})
+
+    for i in np.arange(len(pos_perts)):
+        for j, v in enumerate(variables):
+            (diffs.sel(Dataset=neg_perts[i])[v]*-1).plot(y='level', color='green', ax=axs[i,j])
+            diffs.sel(Dataset=pos_perts[i])[v].plot(y='level', color='blue', ax=axs[i,j])
+
+            att=diffs.sel(Dataset=pos_perts[i])[v].attrs
+            lab = f'{att["long_name"].replace("mixing ratio", "MR")} [{att["units"]}]'
+            axs[i,j].set_xlabel(lab)
+            axs[i,j].axvline(0, color='red')
+            axs[i,j].set_title(pos_perts[i])
+            axs[i,j].invert_yaxis()
+            axs[i,j].xaxis.set_major_locator(plt.MaxNLocator(3))
+            axs[i,j].ticklabel_format(useOffset=False, style='plain', scilimits=(-3,4)) 
+            axs[i,j].set_xlim(lims[v][0], lims[v][1])
+            axs[i,j].set_ylim(1000,200)
+            if j > 0:
+                axs[i,j].set_ylabel('')
+                axs[i,j].set_yticks([])
+                
+            if comp is not None:
+                pos = comp[comp.pert == pos_perts[i]]
+                neg = comp[comp.pert == neg_perts[i]]
+                
+                if len(pos) > 0:
+                    axs[i,j].plot(pos[v], pos.pressure, color='blue', linestyle='--')
+                    
+                if len(neg) > 0:
+                    axs[i,j].plot(neg[v]*-1, neg.pressure, color='green', linestyle='--')
+            
