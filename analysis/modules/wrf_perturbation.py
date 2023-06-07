@@ -1482,4 +1482,54 @@ def responses_grid(diffs, comp, pos_perts, neg_perts, variables, figsize=(20,20)
                     
                 if len(neg) > 0:
                     axs[i,j].plot(neg[v]*-1, neg.pressure, color='green', linestyle='--')
-            
+                    
+def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
+    # Read in reference (Kuang 2010) results.
+    refs = {'q_dq': {'var': 'q', 'pert': 'q', 
+                     'file': 'SAM/matrix_M_inv/M_inv_sam_q_dqdt_norm_kuang.csv'},
+            'q_dT': {'var': 'q', 'pert': 'T', 
+                     'file': 'SAM/matrix_M_inv/M_inv_sam_q_dtdt_norm_kuang.csv'},
+            'T_dq': {'var': 'tk', 'pert': 'q', 
+                     'file': 'SAM/matrix_M_inv/M_inv_sam_t_dqdt_norm_kuang.csv'},
+            'T_qT': {'var': 'tk', 'pert': 'T', 
+                     'file': 'SAM/matrix_M_inv/M_inv_sam_t_dtdt_norm_kuang.csv'}}
+
+    ref_pressures = pd.read_csv(ref_dir+'/pressures', header=None).round(0).astype(int).to_dict()[0]
+    print(ref_pressures)
+    pert_levels = [850, 729, 565, 483, 412]
+
+    res = pd.DataFrame()
+
+    for ref, key in refs.items():
+        dat = pd.read_csv(ref_dir + key['file'], header=None)
+
+        # Column is perturbation level, row is reponse level.
+        dat = dat.rename(columns=ref_pressures, index=ref_pressures)
+        dat = dat.loc[:,pert_levels]
+
+        dat['var'] = key['var']
+        dat['perturbed'] = key['pert']
+        dat = dat.reset_index()#set_index('var')
+        dat = dat.rename(columns={'index': 'level'})
+
+        res = pd.concat([res, dat])
+
+    res = res.melt(id_vars=['level', 'perturbed', 'var'])
+    res = res.pivot(index=['level', 'variable', 'perturbed'], columns=['var'])
+    res.columns = ['q', 'tk']
+    res = res.reset_index()
+    
+    remap_ps = {850: 850,
+                729: 730,
+                565: 600,
+                483: 500,
+                412: 412}
+    
+    res['Dataset'] = res.perturbed + ' @' + [str(remap_ps[x]) for x in res.variable]
+    ref = res.drop(columns=['variable']).set_index(['level', 'Dataset']).reset_index()
+    
+    ds = [x.replace('T', 'T 0.5') for x in ref.Dataset.values]
+    ds = [x.replace('q', 'q 0.0002') for x in ds]
+    ref['Dataset'] = ds
+    
+    return ref
