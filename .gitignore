@@ -9,7 +9,6 @@ paper/*.fdb_latexmk
 paper/*.fls
 paper/*.log
 paper/*.gz
-paper/*.tex
 
 *.ipynb_checkpoints*
 *__pycache__*
