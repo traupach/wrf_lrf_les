@@ -1,6 +1,5 @@
 # Paper bits and pieces
 paper/*template
-paper/*.cls
 paper/*.aux
 paper/*.bbl
 paper/*.blg
