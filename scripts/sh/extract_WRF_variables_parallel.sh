@@ -4,7 +4,7 @@
 
 #PBS -q normal
 #PBS -P up6
-#PBS -l storage=gdata/up6
+#PBS -l storage=gdata/up6+gdata/hh5
 #PBS -l ncpus=19
 #PBS -l walltime=03:00:00
 #PBS -l mem=192gb
@@ -15,7 +15,7 @@
 
 module load parallel
 
-SCRIPT="$HOME/git/wrf_lrf_les/scripts/sh/extract_WRF_variables.sh"
+SCRIPT="~/git/wrf_lrf_les/scripts/sh/extract_WRF_variables.sh"
 
 # ${PBS_NCPUS} is total number of CPUs to run on; {%} is replaced with
 # the CPU slot from 1..${PBS_NCPUS}.
