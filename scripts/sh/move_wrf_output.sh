@@ -54,7 +54,7 @@ if [ -e ideal.error.0000 ]; then
     mv -i ideal.error.0000 $dir
     mv -i ideal.out.0000 $dir
 fi
-mv -i rsl* $dir/runs/$run
+tar cvfz $dir/runs/$run/rsl_logs.tar.gz rsl* --remove-files
 mv -i wrf_job.* $dir/runs/$run
 mv -i run_environment.txt $dir/runs/$run
 

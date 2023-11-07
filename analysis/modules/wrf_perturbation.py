@@ -141,7 +141,7 @@ def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profile
             print('Wind relaxation time:\t\t\t\t' + str(wrfin.WIND_RELAXATION_TIME) + ' s')
     elif 'RELAX_U_WINDS' in wrfin.attrs:
         print('Relax U to set profile?\t\t\t\t' + true_false(wrfin.RELAX_U_WINDS))
-        print('RELAX V to set profile?\t\t\t\t' + true_false(wrfin.RELAX_V_WINDS))
+        print('Relax V to set profile?\t\t\t\t' + true_false(wrfin.RELAX_V_WINDS))
         if wrfin.RELAX_U_WINDS > 0 or wrfin.RELAX_V_WINDS > 0:
             print('Wind relaxation time:\t\t\t\t' + str(wrfin.WIND_RELAXATION_TIME) + ' s')
     print('Physics schemes:')
@@ -1375,7 +1375,6 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', reso
 
             axs[i].set_ylim(ylim)
             axs[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
-            
 
     axs[-1].legend()
     axs[0].set_ylabel('Pressure [hPa]')
@@ -1388,32 +1387,32 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', reso
     else:
         plt.show()
         
-def MONC_data(path='analysis/data/',
-              files={'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_415_hPa.csv': ['T -0.5 @412', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_500_hPa.csv': ['T -0.5 @500', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_600_hPa.csv': ['T -0.5 @600', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_730_hPa.csv': ['T -0.5 @730', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_850_hPa.csv': ['T -0.5 @850', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q -0.0002 @412', '1 km'], 
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q -0.0002 @500', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q -0.0002 @600', '1 km'], 
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q -0.0002 @730', '1 km'], 
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q -0.0002 @850', '1 km'], 
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q 0.0002 @412', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q 0.0002 @500', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q 0.0002 @600', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q 0.0002 @730', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q 0.0002 @850', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_415_hPa.csv': ['T 0.5 @412', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa.csv': ['T 0.5 @500', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa.csv': ['T 0.5 @600', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa.csv': ['T 0.5 @730', '1 km'],
-                     'Chimene_MONC_1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa.csv': ['T 0.5 @850', '1 km'],
-                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa_HorRes_of_250m.csv': ['T 0.5 @500', '250 m'], 
-                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa_HorRes_of_250m.csv': ['T 0.5 @600', '250 m'],
-                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa_HorRes_of_250m.csv': ['T 0.5 @730', '250 m'],
-                     'Chimene_MONC_250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_250m.csv': ['T 0.5 @850', '250 m'],
-                     'Chimene_MONC_500m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_500m.csv': ['T 0.5 @850', '500 m']}):
+def MONC_data(path='data/MONC/',
+              files={'1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_415_hPa.csv': ['T -0.5 @412', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_500_hPa.csv': ['T -0.5 @500', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_600_hPa.csv': ['T -0.5 @600', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_730_hPa.csv': ['T -0.5 @730', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_850_hPa.csv': ['T -0.5 @850', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q -0.0002 @412', '1 km'], 
+                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q -0.0002 @500', '1 km'],
+                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q -0.0002 @600', '1 km'], 
+                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q -0.0002 @730', '1 km'], 
+                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q -0.0002 @850', '1 km'], 
+                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q 0.0002 @412', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q 0.0002 @500', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q 0.0002 @600', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q 0.0002 @730', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q 0.0002 @850', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_415_hPa.csv': ['T 0.5 @412', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa.csv': ['T 0.5 @500', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa.csv': ['T 0.5 @600', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa.csv': ['T 0.5 @730', '1 km'],
+                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa.csv': ['T 0.5 @850', '1 km'],
+                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa_HorRes_of_250m.csv': ['T 0.5 @500', '250 m'], 
+                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa_HorRes_of_250m.csv': ['T 0.5 @600', '250 m'],
+                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa_HorRes_of_250m.csv': ['T 0.5 @730', '250 m'],
+                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_250m.csv': ['T 0.5 @850', '250 m'],
+                     '500m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_500m.csv': ['T 0.5 @850', '500 m']}):
     all_dat = []
     for file, [level, res] in files.items():
         dat = pd.read_csv(f'{path}/{file}')
@@ -1533,3 +1532,49 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
     ref['Dataset'] = ds
     
     return ref
+
+def plot_pw_ts(pw_ts, start_time, end_time, figsize=(8,11), ress=['4 km', '1 km', '100 m'], 
+               hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
+                     'q @412', 'q @500', 'q @600', 'q @730', 'q @850'], file=None):
+    """
+    Plot curves of precipitable water over time, by perterbation, grouping positive and negative perturbations.
+
+    Arguments:
+        pw_ts: PW data by Dataset and time as a resolution: pw dictionary.
+        start_time, end_time: Start and end times to highlight by resolution (dictionaries).
+        figsize: Figure width x height.
+        ress: The resolutions in pw_ts and start_time, end_time dictionaries.
+        hues: The order for hue category values.
+        file: Output file for plot.
+    """
+    
+    fig, axs = plt.subplots(nrows=len(pw_ts), ncols=1, figsize=figsize, gridspec_kw={'hspace': 0.5})
+    
+    for i, r in enumerate(ress):
+        dat = pw_ts[r].to_dataframe().reset_index()
+        dat['pert'] = [x[0:2] + x[-4:] for x in dat.Dataset.values]
+        dat.loc[dat.Dataset=='RCE', 'pert'] = 'RCE'
+        dat.loc[dat.Dataset=='Control', 'pert'] = 'Control'
+        dat['sign'] = ['-' in x for x in dat.Dataset.values]
+
+        sns.lineplot(dat, x='time', y='pw', hue='pert', style='sign', estimator=None, dashes=False, hue_order=hues, ax=axs[i])
+    
+        axs[i].axvspan(xmin=start_time[r], xmax=end_time[r], alpha=0.3, color='green')
+        axs[i].set_title(r)
+        if i != 0:
+            axs[i].get_legend().remove()
+        else:
+            h, l = axs[i].get_legend_handles_labels()
+            axs[i].legend(h[1:-3], l[1:-3], bbox_to_anchor=(1,1), loc='upper left')
+     
+    for ax in axs:
+        ax.set_ylabel('PW [kg m$^{-2}$]')
+        ax.set_xlabel('')
+        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=25, ha='right')
+
+    if file is not None:
+        plt.savefig(file, bbox_inches='tight')
+        plt.show()
+        plt.close()
+    else:
+        plt.show()
