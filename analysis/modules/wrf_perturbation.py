@@ -44,7 +44,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
             if not quiet:
                 print(f'Reading {res} dataset ({directory}): ' + setname + '...')
             
-            datasets.append(xarray.open_mfdataset(directory+'/wrfvars*.nc', combine='nested', concat_dim='time', parallel=True))
+            datasets.append(xarray.open_mfdataset(directory+'/wrfvars*.nc', combine='nested', concat_dim='time', parallel=True).chunk(-1))
             if not resample is None:
                 datasets[-1] = datasets[-1].resample(time=resample).nearest(tolerance=0)
 
@@ -62,10 +62,10 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
                                         str(keydiffs) + '. Consider using drop_vars.')
 
         dat = xarray.combine_nested(datasets, concat_dim='Dataset', compat='equals', 
-                                    combine_attrs='drop_conflicts')
+                                    combine_attrs='drop_conflicts').chunk(-1)
         dat = prettify_long_names(dat)
 
-        dat['rh'] = atm.relative_humidity(theta=dat.T+300, p=dat.level, q=dat.q)
+        dat['rh'] = atm.relative_humidity(theta=dat.T+300, p=dat.level, q=dat.q).load()
         dat.rh.attrs['long_name'] = 'Relative humidity'
         dat.rh.attrs['units'] = '%'
 
@@ -488,7 +488,7 @@ def mean_profiles(dat, start, end, variables=['tk','q','ua','va','rh'],
         title: Plot title.
     """
     
-    profs = dat.sel(time=slice(start, end)).mean('time', keep_attrs=True)
+    profs = dat.sel(time=slice(start, end))[variables].mean('time', keep_attrs=True)
     if plot:
         plot_profiles(profs=profs, variables=variables, figsize=figsize, title=title)
     return profs
@@ -1339,7 +1339,7 @@ def add_mass_flux(wrfvars):
         
     return wrfvars
 
-def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', resolutions=['4 km', '1 km', '100 m'], ylim=(1000,200), relabel={}, retick={}, file=None):
+def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', ylim=(1000,200), relabel={}, retick={}, file=None):
     """
     Plot mean profiles for a given dataset, by resolution.
     
@@ -1348,7 +1348,6 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', reso
         variables: List of variables to plot.
         figsize: Figure size.
         dataset: The dataset to plot.
-        resolutions: The resolutions to plot.
         ylim: Y limits.
         relabel: {variable: label} dictionary with new labels for x axes.
         retick: {variable: ticks} dictionary with new ticks for x axes.
@@ -1356,6 +1355,7 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', reso
     """
     
     fig, axs = plt.subplots(ncols=len(variables), nrows=1, figsize=figsize, gridspec_kw={'wspace': 0.1})
+    resolutions = list(profs.keys())
     
     for res in resolutions:
         for i, variable in enumerate(variables):
@@ -1442,31 +1442,31 @@ def MONC_CWV_data(path='data/MONC/',
     return monc                                    
 
 def MONC_response_data(path='data/MONC/',
-              files={'1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_415_hPa.csv': ['T -0.5 @412', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_500_hPa.csv': ['T -0.5 @500', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_600_hPa.csv': ['T -0.5 @600', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_730_hPa.csv': ['T -0.5 @730', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point5_K_per_day_at_850_hPa.csv': ['T -0.5 @850', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q -0.0002 @412', '1 km'], 
-                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q -0.0002 @500', '1 km'],
-                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q -0.0002 @600', '1 km'], 
-                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q -0.0002 @730', '1 km'], 
-                     '1km/Responses_from_perturbations_of_minus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q -0.0002 @850', '1 km'], 
-                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_415_hPa.csv': ['q 0.0002 @412', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_500_hPa.csv': ['q 0.0002 @500', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_600_hPa.csv': ['q 0.0002 @600', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_730_hPa.csv': ['q 0.0002 @730', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point2_g_per_kg_per_day_at_850_hPa.csv': ['q 0.0002 @850', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_415_hPa.csv': ['T 0.5 @412', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa.csv': ['T 0.5 @500', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa.csv': ['T 0.5 @600', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa.csv': ['T 0.5 @730', '1 km'],
-                     '1km/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa.csv': ['T 0.5 @850', '1 km'],
-                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_500_hPa_HorRes_of_250m.csv': ['T 0.5 @500', '250 m'], 
-                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_600_hPa_HorRes_of_250m.csv': ['T 0.5 @600', '250 m'],
-                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_730_hPa_HorRes_of_250m.csv': ['T 0.5 @730', '250 m'],
-                     '250m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_250m.csv': ['T 0.5 @850', '250 m'],
-                     '500m/Responses_from_perturbations_of_plus_0point5_K_per_day_at_850_hPa_HorRes_of_500m.csv': ['T 0.5 @850', '500 m']}):
+              files={'1km/Responses_from_pert_of_minus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @412', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @500', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @600', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @730', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @850', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @412', '1 km'], 
+                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @500', '1 km'],
+                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @600', '1 km'], 
+                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @730', '1 km'], 
+                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @850', '1 km'], 
+                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @412', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @500', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @600', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @730', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @850', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @412', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @500', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @600', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @730', '1 km'],
+                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @850', '1 km'],
+                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @500', '250 m'], 
+                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @600', '250 m'],
+                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @730', '250 m'],
+                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @850', '250 m'],
+                     '500m/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_500m.csv': ['T 0.5 @850', '500 m']}):
     all_dat = []
     for file, [level, res] in files.items():
         dat = pd.read_csv(f'{path}/{file}')
@@ -1548,7 +1548,6 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
                      'file': 'SAM/matrix_M_inv/M_inv_sam_t_dtdt_norm_kuang.csv'}}
 
     ref_pressures = pd.read_csv(ref_dir+'/pressures', header=None).round(0).astype(int).to_dict()[0]
-    print(ref_pressures)
     pert_levels = [850, 729, 565, 483, 412]
 
     res = pd.DataFrame()
@@ -1587,7 +1586,7 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
     
     return ref
 
-def plot_pw_ts(pw_ts, start_time, end_time, figsize=(8,11), ress=['4 km', '1 km', '100 m'], 
+def plot_pw_ts(pw_ts, RCE_times, figsize=(8,11), 
                hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
                      'q @412', 'q @500', 'q @600', 'q @730', 'q @850'], file=None):
     """
@@ -1595,14 +1594,14 @@ def plot_pw_ts(pw_ts, start_time, end_time, figsize=(8,11), ress=['4 km', '1 km'
 
     Arguments:
         pw_ts: PW data by Dataset and time as a resolution: pw dictionary.
-        start_time, end_time: Start and end times to highlight by resolution (dictionaries).
+        RCE_times: Start and end times to highlight by resolution (dictionary of tuples).
         figsize: Figure width x height.
-        ress: The resolutions in pw_ts and start_time, end_time dictionaries.
         hues: The order for hue category values.
         file: Output file for plot.
     """
     
     fig, axs = plt.subplots(nrows=len(pw_ts), ncols=1, figsize=figsize, gridspec_kw={'hspace': 0.5})
+    ress = list(pw_ts.keys())
     
     for i, r in enumerate(ress):
         dat = pw_ts[r].to_dataframe().reset_index()
@@ -1613,7 +1612,7 @@ def plot_pw_ts(pw_ts, start_time, end_time, figsize=(8,11), ress=['4 km', '1 km'
 
         sns.lineplot(dat, x='time', y='pw', hue='pert', style='sign', estimator=None, dashes=False, hue_order=hues, ax=axs[i])
     
-        axs[i].axvspan(xmin=start_time[r], xmax=end_time[r], alpha=0.3, color='green')
+        axs[i].axvspan(xmin=RCE_times[r][0], xmax=RCE_times[r][1], alpha=0.3, color='green')
         axs[i].set_title(r)
         if i != 0:
             axs[i].get_legend().remove()
@@ -1634,7 +1633,7 @@ def plot_pw_ts(pw_ts, start_time, end_time, figsize=(8,11), ress=['4 km', '1 km'
         plt.show()
 
 def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 km', '500 m', '250 m'], 
-                  hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
+                  hues=['Control', 'Control/RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
                         'q @412', 'q @500', 'q @600', 'q @730', 'q @850'], file=None):
     """
     Plot curves of MONC-derived columnar water vapour (CWV) over time, by perterbation, grouping positive and negative perturbations.
@@ -1653,7 +1652,7 @@ def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 
     for i, r in enumerate(ress):
         dat = monc.loc[monc.res == r].copy()
         dat['pert_short'] = [x[0:2] + x[-4:] for x in dat.pert.values]
-        dat.loc[dat.pert=='RCE', 'pert_short'] = 'RCE'
+        dat.loc[dat.pert=='RCE', 'pert_short'] = 'Control/RCE'
         dat['sign'] = ['-' in x for x in dat.pert.values]
 
         sns.lineplot(dat, x='time', y='cwv', hue='pert_short', style='sign', estimator=None, dashes=False, hue_order=hues, ax=axs[i])
@@ -1683,3 +1682,50 @@ def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 
         plt.close()
     else:
         plt.show()
+
+def load_cache_data(inputs, dirs, runs_start, RCE_times, cache_dir='data/WRF',
+                    prof_vars=['T', 'tk', 'q', 'ua', 'va', 'rh', 'qcloud', 
+                               'qice', 'qsnow', 'qrain', 'qgraup']):
+    """
+    Load precipitable water and mean profile data; generate cache files if they don't exist.
+    
+    Arguments:
+        inputs: Input spec returned by input_map().
+        dirs: Set names and their directory names.
+        cache_dir: Cache directory.
+        prof_vars: Profile variables to read.
+    
+    Rerturns: lists of PW and mean profiles by resolution.
+    """
+
+    pw_ts = {}
+    profs = {}
+    
+    for inp in inputs:
+        d = dirs[inp]
+        cache_file_pw = f'{cache_dir}/pw_{d}.nc'
+        cache_file_prof = f'{cache_dir}/prof_{d}.nc'
+    
+        if not (os.path.exists(cache_file_pw) and os.path.exists(cache_file_prof)):
+            wrfvars = read_wrfvars(inputs={inp: inputs[inp]}, quiet=False)
+    
+            # Cache precipitable water.
+            pw = wrfvars[inp].pw.expand_dims({'res': [inp]}).load()
+            pw.to_netcdf(cache_file_pw)
+            del pw  
+            
+            # Remove RCE runs because we are only interested in perturbed runs.
+            wrfvars[inp] = wrfvars[inp].drop_sel(Dataset='RCE').sel(time=slice(runs_start[inp], 
+                                                                               None)).chunk(-1)
+        
+            # Calculate mean profiles and cache them.
+            p = mean_profiles(dat=wrfvars[inp].chunk({'time': -1, 'Dataset': 1, 'level': -1}), 
+                              variables=prof_vars, start=RCE_times[inp][0], 
+                              end=RCE_times[inp][1], plot=False).load()
+            p.to_netcdf(cache_file_prof)
+            del p
+            
+        pw_ts[inp] = xarray.open_dataset(cache_file_pw)
+        profs[inp] = xarray.open_dataset(cache_file_prof)
+    
+    return pw_ts, profs
