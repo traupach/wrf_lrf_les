@@ -4,17 +4,17 @@
 #
 # Author: T. Raupach <t.raupach@unsw.edu.au>
 
-import matplotlib.pyplot as plt
-import modules.atmosphere as atm
-from matplotlib.ticker import ScalarFormatter
-import seaborn as sns
-import pandas as pd
-import numpy as np
-import textwrap
 import datetime
-import xarray
 import glob
 import os
+import textwrap
+
+import matplotlib.pyplot as plt
+import modules.atmosphere as atm
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import xarray
 
 FIGURE_SIZE = [15, 4]   # Default figure size [horizontal, vertical]. 
 
@@ -45,10 +45,10 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
                 print(f'Reading {res} dataset ({directory}): ' + setname + '...')
             
             datasets.append(xarray.open_mfdataset(directory+'/wrfvars*.nc', combine='nested', concat_dim='time', parallel=True).chunk(-1))
-            if not resample is None:
+            if resample is not None:
                 datasets[-1] = datasets[-1].resample(time=resample).nearest(tolerance=0)
 
-            if not drop_vars is None:
+            if drop_vars is not None:
                 dvars = [v for v in drop_vars if v in datasets[-1].keys()]
                 datasets[-1] = datasets[-1].drop_vars(dvars)
 
@@ -271,7 +271,7 @@ def plot_wrfinput_profiles(wrfin, sounding_file=None):
         ax[i].tick_params(labelleft=False)
     
     # Plot comparison sounding profiles 
-    if not sounding_file is None:
+    if sounding_file is not None:
         prof = pd.read_table(sounding_file, header=None, skiprows=1, sep=r'\s+')
         prof.columns = ['Z', 'T', 'QV', 'U', 'V']
         prof['Z'] = prof['Z'] / 1000 
@@ -322,8 +322,10 @@ def keep_left_axis(axes, invert_y=False):
     """
     
     for i, ax in enumerate(axes):
-        if invert_y: ax.invert_yaxis()
-        if i > 0: ax.set_ylabel('')
+        if invert_y: 
+            ax.invert_yaxis()
+        if i > 0: 
+            ax.set_ylabel('')
 
 def rewrap_labels(axes, length_x=20, length_y=24):
     """
@@ -460,9 +462,9 @@ def plot_profiles(profs, variables=['tk','q','ua','va','rh'], ylims=[1000, 200],
     
     fig, ax = plt.subplots(ncols=len(variables), sharey=True, figsize=figsize)
     for i, var in enumerate(variables):
-        plot = profs[var].plot(hue='Dataset', y='level', ax=ax[i], ylim=ylims, 
-                               xlim=xlims[var] if xlims is not None else None,
-                               yincrease=False, add_legend=False)
+        _ = profs[var].plot(hue='Dataset', y='level', ax=ax[i], ylim=ylims, 
+                            xlim=xlims[var] if xlims is not None else None,
+                            yincrease=False, add_legend=False)
         ax[i].set_title('')
         if vline is not None:
             ax[i].axvline(x=vline, color='red')
@@ -558,7 +560,7 @@ def plot_fields(inputs, pattern, var, timeidx=0, figsize=FIGURE_SIZE, meanover=N
             field = xarray.open_mfdataset(files, concat_dim='Time', combine='nested')[var].isel(Time=timeidx)
             
             
-            if not meanover is None:
+            if meanover is not None:
                 field = field.mean(dim=meanover)
             
             fields.append(field)
@@ -696,10 +698,8 @@ def plot_radiative_cooling_by_level(dat, plot_levels, figsize=FIGURE_SIZE, title
     with xarray.set_options(keep_attrs=True):
         levdata = levdata * 84600 
         
-    levplot = levdata.plot(col='level', hue='Dataset', sharey=False, col_wrap=2,
-                           figsize=figsize).set_titles('{value} hPa')
-    #for ax in levplot.axes:
-    #    rewrap_labels(axes=ax, length_y=12)
+    _ = levdata.plot(col='level', hue='Dataset', sharey=False, col_wrap=2,
+                     figsize=figsize).set_titles('{value} hPa')
         
     plt.suptitle(title)
     plt.show()
@@ -1127,7 +1127,7 @@ def plot_profile_range(dat, var, ignoreDatasets=[], figsize=[15,6], overplot_x=N
                                maxs.sel(Dataset=dataset).values, color='lightblue')
         ax.flat[axnum].set_title(dataset)
         
-        if not overplot_x is None:
+        if overplot_x is not None:
             ax.flat[axnum].scatter(overplot_x, overplot_y, color='red')
 
     rewrap_labels(axes=ax.flat)
@@ -1485,6 +1485,7 @@ def MONC_response_data(path='data/MONC/',
                                 'Delta_qrain (g/kg)': 'qrain',
                                 'Delta_qgraupel (g/kg)': 'qgraup'})
     monc = monc.drop(columns=['level_0', 'index'])
+    monc['model'] = 'MONC'
     return monc
 
 def responses_grid(diffs, comp, pos_perts, neg_perts, variables, figsize=(20,20), lims={'tk': [-0.2, 1.2], 
@@ -1617,8 +1618,8 @@ def plot_pw_ts(pw_ts, RCE_times, figsize=(8,11),
         if i != 0:
             axs[i].get_legend().remove()
         else:
-            h, l = axs[i].get_legend_handles_labels()
-            axs[i].legend(h[1:-3], l[1:-3], bbox_to_anchor=(1,1), loc='upper left')
+            h, labs = axs[i].get_legend_handles_labels()
+            axs[i].legend(h[1:-3], labs[1:-3], bbox_to_anchor=(1,1), loc='upper left')
      
     for ax in axs:
         ax.set_ylabel('PW [kg m$^{-2}$]')
@@ -1664,9 +1665,9 @@ def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 
         if i != 0:
             axs[i].get_legend().remove()
         else:
-            h, l = axs[i].get_legend_handles_labels()
-            assert l[1] == 'Control', 'Mix-up with labels.'
-            axs[i].legend(h[2:-3], l[2:-3], bbox_to_anchor=(1,1), loc='upper left')
+            h, labs = axs[i].get_legend_handles_labels()
+            assert labs[1] == 'Control', 'Mix-up with labels.'
+            axs[i].legend(h[2:-3], labs[2:-3], bbox_to_anchor=(1,1), loc='upper left')
      
     for ax in axs:
         ax.set_ylabel('CWV [mm]')
@@ -1729,3 +1730,61 @@ def load_cache_data(inputs, dirs, runs_start, RCE_times, cache_dir='data/WRF',
         profs[inp] = xarray.open_dataset(cache_file_prof)
     
     return pw_ts, profs
+
+def WRF_responses(profs, variables=['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']):
+    """
+    Calculate WRF responses to perturbations as differences in mean profiles. 
+    Return in the same form as MONC differences on file.
+
+    Arguments:
+        profs: The profiles to use.
+        vars: The variables to consider.
+    """
+
+    # Collect WRF differences together in the same form as the MONC differences.
+    wrf_profs = xarray.merge([profs[x][variables].load().expand_dims({'res': [x]}) for x in profs])
+
+    # Convert quantities in kg kg-1 to g kg-1.
+    for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
+        wrf_profs[v] = wrf_profs[v]*1000
+        
+    wrf_diffs = wrf_profs.drop_sel(Dataset='Control') - wrf_profs.sel(Dataset='Control')
+    
+    wrf = wrf_diffs.to_dataframe().reset_index()
+    wrf['model'] = 'WRF'
+    wrf = wrf.rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+
+    return wrf
+
+def concat_diffs(responses, hydromet_vars=['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+                 variables=['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']):
+    """
+    Collect differences together and organise.
+
+    Arguments: 
+        responses: A list of responses to concatenate.
+        hydromet_vars: Hydrometeor variables to be given a factor of 1e3.
+        variables: All variables to consider negative responses for.
+
+    Returns: responses in one DataFrame.
+    """
+        
+    diffs = pd.concat(responses).reset_index(drop=True)
+    diffs = diffs.sort_values(['pressure', 'model', 'res'], ascending=False)
+    diffs = diffs.rename(columns={'model': 'Model', 'res': 'Resolution'})
+    
+    # Give hydrometeors a factor of 1e3
+    for v in hydromet_vars:
+        diffs[v] = diffs[v] * 1000
+        
+    diffs['pert_group'] = [x.replace('-', '') for x in diffs.pert]
+    diffs['neg'] = ['-' in x for x in diffs.pert]
+    
+    pos = diffs[~diffs.neg].copy()
+    neg = diffs[diffs.neg].copy()
+    
+    for v in variables:
+        neg[v] = -1 * neg[v]
+        
+    diffs = pd.concat([neg, pos])
+    return diffs

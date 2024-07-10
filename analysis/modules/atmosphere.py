@@ -1,4 +1,4 @@
-# Functions to compute basic atmospheric properties.
+### Functions to compute basic atmospheric properties. ###
 
 import xarray
 import numpy as np

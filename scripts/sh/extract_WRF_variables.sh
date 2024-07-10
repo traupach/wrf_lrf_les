@@ -3,9 +3,10 @@
 # Author: Tim Raupach <t.raupach@unsw.edu.au>
 
 . /etc/bashrc # Required to load environment/module command.
-module load python3/3.7.4
-module load netcdf/4.7.3
-module load hdf5/1.10.5
+
+export USER=tr2908
+module use /g/data3/hh5/public/modules
+module load conda/analysis3-24.01
 
 SCRIPT="$HOME/git/wrf_lrf_les/scripts/python/extract_WRF_vars.py"
 
