@@ -25,6 +25,7 @@ Plant\affil{3}, Steven S.Sherwood\affil{1,2}, and Yi-Ling Hwong\affil{4}}
 \item \todo{1-3 key points, $\leq$ 140 characters each}
 \end{keypoints}
 
+\justifying
 \begin{abstract}
 \todo{Abstract\ldots}
 \end{abstract}
@@ -34,9 +35,9 @@ Plant\affil{3}, Steven S.Sherwood\affil{1,2}, and Yi-Ling Hwong\affil{4}}
 
 \section{Introduction}
 
-In the atmosphere, deep convection refers to overturning circulations formed by
-bouyant air that reach the tropopause \cite{Wallace_2006}. Deep convection is
-responsible for the formation of the most severe thunderstorms \todo{ref}. While
+In the atmosphere, deep convection refers to overturning circulations, formed by
+bouyant air, that reach the tropopause \cite{Wallace_2006}. Deep convection is
+associated with the formation of severe thunderstorms \cite{Doswell_2001}. While
 deep convection covers only a small proportion of the Earth's surface at any one
 time, its resulting storms produce a large proportion of the Earth's rainfall
 \cite{Wallace_2006}. Deep convection also warms the atmosphere and balances
@@ -52,13 +53,14 @@ parameterising the sub-grid convection that it can not explicitly resolve. Such
 parameterisations are called convection schemes. 
 
 Many different convection schemes have been produced, each with different
-strengths, weaknesses, and assumptions \todo{On convection schemes, see Arakawa
-2004, Kain and Fritsch 1990, Rio 2019}. Such are the differences between these
-schemes that convection parameterisation is a leading source of uncertainty in
-model outputs \cite{Hwong_JAMES_2021} \todo{other refs}. It is difficult to
-compare convection schemes, since traditional methods in which simulated outputs
-are compared with observations \todo{many from pg. 2 in Hwong 2021} rely on
-observation selection and accuracy \cite{Hwong_JAMES_2021} \todo{Emmanul 1994}.
+strengths, weaknesses, and assumptions \cite{Kain_JAS_1990,
+Arakawa_JC_2004,Rio_CCCR_2019, Lin_AO_2022}. Such are the differences between
+these schemes that convection parameterisation is a leading source of
+uncertainty in model outputs \cite<e.g.>{Hwong_JAMES_2021}. It is
+difficult to compare convection schemes, since traditional methods in which
+simulated outputs are compared with observations \todo{many from pg. 2 in Hwong
+2021} rely on observation selection and accuracy \cite{Hwong_JAMES_2021}
+\todo{Emmanuel 1994?}.
 
 The mathematical framework proposed by \citeA{Kuang_JAS_2010} uses linear
 response functions to compare model behaviour via assessment of the models'
@@ -118,9 +120,9 @@ reference}.
 
 \subsection{Common Model Settings}
 
-Both models were used to simulate convection at high resolution over
-a water surface with periodic boundary conditions. The models used a constant
-sea surface temperature (SST) of 301.15 K. This value is a little different from
+Both models were used to simulate convection at high resolution over a water
+surface with periodic boundary conditions. The models used a constant sea
+surface temperature (SST) of 301.15 K. This value is a little different from
 that used in \citeA{Kuang_JAS_2010} but matches \citeA{Hwong_JAMES_2021}.
 
 Radiative cooling and evaporation were both idealised. We used idealised
@@ -147,43 +149,42 @@ of 0.001 for the surface exchange coefficients. While the wind speed here and in
 \citeA{Hwong_JAMES_2021} was slightly different from that of
 \citeA{Kuang_JAS_2010}, the important quantity is the product of the wind with
 the surface exchange coefficient, and the exchange coefficient value in
-\citeA{Kuang_JAS_2010} was not stated.
-
-Horizontal winds were relaxed to 0 m s$^{-1}$ with a four-day relation time.
-\todo{By level-mean wind or pixel-by-pixel?} \todo{Is this true for both WRF and
-MONC? Different for 1 km (Chimene) runs in WRF.}.
+\citeA{Kuang_JAS_2010} was not stated. Level-mean horizontal winds were relaxed
+to 0 m s$^{-1}$ with a three-hour relation time. \todo{Is this also true for
+MONC?}.
 
 For each resolution, the models were run until they reached radiative convective
-equilibrium (RCE) at time $t_1$. After RCE was reached, small perturbations in
-temperature or moisture fields were introduced, while a control was run with no
-perturbations, and the models were allowed to again reach RCE at time $t_2$.
-Domain-mean atmospheric profiles for time $t_1$ were subtracted from those at
-$t_2$ to examine the differences made by the perturbations. In the following two
-sections we examine the model-specific setups for WRF and MONC, respectively.
+equilibrium (RCE) at a time we designate $t_1$. After RCE was reached, small
+perturbations in temperature or moisture fields were introduced, while a control
+was run with no perturbations, and the models were allowed to again reach RCE at
+the time we call $t_2$. Domain-mean atmospheric profiles for time $t_1$ were
+subtracted from those at $t_2$ to examine the differences made by the
+perturbations. In the following two sections we examine the model-specific
+setups for WRF and MONC, respectively.
 
 \subsection{WRF}
 
 WRF was run on a 20 $\times$ 20 km$^2$ domain for horizontal grid spacings of 4
 km, 1 km and 100 m. The runs at 4 km and 1 km grid resolution used 74 grid
-points in the vertical while the run at 100 m grid spacing used 370 grid points
-in the vertical. The parameterisations used are summarised in Table
+points in the vertical while the run at 100 m grid spacing used 370 vertical
+grid points. The parameterisations used are summarised in Table
 \ref{tab:WRF_schemes}. The model timestep was set to 6 s for 4 km and 1 km grid
-spacing and 1 s for 100 m grid spacing, and outputs were recorded hourly in all
-cases. For the runs with 1 km and 4 km grid spacing, the models were initialised
+spacing and 1 s for 100 m grid spacing, and outputs were recorded \todo{at 2 hour resolution for 1 and 4 km and at 4 hour resolution for the 100 m cases}. For the runs with 1 km and 4 km grid spacing, the models were initialised
 using a Radiative-Convective Equilibrium Model Intercomparison Project (RCEMIP)
 profile \cite{Wing_GMD_2018}. For the runs at 100 m grid spacing, the model was
-initialised using the RCE model state from the 1 km runs, to start close to RCE
-and reduce computation time. Temperature and water vapour mixing ratio in the
-stratosphere were relaxed to the initial profile values to avoid model drift, as
-suggested by \citeA{Herman_JAMES_2013}. Relaxation was applied above 160 hPa
-with the inverse relaxation constant increasing linearly from $1/\tau = 0$
-day$^{-1}$ at 160 hPa to $1/\tau = 0.5$ day$^{-1}$ at and above 100 hPa
-\cite{Herman_JAMES_2013}. Full diffusion (\texttt{diff\_opt = 2}) was used at
-all resolutions; at 4 km and 1 km resolutions, horizontal diffusion was
-diagnosed from deformation and vertical diffusion was assumed done by the
-planetary boundary layer scheme (\texttt{km\_opt = 4}) while the simulations at
-100 m used a prognostic equation (\texttt{km\_opt = 3}) for turbulent kinetic
-energy \cite{Skamarock_2019}.
+initialised using the RCE model state from the 1 km runs \todo{the average state
+over the last seven days of those runs}, to start close to RCE and reduce
+computation time. Temperature and water vapour mixing ratio in the stratosphere
+were relaxed to the initial profile values to avoid model drift, as suggested by
+\citeA{Herman_JAMES_2013}. Relaxation was applied above 160 hPa with the inverse
+relaxation constant increasing linearly from $1/\tau = 0$ day$^{-1}$ at 160 hPa
+to $1/\tau = 0.5$ day$^{-1}$ at and above 100 hPa \cite{Herman_JAMES_2013}. Full
+diffusion (\texttt{diff\_opt = 2}) was used at all resolutions; at 4 km and 1 km
+resolutions, horizontal diffusion was diagnosed from deformation and vertical
+diffusion was assumed done by the planetary boundary layer scheme
+(\texttt{km\_opt = 4}) while the simulations at 100 m used a prognostic equation
+(\texttt{km\_opt = 2}) for turbulent kinetic energy \cite{Skamarock_2019}.
+Restarts were synchronised between runs to ensure consistency.
 
 \begin{table}[t]
     \caption{Parameterisations used in the WRF simulations. These schemes were
@@ -255,8 +256,8 @@ $$
 pressure at level $i$.
 
 We calculated the spatial means per interpolated model pressure level, per time
-step. The average of these mean profiles over the RCE period was calculated for
-each run for comparison.
+step. The temporal average of these mean profiles over the RCE period was
+calculated for each run for comparison.
 
 \subsection{MONC}
 
@@ -297,18 +298,33 @@ used.}
 
 We used plots of spatially-averaged precipitable water by time to determine when
 the models had reached RCE. Figure \ref{fig:rce_pw} shows precipitable
-water by time for the runs. For the WRF runs, at 4 km grid spacing the RCE state
+water by time for the WRF runs. For the WRF runs, at 4 km grid spacing the RCE state
 had a precipitable water (PW) of $\sim$37 mm, which rose to $\sim$42 mm at 1 km
 grid spacing and $\sim$41 mm at 100 m grid spacing.
 
 \begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/RCE_PW} \caption{Spatial
-    mean precipitation water produced by the WRF model by grid spacing and time.
-    The RCE run was computed until mean precipitable water stabilised and the
-    model was at RCE. At this point the perturbations were introduced and the
-    model was run until all perturbed runs were also at RCE. The parts of the
-    time axes highlighted in green show the ``RCE region'' over which mean
-    profiles were calculated for comparison. \todo{Include MONC results?}}
+    \noindent\includegraphics[width=\textwidth]{figures/RCE_PW_WRF} 
+    \caption{Spatial mean precipitable water produced by the WRF model by grid
+    spacing and time. The RCE run was computed until mean precipitable water
+    stabilised and the model was at RCE. At this point the perturbations were
+    introduced and the model was run until all perturbed runs were also at RCE.
+    The parts of the time axes highlighted in green show the ``RCE region'' over
+    which mean profiles were calculated for comparison. Note that to reduce the
+    number of colours required, positive and negative perturbations per variable
+    and perturbation pressure use the same colour. \todo{Trim ends to end of RCE
+    time}}
+    \label{fig:rce_pw}
+\end{figure}
+
+\begin{figure}[pth]
+    \noindent\includegraphics[width=\textwidth]{figures/RCE_CWV_MONC}
+    \caption{\todo{Spatial mean} columnar water vapor produced by the MONC
+    model, by grid spacing and time. \todo{The parts of the time axes
+    highlighted in green show the ``RCE region'' over which mean profiles were
+    calculated for comparison.} Note that for 1 km grid spacing, to reduce the
+    number of colours required, positive and negative perturbations per variable
+    and perturbation pressure use the same colour. \todo{Trim ends to end of RCE
+    time}}
     \label{fig:rce_pw}
 \end{figure}
 
@@ -329,12 +345,12 @@ $\sim$950 and $\sim$600 hPa, whereas at 1 km and 4 km grid spacing this part of
 the atmosphere was drier, with the 4 km grid spacing simulation drying to
 $\sim$60\% relative humidity at about 800 hPa.
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/RCE_profiles}
-    \caption{Mean profiles for selected variables in the control runs' RCE
-    periods, by grid spacing. \todo{Include MONC results on the same plots.}}
-    \label{fig:rce_profiles}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/RCE_profiles}
+%     \caption{Mean profiles for selected variables in the control runs' RCE
+%     periods, by grid spacing. \todo{Include MONC results on the same plots.}}
+%     \label{fig:rce_profiles}
+% \end{figure}
 
 Mean profiles for hydrometeor classes are shown in Figure
 \ref{fig:rce_hydrometeors}. Hydrometeor profiles are sensitive to resolution in
@@ -355,13 +371,13 @@ and MONC, with perhaps the strongest difference in liquid water for which MONC
 has significantly more at $\sim$800 hPa and less above $\sim$600 hPa. Graupel
 and snow are found at lower heights in WRF than in MONC.
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/RCE_hydrometeors}
-    \caption{Mean profiles for hydrometeor concentrations in the control runs'
-    RCE periods, by grid spacing. All values are mixing ratios.
-    \todo{Include MONC results on the same plots.}}
-    \label{fig:rce_hydrometeors}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/RCE_hydrometeors}
+%     \caption{Mean profiles for hydrometeor concentrations in the control runs'
+%     RCE periods, by grid spacing. All values are mixing ratios.
+%     \todo{Include MONC results on the same plots.}}
+%     \label{fig:rce_hydrometeors}
+% \end{figure}
 
 \subsection{Convective Organisation}
 
@@ -371,79 +387,79 @@ of meaningful organisation in these fixed-radiation setups.
 
 \subsection{Responses to Perturbations in Temperature}
 
-The responses of the models to perturbations in temperature at 412 hPa, 500 hPa,
-600 hPa, 730 hPa, and 850 hPa are shown in Figures \ref{fig:tpert_412},
-\ref{fig:tpert_500}, \ref{fig:tpert_600}, \ref{fig:tpert_730}, and
-\ref{fig:tpert_850}, respectively. In all cases, the moisture and hydrometeor
-responses to forcing perturbations are much smaller than the changes in the mean
-profiles due to resolution (Figures \ref{fig:rce_profiles} and
-\ref{fig:rce_hydrometeors}). WRF and MONC produce responses of similar
-amplitude. MONC is more likely to show nonlinearity to positive and negative
-perturbations than WRF \todo{not certain, given missing MONC negative
-perturbation profiles in the current results}, with the strongest example being
-the temperature response in the upper troposphere to a temperature perturbation
-at 850 hPa. 
+The responses of the models to perturbations in temperature at 412 hPa (415 hPa
+for MONC), 500 hPa, 600 hPa, 730 hPa, and 850 hPa are shown in Figures
+\ref{fig:tpert_412}, \ref{fig:tpert_500}, \ref{fig:tpert_600},
+\ref{fig:tpert_730}, and \ref{fig:tpert_850}, respectively. In all cases, the
+moisture and hydrometeor responses to forcing perturbations are much smaller
+than the changes in the mean profiles due to resolution (Figures
+\ref{fig:rce_profiles} and \ref{fig:rce_hydrometeors}). WRF and MONC produce
+responses of similar amplitude. MONC is more likely to show nonlinearity to
+positive and negative perturbations than WRF \todo{not certain, given missing
+MONC negative perturbation profiles in the current results}, with the strongest
+example being the temperature response in the upper troposphere to a temperature
+perturbation at 850 hPa. 
 
-\begin{itemize}
-   \item \todo{Bob: WRF has been run for positive and negative perturbations at
-   both 500m and 1km. There is  little indication of nonlinearity in WRF for the
-   temperature and moisture responses, but the 500m run does show some marked
-   nonlinearity in the hydrometeor response, specifically for rain water, for
-   liquid water at upper levels and for graupel.}
-   \item \todo{Tim: WRF was run at 4 km, 1 km and 100 m - do you mean MONC at
-   500 m or WRF at a different resolution?}
-   \item \todo{Steve: need to check whether discrepancies are actually
-   non-linearity or just noise.}
-\end{itemize}
+% \begin{itemize}
+%    \item \todo{Bob: WRF has been run for positive and negative perturbations at
+%    both 500m and 1km. There is  little indication of nonlinearity in WRF for the
+%    temperature and moisture responses, but the 500m run does show some marked
+%    nonlinearity in the hydrometeor response, specifically for rain water, for
+%    liquid water at upper levels and for graupel.}
+%    \item \todo{Tim: WRF was run at 4 km, 1 km and 100 m - do you mean MONC at
+%    500 m or WRF at a different resolution?}
+%    \item \todo{Steve: need to check whether discrepancies are actually
+%    non-linearity or just noise.}
+% \end{itemize}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@412}
-    \caption{Differences in model values by pressure, after a perturbation of
-    +0.5 K was introduced in the $T$ field at 412 hPa. The solid vertical black
-    line shows zero difference. The dashed horizontal line shoes the maximum
-    perturbation level. MR stands for mixing ratio. Responses to positive
-    perturbations are shown with opaque lines, while responses to negative
-    perturbations are shown with semi-transparent lines. Responses to negative
-    perturbations have been multiplied by $-1$ so they overlay responses to
-    positive perturbations if the positive and negative responses are symmetric.
-    Black circles show the responses to the same perturbations recorded by
-    \citeA{Kuang_JAS_2010}. \todo{What's going on with WRF 100 m rain?}.
-    \todo{MONC results for RH are missing in all these response plots, and
-    should be added.}}
-    \label{fig:tpert_412}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@412}
+%     \caption{Differences in model values by pressure, after a perturbation of
+%     +0.5 K was introduced in the $T$ field at 412 hPa. The solid vertical black
+%     line shows zero difference. The dashed horizontal line shoes the maximum
+%     perturbation level. MR stands for mixing ratio. Responses to positive
+%     perturbations are shown with opaque lines, while responses to negative
+%     perturbations are shown with semi-transparent lines. Responses to negative
+%     perturbations have been multiplied by $-1$ so they overlay responses to
+%     positive perturbations if the positive and negative responses are symmetric.
+%     Black circles show the responses to the same perturbations recorded by
+%     \citeA{Kuang_JAS_2010}. \todo{What's going on with WRF 100 m rain?}.
+%     \todo{MONC results for RH are missing in all these response plots, and
+%     should be added.}}
+%     \label{fig:tpert_412}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@500}
-    \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 500
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 483 hPa.}
-    \label{fig:tpert_500}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@500}
+%     \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 500
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 483 hPa.}
+%     \label{fig:tpert_500}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@600}
-    \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 600
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 565 hPa.}
-    \label{fig:tpert_600}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@600}
+%     \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 600
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 565 hPa.}
+%     \label{fig:tpert_600}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@730}
-    \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 730
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 729 hPa.}
-    \label{fig:tpert_730}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@730}
+%     \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 730
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 729 hPa.}
+%     \label{fig:tpert_730}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@850}
-    \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 850
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 850 hPa.}
-    \label{fig:tpert_850}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@850}
+%     \caption{As in Figure \ref{fig:tpert_412}, but for a perturbation at 850
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 850 hPa.}
+%     \label{fig:tpert_850}
+% \end{figure}
 
 In response to temperature perturbations, there is a minimum in the warming in
 the vicinity of the perturbation level, or just above that, and enhanced warming
@@ -521,54 +537,54 @@ results for WRF RH or the 412 hPa results for cloud water or rain at 100 m}. In
 this case the strongest example of nonlinearity in MONC is the temperature
 response in the mid levels to a moisture perturbation at 600 hPa.
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@412}
-    \caption{Differences in model values by pressure, after a perturbation of
-    0.2 g kg$^{-1}$ was introduced in the $q$ field at 412 hPa. The solid
-    vertical black line shows zero difference. The dashed horizontal line shoes
-    the maximum perturbation level. MR stands for mixing ratio. Responses to
-    positive perturbations are shown with opaque lines, while responses to
-    negative perturbations are shown with semi-transparent lines. Responses to
-    negative perturbations have been multiplied by $-1$ so they overlay
-    responses to positive perturbations if the positive and negative responses
-    are symmetric. Black circles show the responses to the same perturbations
-    recorded by \citeA{Kuang_JAS_2010}. \todo{What's going on with WRF 100 m
-    rain?}. \todo{MONC results for RH are missing in all these response plots,
-    and should be added.}}
-    \label{fig:qpert_412}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@412}
+%     \caption{Differences in model values by pressure, after a perturbation of
+%     0.2 g kg$^{-1}$ was introduced in the $q$ field at 412 hPa. The solid
+%     vertical black line shows zero difference. The dashed horizontal line shoes
+%     the maximum perturbation level. MR stands for mixing ratio. Responses to
+%     positive perturbations are shown with opaque lines, while responses to
+%     negative perturbations are shown with semi-transparent lines. Responses to
+%     negative perturbations have been multiplied by $-1$ so they overlay
+%     responses to positive perturbations if the positive and negative responses
+%     are symmetric. Black circles show the responses to the same perturbations
+%     recorded by \citeA{Kuang_JAS_2010}. \todo{What's going on with WRF 100 m
+%     rain?}. \todo{MONC results for RH are missing in all these response plots,
+%     and should be added.}}
+%     \label{fig:qpert_412}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@500}
-    \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 500
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 483 hPa.}
-    \label{fig:qpert_500}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@500}
+%     \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 500
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 483 hPa.}
+%     \label{fig:qpert_500}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@600}
-    \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 600
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 565 hPa.}
-    \label{fig:qpert_600}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@600}
+%     \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 600
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 565 hPa.}
+%     \label{fig:qpert_600}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@730}
-    \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 730
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 729 hPa.}
-    \label{fig:qpert_730}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@730}
+%     \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 730
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 729 hPa.}
+%     \label{fig:qpert_730}
+% \end{figure}
 
-\begin{figure}[pth]
-    \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@850}
-    \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 850
-    hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
-    to a temperature perturbation at 850 hPa.}
-    \label{fig:qpert_850}
-\end{figure}
+% \begin{figure}[pth]
+%     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@850}
+%     \caption{As in Figure \ref{fig:qpert_412}, but for a perturbation at 850
+%     hPa, and with black circles showing the responses of \citeA{Kuang_JAS_2010}
+%     to a temperature perturbation at 850 hPa.}
+%     \label{fig:qpert_850}
+% \end{figure}
 
 We first examine responses to temperature profiles in response to moisture
 perturbations. Warming in the boundary layer is very consistent between
