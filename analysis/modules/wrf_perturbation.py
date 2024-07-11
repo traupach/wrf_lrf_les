@@ -1387,47 +1387,42 @@ def plot_mean_profiles(profs, variables, figsize=(13,4), dataset='Control', ylim
     else:
         plt.show()
 
-def MONC_CWV_data(path='data/MONC/',
-                  files={'1km/CWV_from_pert_of_minus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @412', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @500', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @600', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @730', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @850', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @412', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @500', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @600', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @730', '1 km'],
-                         '1km/CWV_from_pert_of_minus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @850', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @412', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @500', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @600', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @730', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @850', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @412', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @500', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @600', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @730', '1 km'],
-                         '1km/CWV_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @850', '1 km'],
-                         '1km/CWV_from_unpert_with_Hor_Res_of_1km.csv': ['RCE', '1 km'],
-                         '500m/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_500m.csv': ['q 0.0002 @500', '500 m'],
-                         '500m/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_500m.csv': ['q 0.0002 @850', '500 m'],
-                         '500m/CWV_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_500m.csv': ['T 0.5 @500', '500 m'],
-                         '500m/CWV_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_500m.csv': ['T 0.5 @850', '500 m'],
-                         '500m/CWV_from_unpert_with_Hor_Res_of_500m.csv': ['RCE', '500 m'],
-                         '250m/CWV_from_pert_of_minus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_250m.csv': ['T -0.5 @412', '250 m'],
-                         '250m/CWV_from_pert_of_minus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_250m.csv': ['T -0.5 @500', '250 m'],
-                         '250m/CWV_from_pert_of_minus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_250m.csv': ['T -0.5 @600', '250 m'],
-                         '250m/CWV_from_pert_of_minus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_250m.csv': ['T -0.5 @730', '250 m'],
-                         '250m/CWV_from_pert_of_minus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_250m.csv': ['T -0.5 @850', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_250m.csv': ['q 0.0002 @500', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_250m.csv': ['q 0.0002 @850', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @412', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @500', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @600', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @730', '250 m'],
-                         '250m/CWV_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @850', '250 m'],
-                         '250m/CWV_from_unpert_with_Hor_Res_of_250m.csv': ['RCE', '250 m']}):
+def MONC_file_list(lead='Responses',
+    available={'1 km': {'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                        'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                        'minus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850],
+                        'plus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850]},
+                '500 m': {'plus_0p5_K_p_day': [500, 850],
+                          'plus_0p2_g_p_kg_p_day': [500, 850]},
+                '250 m':{'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                         'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                         'plus_0p2_g_p_kg_p_day': [500, 850]}},
+    perts={'minus_0p5_K_p_day': 'T -0.5',
+           'plus_0p5_K_p_day': 'T 0.5',
+           'minus_0p2_g_p_kg_p_day': 'q -0.0002',
+           'plus_0p2_g_p_kg_p_day': 'q 0.0002'}):
     
+    d = {}
+    for res, avail in available.items():
+        for pert, levels in avail.items():
+            for lev in levels:
+                
+                # Rename 415 to 412 to match WRF simulation outputs.
+                lev_p = lev
+                if lev == 415:
+                    lev_p = 412
+
+                res_ns = res.replace(" ", "")
+                file = f'{res_ns}/{lead}_from_pert_of_{pert}_at_{lev}_hPa_with_Hor_Res_of_{res_ns}.csv'
+                d[file] = [f'{perts[pert]} @{lev_p}', res]
+
+    return d  
+
+def MONC_CWV_data(path='data/MONC/', pert_files=MONC_file_list(lead='CWV'), 
+                  RCE_files={'1km/CWV_from_unpert_with_Hor_Res_of_1km.csv': ['RCE', '1 km'],
+                             '500m/CWV_from_unpert_with_Hor_Res_of_500m.csv': ['RCE', '500 m'],
+                             '250m/CWV_from_unpert_with_Hor_Res_of_250m.csv': ['RCE', '250 m']}):  
+    files = RCE_files | pert_files  
     all_dat = []
     for file, [level, res] in files.items():
         dat = pd.read_csv(f'{path}/{file}')
@@ -1441,32 +1436,8 @@ def MONC_CWV_data(path='data/MONC/',
     monc = monc.drop(columns=['level_0', 'index'])
     return monc                                    
 
-def MONC_response_data(path='data/MONC/',
-              files={'1km/Responses_from_pert_of_minus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @412', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @500', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @600', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @730', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T -0.5 @850', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @412', '1 km'], 
-                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @500', '1 km'],
-                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @600', '1 km'], 
-                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @730', '1 km'], 
-                     '1km/Responses_from_pert_of_minus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q -0.0002 @850', '1 km'], 
-                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @412', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @500', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @600', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @730', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p2_g_p_kg_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['q 0.0002 @850', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_415_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @412', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @500', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @600', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @730', '1 km'],
-                     '1km/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv': ['T 0.5 @850', '1 km'],
-                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_500_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @500', '250 m'], 
-                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_600_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @600', '250 m'],
-                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_730_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @730', '250 m'],
-                     '250m/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_250m.csv': ['T 0.5 @850', '250 m'],
-                     '500m/Responses_from_pert_of_plus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_500m.csv': ['T 0.5 @850', '500 m']}):
+def MONC_response_data(path='data/MONC/', 
+                       files=MONC_file_list(lead='Responses')):
     all_dat = []
     for file, [level, res] in files.items():
         dat = pd.read_csv(f'{path}/{file}')
@@ -1587,87 +1558,74 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
     
     return ref
 
-def plot_pw_ts(pw_ts, RCE_times, figsize=(8,11), 
+def plot_pw_ts(pw_ts, RCE_times, axs,
                hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
-                     'q @412', 'q @500', 'q @600', 'q @730', 'q @850'], file=None):
+                     'q @412', 'q @500', 'q @600', 'q @730', 'q @850']):
     """
-    Plot curves of precipitable water over time, by perterbation, grouping positive and negative perturbations.
-
+    Plot curves of precipitable water over time, by perterbation, grouping positive and negative perturbations, and by model.
+    
     Arguments:
-        pw_ts: PW data by Dataset and time as a resolution: pw dictionary.
+        pw_ts: WRF PW data by Dataset and time as a resolution: pw dictionary.
         RCE_times: Start and end times to highlight by resolution (dictionary of tuples).
-        figsize: Figure width x height.
+        axs: Axes to plot to.
         hues: The order for hue category values.
-        file: Output file for plot.
     """
     
-    fig, axs = plt.subplots(nrows=len(pw_ts), ncols=1, figsize=figsize, gridspec_kw={'hspace': 0.5})
     ress = list(pw_ts.keys())
-    
     for i, r in enumerate(ress):
-        dat = pw_ts[r].to_dataframe().reset_index()
+        dat = pw_ts[r]
+        min_time = dat.time.min()
+
+        # Convert timedates to fractional days since simulation start.
+        dat = dat.assign_coords({'time': (dat.time - min_time).dt.total_seconds()/86400})
+        dat = dat.to_dataframe().reset_index()
         dat['pert'] = [x[0:2] + x[-4:] for x in dat.Dataset.values]
         dat.loc[dat.Dataset=='RCE', 'pert'] = 'RCE'
         dat.loc[dat.Dataset=='Control', 'pert'] = 'Control'
         dat['sign'] = ['-' in x for x in dat.Dataset.values]
 
-        sns.lineplot(dat, x='time', y='pw', hue='pert', style='sign', estimator=None, dashes=False, hue_order=hues, ax=axs[i])
+        sns.lineplot(dat, x='time', y='pw', hue='pert', style='sign', estimator=None, 
+                     dashes=False, hue_order=hues, ax=axs[i], legend=i==0)
     
-        axs[i].axvspan(xmin=RCE_times[r][0], xmax=RCE_times[r][1], alpha=0.3, color='green')
-        axs[i].set_title(r)
-        if i != 0:
-            axs[i].get_legend().remove()
-        else:
-            h, labs = axs[i].get_legend_handles_labels()
-            axs[i].legend(h[1:-3], labs[1:-3], bbox_to_anchor=(1,1), loc='upper left')
+        axs[i].axvspan(xmin=(np.datetime64(RCE_times[r][0])-min_time).dt.total_seconds()/86400,
+                       xmax=(np.datetime64(RCE_times[r][1])-min_time).dt.total_seconds()/86400, 
+                       alpha=0.3, color='green')
+        axs[i].set_title(f'WRF {r}')
      
     for ax in axs:
         ax.set_ylabel('PW [kg m$^{-2}$]')
         ax.set_xlabel('')
-        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=25, ha='right')
 
-    if file is not None:
-        plt.savefig(file, bbox_inches='tight')
-        plt.show()
-        plt.close()
-    else:
-        plt.show()
+    axs[-1].set_xlabel('Simulation days')
 
-def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 km', '500 m', '250 m'], 
-                  hues=['Control', 'Control/RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
-                        'q @412', 'q @500', 'q @600', 'q @730', 'q @850'], file=None):
+def plot_monc_cwv(monc, axs, start_time=None, end_time=None, ress=['1 km', '500 m', '250 m'], 
+                  hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
+                        'q @412', 'q @500', 'q @600', 'q @730', 'q @850']):
     """
     Plot curves of MONC-derived columnar water vapour (CWV) over time, by perterbation, grouping positive and negative perturbations.
 
     Arguments:
         monc: CWV data as pandas dataframe read by MONC_CWV_data().
+        axs: Axes to plot to.
         start_time, end_time: Start and end times to highlight by resolution (dictionaries).
         figsize: Figure width x height.
         ress: The resolutions in pw_ts and start_time, end_time dictionaries.
         hues: The order for hue category values.
-        file: Output file for plot.
     """
-    
-    fig, axs = plt.subplots(nrows=len(ress), ncols=1, figsize=figsize, gridspec_kw={'hspace': 0.4})
     
     for i, r in enumerate(ress):
         dat = monc.loc[monc.res == r].copy()
         dat['pert_short'] = [x[0:2] + x[-4:] for x in dat.pert.values]
-        dat.loc[dat.pert=='RCE', 'pert_short'] = 'Control/RCE'
+        dat.loc[dat.pert=='RCE', 'pert_short'] = 'RCE'
         dat['sign'] = ['-' in x for x in dat.pert.values]
 
-        sns.lineplot(dat, x='time', y='cwv', hue='pert_short', style='sign', estimator=None, dashes=False, hue_order=hues, ax=axs[i])
+        sns.lineplot(dat, x='time', y='cwv', hue='pert_short', style='sign', estimator=None, 
+                     dashes=False, hue_order=hues, ax=axs[i], legend=False)
 
         if start_time is not None:
             if end_time is not None:
                 axs[i].axvspan(xmin=start_time[r], xmax=end_time[r], alpha=0.3, color='green')
-        axs[i].set_title(r)
-        if i != 0:
-            axs[i].get_legend().remove()
-        else:
-            h, labs = axs[i].get_legend_handles_labels()
-            assert labs[1] == 'Control', 'Mix-up with labels.'
-            axs[i].legend(h[2:-3], labs[2:-3], bbox_to_anchor=(1,1), loc='upper left')
+        axs[i].set_title(f'MONC {r}')
      
     for ax in axs:
         ax.set_ylabel('CWV [mm]')
@@ -1676,13 +1634,6 @@ def plot_monc_cwv(monc, start_time=None, end_time=None, figsize=(8,9), ress=['1 
         ax.set_xlim(-5, None)
 
     axs[-1].set_xlabel('Simulation days')
-    
-    if file is not None:
-        plt.savefig(file, bbox_inches='tight')
-        plt.show()
-        plt.close()
-    else:
-        plt.show()
 
 def load_cache_data(inputs, dirs, runs_start, RCE_times, cache_dir='data/WRF',
                     prof_vars=['T', 'tk', 'q', 'ua', 'va', 'rh', 'qcloud', 
@@ -1788,3 +1739,47 @@ def concat_diffs(responses, hydromet_vars=['q', 'qcloud', 'qice', 'qsnow', 'qrai
         
     diffs = pd.concat([neg, pos])
     return diffs
+
+def plot_ts_wrf_monc(
+    wrf_pw_ts,
+    monc_cwv,
+    WRF_RCE_times,
+    figsize=(12, 8),
+    hues=[
+        'Control',
+        'RCE',
+        'T @412',
+        'T @500',
+        'T @600',
+        'T @730',
+        'T @850',
+        'q @412',
+        'q @500',
+        'q @600',
+        'q @730',
+        'q @850',
+    ],
+    file=None,
+    ncols=2,
+    nrows=3,
+):
+    """
+    Plot curves of precipitable water (for WRF) or columnar water vapour (for MONC) over time,
+    by perturbation, resolution, and by model.
+
+    Arguments:
+          wrf_pw_ts: WRF PW data by Dataset and time as a resolution: pw dictionary.
+          monc_cwv: MONC CWV data by Dataset and time as a pandas dataframe.
+          WRF_RCE_times_WRF: Start and end times to highlight by resolution (dictionary of tuples).
+          figsize: Figure width x height.
+          hues: The order for hue category values.
+          file: Output file for plot.
+    """
+
+    _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'hspace': 0.5})
+    plot_pw_ts(pw_ts=wrf_pw_ts, RCE_times=WRF_RCE_times, axs=axs[:, 0], hues=hues)
+    plot_monc_cwv(monc=monc_cwv, axs=axs[:, 1], hues=hues)
+    h, labs = axs[0, 0].get_legend_handles_labels()
+    _ = axs[0, 0].legend(h[1:-3], labs[1:-3], bbox_to_anchor=(2.2, 0), loc='upper left')
+    if file is not None:
+        plt.savefig(file, bbox_inches='tight')

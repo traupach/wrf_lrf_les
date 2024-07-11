@@ -94,17 +94,17 @@ def compute_wrf_profile(p_s, T_s, q_s, z, theta, q_v, dry=False, verbose=True):
     rho[0] = atm.density(p=p_s, theta=theta_s, q_v=q_v[0])
 
     # Integrate up the column finding moist profile values.
-    for l in range(len(z)-1):
-        p_moist[l+1], rho[l+1] = integrate_moist_wrf(rho_bottom=rho[l], p_bottom=p_moist[l], 
-                                                     q_bottom=q_v[l], q_top=q_v[l+1], 
-                                                     theta_top=theta[l+1], dz=z[l+1]-z[l])
+    for x in range(len(z)-1):
+        p_moist[x+1], rho[x+1] = integrate_moist_wrf(rho_bottom=rho[x], p_bottom=p_moist[x], 
+                                                     q_bottom=q_v[x], q_top=q_v[x+1], 
+                                                     theta_top=theta[x+1], dz=z[x+1]-z[x])
     
     # Integrate down the column to find dry pressure values, starting with the top
     # moist pressure value.
     p_dry[len(z)-1] = p_moist[len(z)-1]
-    for l in reversed(range(len(z)-1)):
-        p_dry[l] = integrate_dry_wrf(p_top=p_dry[l+1], rho_top=rho[l+1], 
-                                     rho_bottom=rho[l], dz=z[l+1]-z[l])
+    for x in reversed(range(len(z)-1)):
+        p_dry[x] = integrate_dry_wrf(p_top=p_dry[x+1], rho_top=rho[x+1], 
+                                     rho_bottom=rho[x], dz=z[x+1]-z[x])
     
     # Return values at input z heights including the surface.
     profile = xarray.Dataset(
@@ -273,31 +273,31 @@ def base_state_geopotential(eta, dry_profile, moist_profile, p_surface_dry, p_su
         q_v[k] = interpolate(v=moist_profile.q_v.values, z=moist_profile.p_dry.values*100, h=p_level_moist[k])
         
     # Calculate perturbation (including moisture) geopotentials, down the column.
-    for l in reversed(range(len(eta_half))):
-        if(l == len(eta_half)-1):
-            q_v_half = q_v[l]
-            delta_eta = eta[l+1] - eta[l]
-            pert_pressure[l] = -0.5*(column_mass_perturb+(q_v_half/(1+q_v_half))*
+    for x in reversed(range(len(eta_half))):
+        if(x == len(eta_half)-1):
+            q_v_half = q_v[x]
+            delta_eta = eta[x+1] - eta[x]
+            pert_pressure[x] = -0.5*(column_mass_perturb+(q_v_half/(1+q_v_half))*
                                     (column_mass_dry))/(1/delta_eta)/(1/(1+q_v_half))
         else:
-            delta_eta = eta_half[l+1] - eta_half[l]
-            q_v_half = (q_v[l] + q_v[l+1])/2
+            delta_eta = eta_half[x+1] - eta_half[x]
+            q_v_half = (q_v[x] + q_v[x+1])/2
             
-            pert_pressure[l] = pert_pressure[l+1] - (column_mass_perturb+(q_v_half/(1+q_v_half))*
+            pert_pressure[x] = pert_pressure[x+1] - (column_mass_perturb+(q_v_half/(1+q_v_half))*
                                                      (column_mass_dry))/(1/delta_eta)/(1/(1+q_v_half))
         
-        rho_moist[l] = atm.density(p=(p_level_dry[l]+pert_pressure[l])/100, theta=theta[l], q_v=q_v[l])
-        pert_alpha[l] = (1/rho_moist[l]) - (1/rho_dry[l])
+        rho_moist[x] = atm.density(p=(p_level_dry[x]+pert_pressure[x])/100, theta=theta[x], q_v=q_v[x])
+        pert_alpha[x] = (1/rho_moist[x]) - (1/rho_dry[x])
    
     # Up the column to calculate geopotentials.
-    for l in range(1, len(eta)):
+    for x in range(1, len(eta)):
         # Base-state (dry) geopotential.
-        phi[l] = phi[l-1] - (eta[l] - eta[l-1]) * column_mass_dry * (1/rho_dry[l-1])
+        phi[x] = phi[x-1] - (eta[x] - eta[x-1]) * column_mass_dry * (1/rho_dry[x-1])
    
         # Perturbation (moist) geopotential.
-        phi_pert[l] = phi_pert[l-1] - (eta[l] - eta[l-1]) * (
-            (column_mass_dry + column_mass_perturb) * pert_alpha[l-1] +
-            (column_mass_perturb * 1/rho_dry[l-1]))
+        phi_pert[x] = phi_pert[x-1] - (eta[x] - eta[x-1]) * (
+            (column_mass_dry + column_mass_perturb) * pert_alpha[x-1] +
+            (column_mass_perturb * 1/rho_dry[x-1]))
     
     return(phi, phi_pert)
     
@@ -346,11 +346,11 @@ def destagger_etas(half):
     etas = np.ones(len(half)+1)
 
     # Iterate from surface to top, making the first value 1 for the surface.
-    for l in range(1,len(etas)):
-        etas[l] = etas[l-1] - 2*(etas[l-1] - half[l-1])
+    for x in range(1,len(etas)):
+        etas[x] = etas[x-1] - 2*(etas[x-1] - half[x-1])
         
-        if l < len(half):
-            assert etas[l] > half[l], 'Impossible to create monotonically decreasing etas.'
+        if x < len(half):
+            assert etas[x] > half[x], 'Impossible to create monotonically decreasing etas.'
 
     return(etas)
 
