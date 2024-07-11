@@ -1601,9 +1601,9 @@ def plot_mean_profiles(
         ncols: Number of columns to use.
     """
 
-    _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'wspace': 0.1, 'hspace': 0.4})
-    # resolutions = profs.res.unique()
-
+    _, axs = plt.subplots(
+        nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'wspace': 0.1, 'hspace': 0.4}
+    )
     profs = profs.sort_values(['Model', 'Resolution', 'level'])
 
     for i, v in enumerate(variables):
@@ -1637,7 +1637,7 @@ def plot_mean_profiles(
         axs.flat[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
 
     axs[0, 0].set_ylabel('Pressure [hPa]')
-    sns.move_legend(axs[0, 0], 'upper left', bbox_to_anchor=(5.4, 1))
+    sns.move_legend(axs[0, 0], 'upper left', bbox_to_anchor=(5.4, 0.25))
 
     if file is not None:
         plt.savefig(file, bbox_inches='tight')
