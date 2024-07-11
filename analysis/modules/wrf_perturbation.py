@@ -1560,7 +1560,8 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
 
 def plot_pw_ts(pw_ts, RCE_times, axs,
                hues=['Control', 'RCE', 'T @412', 'T @500', 'T @600', 'T @730', 'T @850', 
-                     'q @412', 'q @500', 'q @600', 'q @730', 'q @850']):
+                     'q @412', 'q @500', 'q @600', 'q @730', 'q @850'],
+               ress=['4 km', '1 km', '100 m']):
     """
     Plot curves of precipitable water over time, by perterbation, grouping positive and negative perturbations, and by model.
     
@@ -1571,7 +1572,6 @@ def plot_pw_ts(pw_ts, RCE_times, axs,
         hues: The order for hue category values.
     """
     
-    ress = list(pw_ts.keys())
     for i, r in enumerate(ress):
         dat = pw_ts[r]
         min_time = dat.time.min()
@@ -1762,6 +1762,8 @@ def plot_ts_wrf_monc(
     file=None,
     ncols=2,
     nrows=3,
+    wrf_res = ['4 km', '1 km', '100 m'],
+    monc_res = ['1 km', '500 m', '250 m']
 ):
     """
     Plot curves of precipitable water (for WRF) or columnar water vapour (for MONC) over time,
@@ -1777,8 +1779,8 @@ def plot_ts_wrf_monc(
     """
 
     _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'hspace': 0.5})
-    plot_pw_ts(pw_ts=wrf_pw_ts, RCE_times=WRF_RCE_times, axs=axs[:, 0], hues=hues)
-    plot_monc_cwv(monc=monc_cwv, axs=axs[:, 1], hues=hues)
+    plot_pw_ts(pw_ts=wrf_pw_ts, RCE_times=WRF_RCE_times, axs=axs[:, 0], hues=hues, ress=wrf_res)
+    plot_monc_cwv(monc=monc_cwv, axs=axs[:, 1], hues=hues, ress=monc_res)
     h, labs = axs[0, 0].get_legend_handles_labels()
     _ = axs[0, 0].legend(h[1:-3], labs[1:-3], bbox_to_anchor=(2.2, 0), loc='upper left')
     if file is not None:
