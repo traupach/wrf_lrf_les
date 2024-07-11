@@ -289,6 +289,7 @@ def compare_perturbation_forcing(dat, p_pert, k_pert):
     plt.legend()
     plt.gca().invert_yaxis()
 
+
 def plot_wrfinput_profiles(wrfin, sounding_file=None):
     """
     Plot grid-mean temperature, water vapour mixing ratio, and pressure by height in a facetted plot.
@@ -1573,20 +1574,17 @@ def add_mass_flux(wrfvars):
 
     return wrfvars
 
+
 def plot_mean_profiles(
     profs,
-    variables=['tk', 'q', 'ua', 'va', 'rh'],
-    relabel={
-        'tk': 'Temperature\n[K]',
-        'q': 'Water vapor\nmixing ratio\n[kg kg$^{-1}$]',
-        'ua': 'U wind\n[m s$^{-1}$]',
-        'va': 'V wind\n[m s$^{-1}$]',
-        'rh': 'Relative\nhumidity [%]',
-    },
+    variables,
+    relabel={},
     figsize=(13, 4),
     ylim=(1000, 200),
     retick={},
     file=None,
+    ncols=5,
+    nrows=2,
 ):
     """
     Plot mean profiles for a given dataset, by resolution and model.
@@ -1600,11 +1598,10 @@ def plot_mean_profiles(
         relabel: {variable: label} dictionary with new labels for x axes.
         retick: {variable: ticks} dictionary with new ticks for x axes.
         file: File to save plot to.
+        ncols: Number of columns to use.
     """
 
-    _, axs = plt.subplots(
-        ncols=len(variables), nrows=1, figsize=figsize, gridspec_kw={'wspace': 0.1}
-    )
+    _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'wspace': 0.1, 'hspace': 0.4})
     # resolutions = profs.res.unique()
 
     profs = profs.sort_values(['Model', 'Resolution', 'level'])
@@ -1615,33 +1612,36 @@ def plot_mean_profiles(
             x=v,
             y='level',
             hue='Resolution',
-            ax=axs[i],
+            ax=axs.flat[i],
             legend=i == 0,
             style='Model',
             sort=False,
+            estimator=None,
             hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
         )
-        axs[i].invert_yaxis()
+        axs.flat[i].invert_yaxis()
 
-        axs[i].set_title('')
-        axs[i].set_ylabel('')
-        if i > 0:
-            axs[i].set_yticks([])
+        axs.flat[i].set_title('')
+        axs.flat[i].set_ylabel('')
+
+        if i > 0 and i % ncols != 0:
+            axs.flat[i].set_yticks([])
 
         if v in retick:
-            axs[i].set_xticks(retick[v])
+            axs.flat[i].set_xticks(retick[v])
 
         if v in relabel:
-            axs[i].set_xlabel(relabel[v])
+            axs.flat[i].set_xlabel(relabel[v])
 
-        axs[i].set_ylim(ylim)
-        axs[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
+        axs.flat[i].set_ylim(ylim)
+        axs.flat[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
 
-    axs[0].set_ylabel('Pressure [hPa]')
-    sns.move_legend(axs[0], 'upper left', bbox_to_anchor=(5.4, 1))
+    axs[0, 0].set_ylabel('Pressure [hPa]')
+    sns.move_legend(axs[0, 0], 'upper left', bbox_to_anchor=(5.4, 1))
 
     if file is not None:
         plt.savefig(file, bbox_inches='tight')
+
 
 def MONC_file_list(
     lead='Responses',
@@ -2205,12 +2205,12 @@ def read_MONC_profs(
     profs = profs.rename(columns=renamer)
     profs['model'] = 'MONC'
 
-    # Hydrometeor mixing ratios are in g/kg-1, convert to kg/kg-1.
-    profs['q'] = profs.q / 1000
-    profs['qcloud'] = profs.qcloud / 1000
-    profs['qice'] = profs.qice / 1000
-    profs['qsnow'] = profs.qsnow / 1000
-    profs['qrain'] = profs.qrain / 1000
-    profs['qgraup'] = profs.qgraup / 1000
+    # Some hydrometeor mixing ratios appear to be in kg kg-1 so convert to g kg-1.
+    profs['q'] = profs.q * 1000
+    # profs['qcloud'] = profs.qcloud / 1000
+    # profs['qice'] = profs.qice / 1000
+    # profs['qsnow'] = profs.qsnow / 1000
+    # profs['qrain'] = profs.qrain / 1000
+    # profs['qgraup'] = profs.qgraup / 1000
 
     return profs
