@@ -1584,11 +1584,11 @@ def plot_mean_profiles(
         'ua': 'U wind\n[m s$^{-1}$]',
         'va': 'V wind\n[m s$^{-1}$]',
         'rh': 'Relative\nhumidity [%]',
-        'qcloud': 'Cloud\nwater\nmixing ratio\n[g kg$^{-1}$]',
+        'qcloud': 'Cloud water\nmixing\nratio\n[g kg$^{-1}$]',
         'qice': 'Ice\nmixing\nratio\n[g kg$^{-1}$]',
         'qsnow': 'Snow\nmixing\nratio\n[g kg$^{-1}$]',
         'qrain': 'Rain\nmixing\nratio\n[g kg$^{-1}$]',
-        'qgraup': 'Graupel\nmixingratio\n[g kg$^{-1}$]',
+        'qgraup': 'Graupel\nmixing\nratio\n[g kg$^{-1}$]',
     },
     figsize=(13, 4),
     ylim=(1000, 200),
@@ -2279,21 +2279,21 @@ def plot_responses(
     responses,
     refs,
     hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
-    variables=['tk', 'rh', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    variables=['tk', 'q', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
     var_labels={
         'tk': 'Temperature\n[K]',
         'rh': 'RH\n[%]',
-        'q': 'MR Vapour\n[10$^{-3}$ g kg$^{-1}$]',
-        'qcloud': 'MR Cloud\n[10$^{-3}$ g kg$^{-1}$]',
-        'qice': 'MR Ice\n[10$^{-3}$ g kg$^{-1}$]',
-        'qsnow': 'MR Snow\n[10$^{-3}$ g kg$^{-1}$]',
-        'qrain': 'MR Rain\n[10$^{-3}$ g kg$^{-1}$]',
-        'qgraup': 'MR Graupel\n[10$^{-3}$ g kg$^{-1}$]',
+        'q': 'Water vapour\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
     },
     figsize=(12, 8),
     ncols=4,
     nrows=2,
-    hspace=0.4,
+    hspace=0.5,
     wspace=0.1,
     min_pressure=200,
     show_negs=False,
@@ -2403,7 +2403,7 @@ def plot_responses(
                 axs.flat[i].set_ylabel('')
                 axs.flat[i].set_yticks([])
 
-        sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 1))
+        sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
         _ = plt.suptitle(p, y=0.93)
 
         if file is not None:
