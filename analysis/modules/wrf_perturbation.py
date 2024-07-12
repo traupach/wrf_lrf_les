@@ -18,7 +18,6 @@ import xarray
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
-
 def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=False):
     """
     Read all wrfvars files in multiple datasets.
@@ -1362,7 +1361,6 @@ def as_date(d, date_format='%Y-%m-%d'):
 
     return datetime.datetime.strptime(d, date_format)
 
-
 def dat_properties(dat, variables, start, end, datasets=None):
     """
     For each dataset, show the min, max, mean and standard deviation values for a variable
@@ -1404,7 +1402,6 @@ def dat_properties(dat, variables, start, end, datasets=None):
         if var != variables[-1]:
             print(' ')
 
-
 def model_setups(inputs, dataset='RCE'):
     """
     Print information about each model setup in inputs.
@@ -1420,85 +1417,6 @@ def model_setups(inputs, dataset='RCE'):
             wrfinput_file=inputs[res][dataset] + 'wrfinput_d01',
             sounding_file=inputs[res][dataset] + 'input_sounding',
         )
-
-
-def plot_profiles_by_time(dat, variable, figsize=(14, 10), col_wrap=3, yincrease=False):
-    """
-    Plot variable vs time vs height for each key in 'dat'.
-
-    Arguments:
-        dat: Data to plot. Should be dictionary.
-        variable: The variable to plot.
-        figsize: Figure size width x height.
-        col_wrap: Number of columns per row.
-        yincrease: y axis increases from bottom to top?
-    """
-
-    for res in dat.keys():
-        dat[res][variable].plot(
-            col='Dataset', x='time', figsize=figsize, col_wrap=col_wrap, yincrease=yincrease
-        ).set_titles('{value}')
-        plt.suptitle(res, y=1.01)
-        plt.show()
-
-
-def plot_levels_by_time(dat, variable, plot_levels, figsize=(10, 5), col_wrap=2):
-    """
-    Plot variable vs time by level for each key in 'dat'.
-
-    Arguments:
-        dat: Data to plot. Should be dictionary.
-        variable: The variable to plot.
-        plot_levels: Values of 'level' to plot from dat.
-        figsize: Figure size width x height.
-        col_wrap: Number of columns per row.
-    """
-
-    for res in dat.keys():
-        dat[res][variable].sel(level=plot_levels).plot(
-            hue='Dataset', col='level', col_wrap=col_wrap, figsize=figsize, sharey=False
-        ).set_titles('{value} hPa')
-        plt.suptitle(res, y=1.01)
-        plt.show()
-
-
-def plot_RCE_tq_profiles(
-    inputs, wrfvars, start_time, end_time, p_from=200, p_to=80, ncols=5, nrows=2, figsize=[13, 6]
-):
-    """
-    Plot the RCE T and q profiles and the profiles from the output data to compare.
-
-    Arguments:
-        inputs: Input directories by resolution then dataset (dict of dicts).
-        wrfvars: Data to plot (dictionary by resolution).
-        start_time, end_time: Times over which to find the mean profile.
-        p_from, p_to: Pressure ranges to plot [hPa].
-        nrows, ncols: Rows/columns to use.
-        figsize: Figure size width x height.
-    """
-
-    for res in inputs.keys():
-        RCE_profiles = target_tk_profiles(
-            wrfout_file=(inputs[res]['Control'] + '/wrfout_d01_' + start_time[res] + '_00:00:00'),
-            pres=wrfvars[res].pres.sel(Dataset='Control'),
-            start=start_time[res],
-            end=end_time[res],
-        )
-
-        # Show values in all non-RCE datasets.
-        plot_tq_stratosphere(
-            dat=wrfvars[res]
-            .drop_sel(Dataset='RCE')
-            .sel(time=slice(start_time[res], end_time[res])),
-            title=res,
-            RCE_profiles=RCE_profiles,
-            p_from=p_from,
-            p_to=p_to,
-            ncols=ncols,
-            nrows=nrows,
-            figsize=figsize,
-        )
-
 
 def input_map(perts, basedir):
     """
@@ -1529,22 +1447,6 @@ def input_map(perts, basedir):
 
     return inputs
 
-
-def shear_profile(z, z_s=3000, U_s=22):
-    """
-    Return a straight shear profile for a horizontal wind (U or V) at different heights.
-    The shear amount is formulated using Equation 14 in Richardson et al., 2007 (DOI: 10.1175/MWR3463.1).
-
-    Arguments:
-        z: The heights for which to calculate the wind magnitude in either U or V [m].
-        z_s: Parameter one [m].
-        U_s: Parameter two (maximum wind speed at about z_s*2) [m s-1].
-    """
-
-    wind = U_s * np.tanh(z / z_s)
-    return wind
-
-
 def add_mass_flux(wrfvars):
     """
     Add mass flux to the datasets.
@@ -1573,7 +1475,6 @@ def add_mass_flux(wrfvars):
         wrfvars[res].conv_mass_flux.attrs['units'] = 'kg m-2 s-1'
 
     return wrfvars
-
 
 def plot_mean_profiles(
     profs,
@@ -1717,7 +1618,6 @@ def MONC_CWV_data(
     monc = monc.drop(columns=['level_0', 'index'])
     return monc
 
-
 def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')):
     all_dat = []
     for file, [level, res] in files.items():
@@ -1731,6 +1631,7 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
         columns={
             'Pressure (hPa)': 'pressure',
             'Delta_theta (K)': 'T',
+            'Delta_RH (%)': 'rh',
             'Delta_Temp (K)': 'tk',
             'Delta_qv (g/kg)': 'q',
             'Delta_qliq (g/kg)': 'qcloud',
@@ -1743,67 +1644,6 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
     monc = monc.drop(columns=['level_0', 'index'])
     monc['model'] = 'MONC'
     return monc
-
-
-def responses_grid(
-    diffs,
-    comp,
-    pos_perts,
-    neg_perts,
-    variables,
-    figsize=(20, 20),
-    lims={
-        'tk': [-0.2, 1.2],
-        'q': [-0.1, 0.55],
-        'T': [-0.2, 1.2],
-        'qcloud': np.array([-1.5, 1.4]) * 1e-3,
-        'qice': np.array([-0.6, 0.2]) * 1e-3,
-        'qsnow': np.array([-20, 20]) * 1e-3,
-        'qrain': np.array([-1, 1.8]) * 1e-3,
-        'qgraup': np.array([-2.5, 1]) * 1e-3,
-    },
-):
-    """
-    Plot a grid of responses with perturbations in rows, variables in columns.
-
-    Arguments:
-        diff:
-    """
-
-    # Perts in rows, variables in columns.
-    fig, axs = plt.subplots(
-        nrows=len(pos_perts), ncols=len(variables), figsize=figsize, gridspec_kw={'hspace': 0.35}
-    )
-
-    for i in np.arange(len(pos_perts)):
-        for j, v in enumerate(variables):
-            (diffs.sel(Dataset=neg_perts[i])[v] * -1).plot(y='level', color='green', ax=axs[i, j])
-            diffs.sel(Dataset=pos_perts[i])[v].plot(y='level', color='blue', ax=axs[i, j])
-
-            att = diffs.sel(Dataset=pos_perts[i])[v].attrs
-            lab = f'{att["long_name"].replace("mixing ratio", "MR")} [{att["units"]}]'
-            axs[i, j].set_xlabel(lab)
-            axs[i, j].axvline(0, color='red')
-            axs[i, j].set_title(pos_perts[i])
-            axs[i, j].invert_yaxis()
-            axs[i, j].xaxis.set_major_locator(plt.MaxNLocator(3))
-            axs[i, j].ticklabel_format(useOffset=False, style='plain', scilimits=(-3, 4))
-            axs[i, j].set_xlim(lims[v][0], lims[v][1])
-            axs[i, j].set_ylim(1000, 200)
-            if j > 0:
-                axs[i, j].set_ylabel('')
-                axs[i, j].set_yticks([])
-
-            if comp is not None:
-                pos = comp[comp.pert == pos_perts[i]]
-                neg = comp[comp.pert == neg_perts[i]]
-
-                if len(pos) > 0:
-                    axs[i, j].plot(pos[v], pos.pressure, color='blue', linestyle='--')
-
-                if len(neg) > 0:
-                    axs[i, j].plot(neg[v] * -1, neg.pressure, color='green', linestyle='--')
-
 
 def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
     # Read in reference (Kuang 2010) results.
@@ -2092,7 +1932,7 @@ def WRF_responses(
     # Collect WRF differences together in the same form as the MONC differences.
     wrf_profs = xarray.merge([profs[x][variables].load().expand_dims({'res': [x]}) for x in profs])
 
-    # Convert quantities in kg kg-1 to g kg-1.
+    # Convert quantities in g kg-1 to g kg-1.
     for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
         wrf_profs[v] = wrf_profs[v] * 1000
 
@@ -2103,7 +1943,6 @@ def WRF_responses(
     wrf = wrf.rename(columns={'Dataset': 'pert', 'level': 'pressure'})
 
     return wrf
-
 
 def concat_diffs(
     responses,
@@ -2125,7 +1964,7 @@ def concat_diffs(
     diffs = diffs.sort_values(['pressure', 'model', 'res'], ascending=False)
     diffs = diffs.rename(columns={'model': 'Model', 'res': 'Resolution'})
 
-    # Give hydrometeors a factor of 1e3
+    # Give hydrometeors a factor of 1e3 so units go from g kg-1 to 1e-3 g kg-1.
     for v in hydromet_vars:
         diffs[v] = diffs[v] * 1000
 
@@ -2230,11 +2069,6 @@ def read_MONC_profs(
 
     # Some hydrometeor mixing ratios appear to be in kg kg-1 so convert to g kg-1.
     profs['q'] = profs.q * 1000
-    # profs['qcloud'] = profs.qcloud / 1000
-    # profs['qice'] = profs.qice / 1000
-    # profs['qsnow'] = profs.qsnow / 1000
-    # profs['qrain'] = profs.qrain / 1000
-    # profs['qgraup'] = profs.qgraup / 1000
 
     return profs
 
@@ -2305,16 +2139,16 @@ def plot_responses(
     Args:
         responses: Responses to plot.
         refs: Reference profiles.
-        hue_order: Order to display colours in. Defaults to ['4 km', '1 km', '500 m', '250 m', '100 m'].
-        variables: Variables to plot. Defaults to ['tk', 'rh', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'].
-        var_labels: Label for each variable. Defaults to { 'tk': 'Temperature\n[K]', 'rh': 'RH\n[%]', 'q': 'MR Vapour\n[10$^{-3}$ g kg$^{-1}$]', 'qcloud': 'MR Cloud\n[10$^{-3}$ g kg$^{-1}$]', 'qice': 'MR Ice\n[10$^{-3}$ g kg$^{-1}$]', 'qsnow': 'MR Snow\n[10$^{-3}$ g kg$^{-1}$]', 'qrain': 'MR Rain\n[10$^{-3}$ g kg$^{-1}$]', 'qgraup': 'MR Graupel\n[10$^{-3}$ g kg$^{-1}$]', }.
-        figsize: Figure size. Defaults to (12, 8).
-        ncols: Number of columns. Defaults to 4.
-        nrows: Number of rows. Defaults to 2.
-        hspace: gridspec hspace parameter. Defaults to 0.4.
-        wspace: gridspec wspace parameter. Defaults to 0.1.
-        min_pressure: Minimum pressure to show. Defaults to 200.
-        show_negs: Show negative responses with reduced alpha?. Defaults to False.
+        hue_order: Order to display colours in. 
+        variables: Variables to plot. 
+        var_labels: Label for each variable. 
+        figsize: Figure size. 
+        ncols: Number of columns. 
+        nrows: Number of rows. 
+        hspace: gridspec hspace parameter. 
+        wspace: gridspec wspace parameter. 
+        min_pressure: Minimum pressure to show. 
+        show_negs: Show negative responses with reduced alpha?. 
         file: Save to file with this starting path (and finished by pert pressure.pdf)
     """
     assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
