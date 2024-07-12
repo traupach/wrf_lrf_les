@@ -1577,8 +1577,19 @@ def add_mass_flux(wrfvars):
 
 def plot_mean_profiles(
     profs,
-    variables,
-    relabel={},
+    variables=['tk', 'q', 'ua', 'va', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    relabel={
+        'tk': 'Temperature\n[K]',
+        'q': 'Water vapor\nmixing ratio\n[g kg$^{-1}$]',
+        'ua': 'U wind\n[m s$^{-1}$]',
+        'va': 'V wind\n[m s$^{-1}$]',
+        'rh': 'Relative\nhumidity [%]',
+        'qcloud': 'Cloud\nwater\nmixing ratio\n[g kg$^{-1}$]',
+        'qice': 'Ice\nmixing\nratio\n[g kg$^{-1}$]',
+        'qsnow': 'Snow\nmixing\nratio\n[g kg$^{-1}$]',
+        'qrain': 'Rain\nmixing\nratio\n[g kg$^{-1}$]',
+        'qgraup': 'Graupel\nmixingratio\n[g kg$^{-1}$]',
+    },
     figsize=(13, 4),
     ylim=(1000, 200),
     retick={},
@@ -2014,20 +2025,31 @@ def load_cache_data(
     """
 
     pw_ts = {}
+    pw_sv_ts = {}
     profs = {}
 
     for inp in inputs:
         d = dirs[inp]
         cache_file_pw = f'{cache_dir}/pw_{d}.nc'
+        cache_file_pw_sv = f'{cache_dir}/pw_scaled_var_{d}.nc'
         cache_file_prof = f'{cache_dir}/prof_{d}.nc'
 
-        if not (os.path.exists(cache_file_pw) and os.path.exists(cache_file_prof)):
+        if not (
+            os.path.exists(cache_file_pw)
+            and os.path.exists(cache_file_prof)
+            and os.path.exists(cache_file_pw_sv)
+        ):
             wrfvars = read_wrfvars(inputs={inp: inputs[inp]}, quiet=False)
 
             # Cache precipitable water.
             pw = wrfvars[inp].pw.expand_dims({'res': [inp]}).load()
             pw.to_netcdf(cache_file_pw)
             del pw
+
+            # Cache variance/mean of PW.
+            pw_sv = wrfvars[inp].pw_scaled_var.expand_dims({'res': [inp]}).load()
+            pw_sv.to_netcdf(cache_file_pw_sv)
+            del pw_sv
 
             # Remove RCE runs because we are only interested in perturbed runs.
             wrfvars[inp] = (
@@ -2049,9 +2071,10 @@ def load_cache_data(
             del p
 
         pw_ts[inp] = xarray.open_dataset(cache_file_pw)
+        pw_sv_ts[inp] = xarray.open_dataset(cache_file_pw_sv)
         profs[inp] = xarray.open_dataset(cache_file_prof)
 
-    return pw_ts, profs
+    return pw_ts, profs, pw_sv_ts
 
 
 def WRF_responses(
@@ -2214,3 +2237,174 @@ def read_MONC_profs(
     # profs['qgraup'] = profs.qgraup / 1000
 
     return profs
+
+
+def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
+    """
+    Collect together mean profiles for thecontrol run for MONC and WRF.
+
+    Arguments:
+        wrf_profs: WRF profiles (for all runs).
+        monc_ctrl_profs: MONC profiles for control runs in pandas format.
+    """
+
+    wrf_ctrl_profs = pd.concat(
+        [
+            wrf_profs[x]
+            .sel(Dataset='Control')
+            .to_dataframe()
+            .drop(columns='Dataset')
+            .assign(res=x, model='WRF')
+            for x in wrf_profs
+        ]
+    )
+    wrf_ctrl_profs = wrf_ctrl_profs.reset_index()
+
+    # Convert wrf mixing ratios to g kg-1.
+    wrf_ctrl_profs['q'] = wrf_ctrl_profs.q * 1000
+    wrf_ctrl_profs['q'] = wrf_ctrl_profs.q * 1000
+    wrf_ctrl_profs['qcloud'] = wrf_ctrl_profs.qcloud * 1000
+    wrf_ctrl_profs['qice'] = wrf_ctrl_profs.qice * 1000
+    wrf_ctrl_profs['qsnow'] = wrf_ctrl_profs.qsnow * 1000
+    wrf_ctrl_profs['qrain'] = wrf_ctrl_profs.qrain * 1000
+    wrf_ctrl_profs['qgraup'] = wrf_ctrl_profs.qgraup * 1000
+
+    profs = pd.concat([wrf_ctrl_profs, monc_ctrl_profs])
+    profs = profs.rename(columns={'res': 'Resolution', 'model': 'Model'})
+
+    return profs
+
+
+def plot_responses(
+    responses,
+    refs,
+    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
+    variables=['tk', 'rh', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    var_labels={
+        'tk': 'Temperature\n[K]',
+        'rh': 'RH\n[%]',
+        'q': 'MR Vapour\n[10$^{-3}$ g kg$^{-1}$]',
+        'qcloud': 'MR Cloud\n[10$^{-3}$ g kg$^{-1}$]',
+        'qice': 'MR Ice\n[10$^{-3}$ g kg$^{-1}$]',
+        'qsnow': 'MR Snow\n[10$^{-3}$ g kg$^{-1}$]',
+        'qrain': 'MR Rain\n[10$^{-3}$ g kg$^{-1}$]',
+        'qgraup': 'MR Graupel\n[10$^{-3}$ g kg$^{-1}$]',
+    },
+    figsize=(12, 8),
+    ncols=4,
+    nrows=2,
+    hspace=0.4,
+    wspace=0.1,
+    min_pressure=200,
+    show_negs=False,
+    file='paper/figures/pert_diffs_',
+):
+    """
+    Make plots showing perturbation responses.
+
+    Args:
+        responses: Responses to plot.
+        refs: Reference profiles.
+        hue_order: Order to display colours in. Defaults to ['4 km', '1 km', '500 m', '250 m', '100 m'].
+        variables: Variables to plot. Defaults to ['tk', 'rh', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'].
+        var_labels: Label for each variable. Defaults to { 'tk': 'Temperature\n[K]', 'rh': 'RH\n[%]', 'q': 'MR Vapour\n[10$^{-3}$ g kg$^{-1}$]', 'qcloud': 'MR Cloud\n[10$^{-3}$ g kg$^{-1}$]', 'qice': 'MR Ice\n[10$^{-3}$ g kg$^{-1}$]', 'qsnow': 'MR Snow\n[10$^{-3}$ g kg$^{-1}$]', 'qrain': 'MR Rain\n[10$^{-3}$ g kg$^{-1}$]', 'qgraup': 'MR Graupel\n[10$^{-3}$ g kg$^{-1}$]', }.
+        figsize: Figure size. Defaults to (12, 8).
+        ncols: Number of columns. Defaults to 4.
+        nrows: Number of rows. Defaults to 2.
+        hspace: gridspec hspace parameter. Defaults to 0.4.
+        wspace: gridspec wspace parameter. Defaults to 0.1.
+        min_pressure: Minimum pressure to show. Defaults to 200.
+        show_negs: Show negative responses with reduced alpha?. Defaults to False.
+        file: Save to file with this starting path (and finished by pert pressure.pdf)
+    """
+    assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
+    perts = [x for x in np.unique(responses.pert_group)]
+    for p in perts:
+        p_level = float(p[-3:])
+
+        fig, axs = plt.subplots(
+            ncols=ncols,
+            nrows=nrows,
+            figsize=figsize,
+            gridspec_kw={'hspace': hspace, 'wspace': wspace},
+        )
+        d = responses[responses.pert_group == p]
+        d = d[d.pressure >= min_pressure]
+
+        for i, variable in enumerate(variables):
+            axs.flat[i].axvline(0, color='black')
+            axs.flat[i].axhline(p_level, color='black', linestyle='--')
+
+            sns.lineplot(
+                data=d[~d.neg],
+                x=variable,
+                y='pressure',
+                ax=axs.flat[i],
+                style='Model',
+                hue='Resolution',
+                sort=False,
+                estimator=None,
+                legend=(i == ncols - 1),
+                hue_order=hue_order[::-1],
+                palette=sns.color_palette('turbo', len(hue_order)),
+                zorder=5,
+            )
+
+            if len(d[d.neg]) > 0 and show_negs:
+                sns.lineplot(
+                    data=d[d.neg],
+                    x=variable,
+                    y='pressure',
+                    ax=axs.flat[i],
+                    style='Model',
+                    hue='Resolution',
+                    sort=False,
+                    estimator=None,
+                    legend=False,
+                    hue_order=hue_order[::-1],
+                    alpha=0.5,
+                    palette=sns.color_palette('turbo', len(hue_order)),
+                    zorder=5,
+                )
+
+            axs.flat[i].invert_yaxis()
+            axs.flat[i].set_ylim(1000, min_pressure)
+
+            # Add Kuang 2010 reference values.
+            if variable == 'q':
+                r = refs[refs.Dataset == p]
+                axs.flat[i].scatter(
+                    r.q * 1000,
+                    r.level,
+                    facecolors='none',
+                    edgecolors='black',
+                    zorder=10,
+                    s=30,
+                )
+            if variable == 'tk':
+                r = refs[refs.Dataset == p]
+                axs.flat[i].scatter(
+                    r.tk,
+                    r.level,
+                    facecolors='none',
+                    edgecolors='black',
+                    zorder=10,
+                    s=30,
+                )
+
+            # Relabel axes if required.
+            if variable in var_labels:
+                axs.flat[i].set_xlabel(var_labels[variable])
+
+            # Handle ticks.
+            if i % ncols == 0:
+                axs.flat[i].set_ylabel('Pressure [hPa]')
+            else:
+                axs.flat[i].set_ylabel('')
+                axs.flat[i].set_yticks([])
+
+        sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 1))
+        _ = plt.suptitle(p, y=0.93)
+
+        if file is not None:
+            plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
