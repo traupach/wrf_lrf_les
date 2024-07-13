@@ -77,7 +77,6 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
 
     return res_datasets
 
-
 def prettify_long_names(dat):
     """
     Make the long_name attribute for selected variables pretty for plotting.
@@ -95,7 +94,6 @@ def prettify_long_names(dat):
     dat.va.attrs['long_name'] = 'Destaggered v-wind component'
 
     return dat
-
 
 def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profiles=True):
     """
@@ -605,12 +603,15 @@ def mean_profiles(
         variables: The variables to plot.
         figsize: Figure size [width, height].
         title: Plot title.
+
+    Return: The mean profiles and all profiles that went into the mean.
     """
 
-    profs = dat.sel(time=slice(start, end))[variables].mean('time', keep_attrs=True)
+    all_profs = dat.sel(time=slice(start, end))[variables]
+    profs = all_profs.mean('time', keep_attrs=True)
     if plot:
         plot_profiles(profs=profs, variables=variables, figsize=figsize, title=title)
-    return profs
+    return all_profs, profs
 
 
 def plot_daily_rain(inputs, patterns, figsize=FIGURE_SIZE, ncols=5):
@@ -1867,17 +1868,23 @@ def load_cache_data(
     pw_ts = {}
     pw_sv_ts = {}
     profs = {}
+    resps_mean = {}
+    resps_std = {}
 
     for inp in inputs:
         d = dirs[inp]
         cache_file_pw = f'{cache_dir}/pw_{d}.nc'
         cache_file_pw_sv = f'{cache_dir}/pw_scaled_var_{d}.nc'
         cache_file_prof = f'{cache_dir}/prof_{d}.nc'
+        cache_file_resps_mean = f'{cache_dir}/responses_mean_{d}.nc'
+        cache_file_resps_std = f'{cache_dir}/responses_std_{d}.nc'
 
         if not (
             os.path.exists(cache_file_pw)
             and os.path.exists(cache_file_prof)
             and os.path.exists(cache_file_pw_sv)
+            and os.path.exists(cache_file_resps_mean)
+            and os.path.exists(cache_file_resps_std)
         ):
             wrfvars = read_wrfvars(inputs={inp: inputs[inp]}, quiet=False)
 
@@ -1900,21 +1907,39 @@ def load_cache_data(
             )
 
             # Calculate mean profiles and cache them.
-            p = mean_profiles(
+            rce_profs, p = mean_profiles(
                 dat=wrfvars[inp].chunk({'time': -1, 'Dataset': 1, 'level': -1}),
                 variables=prof_vars,
                 start=RCE_times[inp][0],
                 end=RCE_times[inp][1],
                 plot=False,
-            ).load()
-            p.to_netcdf(cache_file_prof)
+            )
+            p.load().to_netcdf(cache_file_prof)
             del p
+
+            # Calculate responses and cache them.
+            mean_r, std_r = WRF_responses(profs=rce_profs.load())
+            mean_r = mean_r.expand_dims({'res': [inp]})
+            std_r = std_r.expand_dims({'res': [inp]})
+            mean_r.to_netcdf(cache_file_resps_mean)
+            std_r.to_netcdf(cache_file_resps_std)
+            del mean_r, std_r
 
         pw_ts[inp] = xarray.open_dataset(cache_file_pw)
         pw_sv_ts[inp] = xarray.open_dataset(cache_file_pw_sv)
         profs[inp] = xarray.open_dataset(cache_file_prof)
+        resps_mean[inp] = xarray.open_dataset(cache_file_resps_mean)
+        resps_std[inp] = xarray.open_dataset(cache_file_resps_std)
 
-    return pw_ts, profs, pw_sv_ts
+    resps_mean = xarray.merge([resps_mean[x] for x in resps_mean])
+    resps_mean = resps_mean.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_mean['model'] = 'WRF'
+
+    resps_std = xarray.merge([resps_std[x] for x in resps_std])
+    resps_std = resps_std.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_std['model'] = 'WRF'
+
+    return pw_ts, profs, pw_sv_ts, resps_mean, resps_std
 
 
 def WRF_responses(
@@ -1927,10 +1952,12 @@ def WRF_responses(
     Arguments:
         profs: The profiles to use.
         vars: The variables to consider.
+
+    Returns: Mean differences and standard deviation of differences.
     """
 
     # Collect WRF differences together in the same form as the MONC differences.
-    wrf_profs = xarray.merge([profs[x][variables].load().expand_dims({'res': [x]}) for x in profs])
+    wrf_profs = profs[variables]
 
     # Convert quantities in g kg-1 to g kg-1.
     for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
@@ -1938,11 +1965,11 @@ def WRF_responses(
 
     wrf_diffs = wrf_profs.drop_sel(Dataset='Control') - wrf_profs.sel(Dataset='Control')
 
-    wrf = wrf_diffs.to_dataframe().reset_index()
-    wrf['model'] = 'WRF'
-    wrf = wrf.rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    # Calculate mean differences.
+    mean_diffs = wrf_diffs.mean('time')
+    std_diffs = wrf_diffs.std('time')
 
-    return wrf
+    return mean_diffs, std_diffs
 
 def concat_diffs(
     responses,
@@ -2238,7 +2265,7 @@ def plot_responses(
                 axs.flat[i].set_yticks([])
 
         sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
-        _ = plt.suptitle(p, y=0.93)
+        _ = plt.suptitle(p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'), y=0.93)
 
         if file is not None:
             plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
