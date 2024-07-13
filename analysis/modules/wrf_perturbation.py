@@ -1625,6 +1625,22 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
         dat = pd.read_csv(f'{path}/{file}')
         dat['pert'] = level
         dat['res'] = res
+
+        # Temp perts at 850 are in 1000 x g kg-1, convert:
+        if (
+            file
+            == '1km/Responses_from_pert_of_minus_0p5_K_p_day_at_850_hPa_with_Hor_Res_of_1km.csv'
+        ):
+            v = [
+                'Delta_qv (g/kg)',
+                'Delta_qliq (g/kg)',
+                'Delta_qice (g/kg)',
+                'Delta_qsnow (g/kg)',
+                'Delta_qrain (g/kg)',
+                'Delta_qgraupel (g/kg)',
+            ]
+            dat[v] = dat[v] / 1000
+
         all_dat.append(dat.reset_index())
 
     monc = pd.concat(all_dat).reset_index()
@@ -2054,7 +2070,6 @@ def plot_ts_wrf_monc(
     if file is not None:
         plt.savefig(file, bbox_inches='tight')
 
-
 def read_MONC_profs(
     path='data/MONC/',
     files={
@@ -2098,7 +2113,6 @@ def read_MONC_profs(
     profs['q'] = profs.q * 1000
 
     return profs
-
 
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     """
