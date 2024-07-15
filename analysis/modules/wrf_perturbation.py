@@ -14,6 +14,7 @@ import modules.atmosphere as atm
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import seaborn.objects as so
 import xarray
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
@@ -412,7 +413,6 @@ def calc_profile_diffs(profs, control_name='Control', variables=['tk', 'q', 'rh'
     neg_diffs = -1 * diffs.sel(Dataset=neg)
     diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
     return diffs
-
 
 def compare_profiles(
     profs,
@@ -2280,6 +2280,108 @@ def plot_responses(
 
         sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
         _ = plt.suptitle(p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'), y=0.93)
+
+        if file is not None:
+            plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
+
+def plot_responses_with_std(resp, std,
+    variables=['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    var_labels={
+        #'tk': 'Temperature\n[K]',
+        #'rh': 'RH\n[%]',
+        'q': 'Water vapour\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+    },
+    figsize=(12, 3),
+    ncols=6,
+    nrows=1,
+    hspace=0.4,
+    wspace=0.1,
+    min_pressure=200,
+    file='paper/figures/pert_var_'):
+    
+    """
+    Make plots showing perturbation responses.
+
+    Args:
+        responses: Responses to plot.
+        std: Standard devs of responses. 
+        variables: Variables to plot. 
+        var_labels: Label for each variable. 
+        figsize: Figure size. 
+        ncols: Number of columns. 
+        nrows: Number of rows. 
+        hspace: gridspec hspace parameter. 
+        wspace: gridspec wspace parameter. 
+        min_pressure: Minimum pressure to show. 
+        file: Save to file with this starting path (and finished by pert pressure.pdf)
+    """
+
+    assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
+
+    resp = resp.copy()
+    resp['pert_group'] = [x.replace('-', '') for x in resp.pert]
+    std = std.copy()
+    std['pert_group'] = [x.replace('-', '') for x in std.pert]
+
+    perts = [x for x in np.unique(resp.pert_group)]
+    for p in perts:
+        p_level = float(p[-3:])
+
+        fig, axs = plt.subplots(
+            ncols=ncols,
+            nrows=nrows,
+            figsize=figsize,
+            gridspec_kw={'hspace': hspace, 'wspace': wspace},
+        )
+        d = resp[resp.pert_group == p]
+        s = std[std.pert_group == p]
+
+        d = d[d.pressure >= min_pressure]
+        s = s[s.pressure >= min_pressure]
+
+        for i, variable in enumerate(variables):
+            axs.flat[i].axvline(0, color='black')
+            axs.flat[i].axhline(p_level, color='black', linestyle='--')
+
+            d['min'] = d[variable] - s[variable]
+            d['max'] = d[variable] + s[variable]
+
+            plot = so.Plot(data=d, x=variable, y='pressure', xmin='min', xmax='max', color='pert')
+            plot = plot.add(so.Line(), orient='y').on(axs.flat[i])
+            plot = plot.add(so.Band(), orient='y').on(axs.flat[i])
+            plot = plot.layout(extent=[0, 0, .8, 1])
+            plot.plot()
+
+            axs.flat[i].invert_yaxis()
+            axs.flat[i].set_ylim(1000, min_pressure)
+
+            # Relabel axes if required.
+            if variable in var_labels:
+                axs.flat[i].set_xlabel(var_labels[variable])
+
+            if i % ncols == 0:
+                axs.flat[i].set_ylabel('Pressure [hPa]')
+            else:
+                axs.flat[i].set_ylabel('')
+                axs.flat[i].set_yticks([])
+
+        # Handle the legend.
+        fig.legends[0].set_bbox_to_anchor((0.88, 0.65))
+        fig.legends[0].set_title('Perturbation')
+        fig.legends[0].get_frame().set_facecolor('white')
+        for i in np.arange(1, len(fig.legends)):
+            fig.legends[i].set_visible(False)
+        
+        labels = fig.legends[0].get_texts()
+        for text in labels:
+            text.set_text('Negative' if '-' in text.get_text() else 'Positive')
+
+        _ = plt.suptitle(p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'), y=1.1, x=0.4)
 
         if file is not None:
             plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
