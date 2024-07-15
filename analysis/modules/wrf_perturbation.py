@@ -2315,11 +2315,8 @@ def plot_responses(
 def plot_responses_with_std(
     resp,
     std,
-    variables=['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    variables=['qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
     var_labels={
-        #'tk': 'Temperature\n[K]',
-        #'rh': 'RH\n[%]',
-        'q': 'Water vapour\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
@@ -2327,7 +2324,7 @@ def plot_responses_with_std(
         'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
     },
     figsize=(12, 3),
-    ncols=6,
+    ncols=5,
     nrows=1,
     hspace=0.4,
     wspace=0.1,
