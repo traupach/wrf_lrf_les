@@ -19,6 +19,7 @@ import xarray
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
+
 def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=False):
     """
     Read all wrfvars files in multiple datasets.
@@ -78,6 +79,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=Fals
 
     return res_datasets
 
+
 def prettify_long_names(dat):
     """
     Make the long_name attribute for selected variables pretty for plotting.
@@ -95,6 +97,7 @@ def prettify_long_names(dat):
     dat.va.attrs['long_name'] = 'Destaggered v-wind component'
 
     return dat
+
 
 def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profiles=True):
     """
@@ -413,6 +416,7 @@ def calc_profile_diffs(profs, control_name='Control', variables=['tk', 'q', 'rh'
     neg_diffs = -1 * diffs.sel(Dataset=neg)
     diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
     return diffs
+
 
 def compare_profiles(
     profs,
@@ -1362,6 +1366,7 @@ def as_date(d, date_format='%Y-%m-%d'):
 
     return datetime.datetime.strptime(d, date_format)
 
+
 def dat_properties(dat, variables, start, end, datasets=None):
     """
     For each dataset, show the min, max, mean and standard deviation values for a variable
@@ -1403,6 +1408,7 @@ def dat_properties(dat, variables, start, end, datasets=None):
         if var != variables[-1]:
             print(' ')
 
+
 def model_setups(inputs, dataset='RCE'):
     """
     Print information about each model setup in inputs.
@@ -1418,6 +1424,7 @@ def model_setups(inputs, dataset='RCE'):
             wrfinput_file=inputs[res][dataset] + 'wrfinput_d01',
             sounding_file=inputs[res][dataset] + 'input_sounding',
         )
+
 
 def input_map(perts, basedir):
     """
@@ -1448,6 +1455,7 @@ def input_map(perts, basedir):
 
     return inputs
 
+
 def add_mass_flux(wrfvars):
     """
     Add mass flux to the datasets.
@@ -1476,6 +1484,7 @@ def add_mass_flux(wrfvars):
         wrfvars[res].conv_mass_flux.attrs['units'] = 'kg m-2 s-1'
 
     return wrfvars
+
 
 def plot_mean_profiles(
     profs,
@@ -1619,6 +1628,7 @@ def MONC_CWV_data(
     monc = monc.drop(columns=['level_0', 'index'])
     return monc
 
+
 def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')):
     all_dat = []
     for file, [level, res] in files.items():
@@ -1661,6 +1671,7 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
     monc = monc.drop(columns=['level_0', 'index'])
     monc['model'] = 'MONC'
     return monc
+
 
 def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
     # Read in reference (Kuang 2010) results.
@@ -1948,11 +1959,19 @@ def load_cache_data(
         resps_std[inp] = xarray.open_dataset(cache_file_resps_std)
 
     resps_mean = xarray.merge([resps_mean[x] for x in resps_mean])
-    resps_mean = resps_mean.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_mean = (
+        resps_mean.to_dataframe()
+        .reset_index()
+        .rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    )
     resps_mean['model'] = 'WRF'
 
     resps_std = xarray.merge([resps_std[x] for x in resps_std])
-    resps_std = resps_std.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_std = (
+        resps_std.to_dataframe()
+        .reset_index()
+        .rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    )
     resps_std['model'] = 'WRF'
 
     return pw_ts, profs, pw_sv_ts, resps_mean, resps_std
@@ -1986,6 +2005,7 @@ def WRF_responses(
     std_diffs = wrf_diffs.std('time')
 
     return mean_diffs, std_diffs
+
 
 def concat_diffs(
     responses,
@@ -2070,6 +2090,7 @@ def plot_ts_wrf_monc(
     if file is not None:
         plt.savefig(file, bbox_inches='tight')
 
+
 def read_MONC_profs(
     path='data/MONC/',
     files={
@@ -2113,6 +2134,7 @@ def read_MONC_profs(
     profs['q'] = profs.q * 1000
 
     return profs
+
 
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     """
@@ -2180,16 +2202,16 @@ def plot_responses(
     Args:
         responses: Responses to plot.
         refs: Reference profiles.
-        hue_order: Order to display colours in. 
-        variables: Variables to plot. 
-        var_labels: Label for each variable. 
-        figsize: Figure size. 
-        ncols: Number of columns. 
-        nrows: Number of rows. 
-        hspace: gridspec hspace parameter. 
-        wspace: gridspec wspace parameter. 
-        min_pressure: Minimum pressure to show. 
-        show_negs: Show negative responses with reduced alpha?. 
+        hue_order: Order to display colours in.
+        variables: Variables to plot.
+        var_labels: Label for each variable.
+        figsize: Figure size.
+        ncols: Number of columns.
+        nrows: Number of rows.
+        hspace: gridspec hspace parameter.
+        wspace: gridspec wspace parameter.
+        min_pressure: Minimum pressure to show.
+        show_negs: Show negative responses with reduced alpha?.
         file: Save to file with this starting path (and finished by pert pressure.pdf)
     """
     assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
@@ -2279,12 +2301,20 @@ def plot_responses(
                 axs.flat[i].set_yticks([])
 
         sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
-        _ = plt.suptitle(p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'), y=0.93)
+        _ = plt.suptitle(
+            p.replace('T 0.5', 'Temperature perturbation').replace(
+                'q 0.0002', 'Moisture perturbation'
+            ),
+            y=0.93,
+        )
 
         if file is not None:
             plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
 
-def plot_responses_with_std(resp, std,
+
+def plot_responses_with_std(
+    resp,
+    std,
     variables=['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
     var_labels={
         #'tk': 'Temperature\n[K]',
@@ -2302,22 +2332,22 @@ def plot_responses_with_std(resp, std,
     hspace=0.4,
     wspace=0.1,
     min_pressure=200,
-    file='paper/figures/pert_var_'):
-    
+    file='paper/figures/pert_var_',
+):
     """
     Make plots showing perturbation responses.
 
     Args:
         responses: Responses to plot.
-        std: Standard devs of responses. 
-        variables: Variables to plot. 
-        var_labels: Label for each variable. 
-        figsize: Figure size. 
-        ncols: Number of columns. 
-        nrows: Number of rows. 
-        hspace: gridspec hspace parameter. 
-        wspace: gridspec wspace parameter. 
-        min_pressure: Minimum pressure to show. 
+        std: Standard devs of responses.
+        variables: Variables to plot.
+        var_labels: Label for each variable.
+        figsize: Figure size.
+        ncols: Number of columns.
+        nrows: Number of rows.
+        hspace: gridspec hspace parameter.
+        wspace: gridspec wspace parameter.
+        min_pressure: Minimum pressure to show.
         file: Save to file with this starting path (and finished by pert pressure.pdf)
     """
 
@@ -2354,7 +2384,7 @@ def plot_responses_with_std(resp, std,
             plot = so.Plot(data=d, x=variable, y='pressure', xmin='min', xmax='max', color='pert')
             plot = plot.add(so.Line(), orient='y').on(axs.flat[i])
             plot = plot.add(so.Band(), orient='y').on(axs.flat[i])
-            plot = plot.layout(extent=[0, 0, .8, 1])
+            plot = plot.layout(extent=[0, 0, 0.8, 1])
             plot.plot()
 
             axs.flat[i].invert_yaxis()
@@ -2371,17 +2401,23 @@ def plot_responses_with_std(resp, std,
                 axs.flat[i].set_yticks([])
 
         # Handle the legend.
-        fig.legends[0].set_bbox_to_anchor((0.88, 0.65))
+        fig.legends[0].set_bbox_to_anchor((0.88, 0.8))
         fig.legends[0].set_title('Perturbation')
         fig.legends[0].get_frame().set_facecolor('white')
         for i in np.arange(1, len(fig.legends)):
             fig.legends[i].set_visible(False)
-        
+
         labels = fig.legends[0].get_texts()
         for text in labels:
             text.set_text('Negative' if '-' in text.get_text() else 'Positive')
 
-        _ = plt.suptitle(p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'), y=1.1, x=0.4)
+        _ = plt.suptitle(
+            p.replace('T 0.5', 'Temperature perturbation').replace(
+                'q 0.0002', 'Moisture perturbation'
+            ),
+            y=1.1,
+            x=0.4,
+        )
 
         if file is not None:
             plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
