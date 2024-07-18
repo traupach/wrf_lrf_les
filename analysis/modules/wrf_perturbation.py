@@ -19,7 +19,6 @@ import xarray
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
-
 def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=False):
     """
     Read all wrfvars files in multiple datasets.
