@@ -19,6 +19,7 @@ import xarray
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
+
 def read_wrfvars(inputs, resample=None, drop_vars=None, calc_rh=True, quiet=False):
     """
     Read all wrfvars files in multiple datasets.
@@ -1808,8 +1809,7 @@ def plot_pw_ts(
 def plot_monc_cwv(
     monc,
     axs,
-    start_time=None,
-    end_time=None,
+    hl_times={'1 km': 20, '500 m': 10, '250 m': 10},
     ress=['1 km', '500 m', '250 m'],
     hues=[
         'Control',
@@ -1832,8 +1832,7 @@ def plot_monc_cwv(
     Arguments:
         monc: CWV data as pandas dataframe read by MONC_CWV_data().
         axs: Axes to plot to.
-        start_time, end_time: Start and end times to highlight by resolution (dictionaries).
-        figsize: Figure width x height.
+        hl_times: Number of days at the end of the timeseries to highlight, by resolution.
         ress: The resolutions in pw_ts and start_time, end_time dictionaries.
         hues: The order for hue category values.
     """
@@ -1857,9 +1856,10 @@ def plot_monc_cwv(
             legend=False,
         )
 
-        if start_time is not None:
-            if end_time is not None:
-                axs[i].axvspan(xmin=start_time[r], xmax=end_time[r], alpha=0.3, color='green')
+        if hl_times is not None:
+            axs[i].axvspan(xmin=dat.groupby('pert_short').time.max().min()-hl_times[r], 
+                           xmax=dat.time.max(), 
+                           alpha=0.3, color='green')
         axs[i].set_title(f'MONC {r}')
 
     for ax in axs:
@@ -2133,7 +2133,6 @@ def read_MONC_profs(
     profs['q'] = profs.q * 1000
 
     return profs
-
 
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     """
