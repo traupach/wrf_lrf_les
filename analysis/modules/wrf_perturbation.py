@@ -1993,7 +1993,7 @@ def WRF_responses(
     # Collect WRF differences together in the same form as the MONC differences.
     wrf_profs = profs[variables]
 
-    # Convert quantities in g kg-1 to g kg-1.
+    # Convert quantities in kg kg-1 to g kg-1.
     for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
         wrf_profs[v] = wrf_profs[v] * 1000
 
@@ -2129,9 +2129,6 @@ def read_MONC_profs(
     profs = profs.rename(columns=renamer)
     profs['model'] = 'MONC'
 
-    # Some hydrometeor mixing ratios appear to be in kg kg-1 so convert to g kg-1.
-    profs['q'] = profs.q * 1000
-
     return profs
 
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
@@ -2156,7 +2153,6 @@ def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     wrf_ctrl_profs = wrf_ctrl_profs.reset_index()
 
     # Convert wrf mixing ratios to g kg-1.
-    wrf_ctrl_profs['q'] = wrf_ctrl_profs.q * 1000
     wrf_ctrl_profs['q'] = wrf_ctrl_profs.q * 1000
     wrf_ctrl_profs['qcloud'] = wrf_ctrl_profs.qcloud * 1000
     wrf_ctrl_profs['qice'] = wrf_ctrl_profs.qice * 1000
