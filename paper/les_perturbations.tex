@@ -353,7 +353,7 @@ the models had reached RCE. Figure \ref{fig:rce_pw} shows precipitable water by
 time for the WRF runs and columnar water vapour by time for the MONC runs. For
 the WRF runs, at 4 km grid spacing the RCE state had a precipitable water (PW)
 of $\sim$40 mm, which rose to $\sim$44 mm at 1 km grid spacing and $\sim$42 mm
-at 100 m grid spacing. For the MONC runs, 
+at 100 m grid spacing. For the MONC runs, \todo{\ldots}.
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/runs_timeseries.pdf}
@@ -364,19 +364,13 @@ at 100 m grid spacing. For the MONC runs,
     water content stabilised and the model was at RCE. At this point the
     perturbations were introduced and the model was run until all perturbed runs
     were also at RCE. The parts of the time axes highlighted in green show the
-    ``RCE region'' over which mean profiles were calculated for comparison
-    \todo{add RCE regions for MONC -- CD: In all MONC the equilibrium states and
-    statistics were obtained by averaging over the last 20 days in  the
-    simulations performed with hor res of 1km and the last 10 days in the
-    simulations performed with hor res of 500 and 250m.}. Note that to reduce
-    the number of colours required, positive and negative perturbations per
-    variable and perturbation pressure use the same colour. \todo{Why do MONC
-    perturbation runs also run in the RCE period and show slightly different
-    results there? CD: You mean the simulations at 250m horizontal resolution? I
-    checked this and it seems like i did a 1min running mean in some timeseries.
-    I will send the new timeseries (instantaneous) for the simulations at 250m
-    by email.} \todo{Do we agree that WRF is sufficiently settled into RCE at
-    100 m grid spacing or is more simulation time required?}}
+    ``RCE region'' over which mean profiles were calculated for comparison. For
+    the MONC runs, the highlighted region shows the maximum range of RCE
+    regions, since RCE regions were defined as the last 20 days in each
+    simulation for 1 km runs and the last 10 days in each simulation for the 500
+    m and 250 m runs. Note that to reduce the number of colours required,
+    positive and negative perturbations per variable and perturbation pressure
+    use the same colour.}
     \label{fig:rce_pw}
 \end{figure}
 
@@ -402,19 +396,7 @@ WRF runs in a region around $\sim$600 hPa.
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/rce_profiles}
     \caption{Mean profiles for selected variables in the control runs' RCE
-    periods, by grid spacing. \todo{Double check: MONC q is in kg kg-1 but other
-    mixing ratios are in g kg-1? CD: The water vapour mixing ratio are in g/kg
-    and the other mixing ratios as well.} \todo{What's the explanation for large
-    q values near the surface for MONC? CD: For all resolutions in MONC the
-    water vapor mixing ratio at model level 1  is about 33g/kg, whereas it is
-    about 15g/kg at model level 2. On your plot the x axis of your water vapour
-    plot is in the order of 20000 g/kg. I don't understand this. For MONC and
-    the former LEM we always plotted profiles from model level 2 to the model
-    top, omitting the first model level.} \todo{Is there a unit problem with the
-    MONC values of qice? CD: The profiles of cloud water, snow, rain and graupel
-    mixing ratio are correct but those of ice are quite small compared to what I
-    have. The peaks should be within 0.001 and 0.003g/kg for all RCE. I will
-    sent you data for the ice mixing ratios  by email.}}
+    periods, by grid spacing.}
     \label{fig:rce_profiles}
 \end{figure}
 
@@ -442,16 +424,13 @@ in the representation of clouds.
 
 \subsection{Convective Organisation}
 
-We tested for convective organisation by examining the spatial variance of
-precipitable water scaled by its spatial mean (not shown), and found no evidence
-of meaningful organisation in these fixed-radiation setups \todo{is this also
-true for MONC? CD: I checked this by looking at snapshots of precipitation
-cross-sections at different time within the equilibrium period. precipitation is
-scattered with no sign of organization. However, our domain size was chosen on
-purpose. It is small enough to prevent self-aggregation of convection (Muller
-and Held, 2012), and so avoids the formation of circulations that may develop
-within the domain and favour mesoscale organization of convection (Bretherton
-and Smolarkiewicz, 1989; Tompkins, 2000)}.
+We tested for convective organisation in by examining the spatial variance of
+precipitable water scaled by its spatial mean (in WRF, not shown), and by
+examining snapshots of precipitation cross-sections inside the equilibrium
+period (in MONC, not shown) and found no evidence of meaningful organisation in
+these fixed-radiation setups. Our domain sizes are chosen such that they are
+too small for self-aggregation of convection to be expected
+\cite{Muller_JAS_2012}.
 
 \subsection{Responses to Perturbations in Temperature}
 
