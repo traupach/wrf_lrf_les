@@ -119,7 +119,7 @@ Section \ref{sec:conclusions}.
 We used two models in this work: the Advanced Research (AR) version of the
 Weather Research and Forecasting (WRF) model, version 4.1.4
 \cite{Skamarock_2019}, and the Met Office/NERC Cloud Model
-\cite<MONC,>{Brown_2020} \todo{which version? Is there a better reference?}.
+\cite<MONC,>{Brown_2020} as used in \citeA{Daleu_QJRMS_2023}.
 
 \subsection{Common Model Settings}
 
@@ -132,7 +132,7 @@ used idealised radiation as in \citeA{Herman_JAMES_2013} and
 radiation. Following \citeA{Herman_JAMES_2013}, the radiative cooling tendency
 was $\theta_{tend,rad} = \theta_t/\Pi$ K day$^{-1}$, where $\Pi$ is the Exner
 function that converts temperature to potential temperature, and $\theta_t$ is a
-temperature tendency set as \todo{double check in code for both WRF and MONC}
+temperature tendency set as \todo{double check in code for WRF}
 
 \begin{align}
  \theta_t = \begin{cases}
@@ -146,13 +146,15 @@ temperature tendency set as \todo{double check in code for both WRF and MONC}
 We used idealised evaporation as in \citeA{Chua_GRL_2019}, with minor
 differences. We used a constant surface wind speed of $W_s = 4.8$ m s$^{-1}$,
 following \citeA{Hwong_JAMES_2021} who used the same approach with a fixed value
-of 0.001 for the surface exchange coefficients. While the wind speed here and in
+of 0.001 for the surface exchange coefficient. While the wind speed here and in
 \citeA{Hwong_JAMES_2021} was slightly different from that of
 \citeA{Kuang_JAS_2010}, the important quantity is the product of the wind with
 the surface exchange coefficient, and the exchange coefficient value in
-\citeA{Kuang_JAS_2010} was not stated. Level-mean horizontal winds were relaxed
-to 0 m s$^{-1}$ with a three-hour relation time. \todo{Is this also true for
-MONC?}.
+\citeA{Kuang_JAS_2010} was not stated. Here we used a fixed value of 0.005 for
+this quantity \todo{double check for WRF and MONC}. Level-mean horizontal winds
+were relaxed to $u = 0$ m s$^{-1}$ and $v = 5$ m s$^{-1}$, where $u$ is the
+zonal and $v$ is the meridional wind component, respectively, with a three-hour
+relation time.
 
 For each resolution, the models were run until they reached radiative convective
 equilibrium (RCE) at time $t_1$. After RCE was reached, small perturbations in
@@ -263,39 +265,25 @@ the RCE period was calculated for each run for comparison.
 
 \subsection{MONC}
 
-MONC was run on a \todo{X $\times$ X km$^2$} domain for grid spacings of 1 km, 500 m, and 250 m. We used an idealized treatment of evaporation in the sense that a
-constant surface wind speed was imposed. However, the surface exchange
-coefficient was calculated by the MONC model itself. The mean value calculated
-was a little larger than that in \citeA{Chua_GRL_2019}, with the product of the
-exchange coefficient and the surface wind speed being $5.2 \times 10^{-3}$ m
-s$^{-1}$ in the MONC simulations compared with $5 \times 10^{-3}$ m s$^{-1}$ for
-the fixed Chua parameters. \todo{Add MONC settings including parameterisations
-used and method of perturbation application.}
-
-\begin{itemize}
-    \item \todo{BP: On 02/12/21 and 09/12/21 and beyond, there was a change of design to match
-    the idealized treatment of evaporation with WRF -- check which version we are
-    showing results from here.}    
-    \item \todo{BP: A change in the treatment of surface fluxes was made on
-    11/05/22. I believe the setup remained fixed after this date and so that is
-    what we should publish. However, there may be a question about showing results
-    at the three resolutions if they are only available for this first setup?}
-    \item \todo{BP: The idealized treatment of evaporation as in Chua et al (2019) was
-    altered to match with the MONC simulations. i.e., with the near surface wind of
-    5 ms-1 rather than 4.8.}
-    \item \todo{BP: I believe we stuck with this value (TR: ie of surface wind
-    speed? I think the WRF sims use 4.8 ms-1) which makes our setup slightly
-    different from Hwong et al (2021). That's a little unfortunate, but I don't
-    suggest to rerun but simply to note that this made very little difference.}
-    \item \todo{BP: Other minor changes were made in the relaxation to mean winds to
-    match between the two models, but again these did not have any significant
-    effects on the results.}
-\end{itemize}
+MONC was run on a 64 $\times$ 64$^2$ domain for grid spacings of 1 km, 500 m,
+and 250 m. The MONC setup was similar to that used in \citeA{Daleu_QJRMS_2023}:
+the domain height was 20 km with a Newtonian damping layer above 16 km; we used
+bi-periodic lateral boundary conditions; the 3D Smagorinsky scheme was used to
+calculate subgrid turbulent eddy fluxes; and the Cloud AeroSol Interactive
+Microphysics \cite<CASIM, see>[and references therein for previous
+uses]{Daleu_QJRMS_2023} scheme represented cloud processes. The model time step
+varied between 1 and 2 seconds. Perturbations were made using a combinations of
+the delta and Gaussian functions, as in Equation 4 of \citeA{Herman_JAMES_2013}.
+We used an idealized treatment of evaporation in the sense that a constant
+near-surface wind speed of 5 m s$^{-1}$ was imposed \todo{confirm if 5 or 4.8
+for WRF}. For pressure levels less than 160 hPa, temperature and moisture fields
+were relaxed to the values of a previous RCE run, following
+\cite{Herman_JAMES_2013} \todo{check if same for WRF and if so move to common
+settings}.
 
 \subsection{Perturbations to Temperature and Humidity}
 
-Constant perturbations were applied to potential temperature \todo{correct to
-say potential temperature not just temperature for both models?} or water vapour
+Constant perturbations were applied to potential temperature or water vapour
 tendencies at given model levels. Given computational constrains, not all
 perturbations were applied in all runs.  Table \ref{tab:pert_runs} shows which
 perturbations were applied to which model runs. For the WRF runs, we used the
@@ -371,18 +359,24 @@ at 100 m grid spacing. For the MONC runs,
     \noindent\includegraphics[width=\textwidth]{figures/runs_timeseries.pdf}
     \caption{Timeseries of water content in WRF and MONC. For WRF, the plots
     show timeseries of the spatial mean precipitable water by grid spacing. For
-    MONC, the plots show timeseries of spatial mean \todo{correct?} columnar
-    water vapour by grid spacing. RCE runs were computed until precipitable
-    water content/columnar water content stabilised and the model was at RCE. At
-    this point the perturbations were introduced and the model was run until all
-    perturbed runs were also at RCE. The parts of the time axes highlighted in
-    green show the ``RCE region'' over which mean profiles were calculated for
-    comparison \todo{add RCE regions for MONC}. Note that to reduce the number
-    of colours required, positive and negative perturbations per variable and
-    perturbation pressure use the same colour. \todo{Why do MONC perturbation
-    runs also run in the RCE period and show slightly different results there?}
-    \todo{Do we agree that WRF is sufficiently settled into RCE at 100 m grid
-    spacing or is more simulation time required?}}
+    MONC, the plots show timeseries of spatial mean column water vapour by grid
+    spacing. RCE runs were computed until precipitable water content/columnar
+    water content stabilised and the model was at RCE. At this point the
+    perturbations were introduced and the model was run until all perturbed runs
+    were also at RCE. The parts of the time axes highlighted in green show the
+    ``RCE region'' over which mean profiles were calculated for comparison
+    \todo{add RCE regions for MONC -- CD: In all MONC the equilibrium states and
+    statistics were obtained by averaging over the last 20 days in  the
+    simulations performed with hor res of 1km and the last 10 days in the
+    simulations performed with hor res of 500 and 250m.}. Note that to reduce
+    the number of colours required, positive and negative perturbations per
+    variable and perturbation pressure use the same colour. \todo{Why do MONC
+    perturbation runs also run in the RCE period and show slightly different
+    results there? CD: You mean the simulations at 250m horizontal resolution? I
+    checked this and it seems like i did a 1min running mean in some timeseries.
+    I will send the new timeseries (instantaneous) for the simulations at 250m
+    by email.} \todo{Do we agree that WRF is sufficiently settled into RCE at
+    100 m grid spacing or is more simulation time required?}}
     \label{fig:rce_pw}
 \end{figure}
 
@@ -409,7 +403,18 @@ WRF runs in a region around $\sim$600 hPa.
     \noindent\includegraphics[width=\textwidth]{figures/rce_profiles}
     \caption{Mean profiles for selected variables in the control runs' RCE
     periods, by grid spacing. \todo{Double check: MONC q is in kg kg-1 but other
-    mixing ratios are in g kg-1?} \todo{What's the explanation for large q values near the surface for MONC?} \todo{Is there a unit problem with the MONC values of qice?}}
+    mixing ratios are in g kg-1? CD: The water vapour mixing ratio are in g/kg
+    and the other mixing ratios as well.} \todo{What's the explanation for large
+    q values near the surface for MONC? CD: For all resolutions in MONC the
+    water vapor mixing ratio at model level 1  is about 33g/kg, whereas it is
+    about 15g/kg at model level 2. On your plot the x axis of your water vapour
+    plot is in the order of 20000 g/kg. I don't understand this. For MONC and
+    the former LEM we always plotted profiles from model level 2 to the model
+    top, omitting the first model level.} \todo{Is there a unit problem with the
+    MONC values of qice? CD: The profiles of cloud water, snow, rain and graupel
+    mixing ratio are correct but those of ice are quite small compared to what I
+    have. The peaks should be within 0.001 and 0.003g/kg for all RCE. I will
+    sent you data for the ice mixing ratios  by email.}}
     \label{fig:rce_profiles}
 \end{figure}
 
@@ -439,7 +444,14 @@ in the representation of clouds.
 
 We tested for convective organisation by examining the spatial variance of
 precipitable water scaled by its spatial mean (not shown), and found no evidence
-of meaningful organisation in these fixed-radiation setups \todo{is this also true for MONC?}.
+of meaningful organisation in these fixed-radiation setups \todo{is this also
+true for MONC? CD: I checked this by looking at snapshots of precipitation
+cross-sections at different time within the equilibrium period. precipitation is
+scattered with no sign of organization. However, our domain size was chosen on
+purpose. It is small enough to prevent self-aggregation of convection (Muller
+and Held, 2012), and so avoids the formation of circulations that may develop
+within the domain and favour mesoscale organization of convection (Bretherton
+and Smolarkiewicz, 1989; Tompkins, 2000)}.
 
 \subsection{Responses to Perturbations in Temperature}
 
@@ -482,7 +494,10 @@ these hydrometeor mixing ratios.
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@850}
     \caption{As in Figure \ref{fig:tpert_412}, but for a temperature
-    perturbation at 850 hPa. \todo{Note negative reponses for T at 850 in MONC files appear to be in 1000 * g kg-1.}}
+    perturbation at 850 hPa. \todo{Note negative reponses for T at 850 in MONC
+    files appear to be in 1000 * g kg-1. CD: The rain, graupel, snow responses
+    are in  1000*g/kg, while the ice responses are 100000*g/kg. The same applies
+    to Figures 5 and 6 below.}}
     \label{fig:tpert_850}
 \end{figure}
 
@@ -627,15 +642,29 @@ and reductions in snow above the perturbation level. Graupel is consistently
 strongly reduced around 600 hPa but there are responses with opposite signs in
 the upper levels. The responses of hydrometeors in MONC are generally weaker
 than WRF for liquid water, ice and snow \todo{is there a unit problem for MONC
-ice mixing ratio responses?}. MONC responds more strongly for graupel, however,
-especially in response to higher level perturbations where non-linearities are
-evident.
+ice mixing ratio responses? CD: snow, graupel, cloud water responses are
+1000*g/kg and ice mixing ratio  responses are 100000*g/kg}. MONC responds more
+strongly for graupel, however, especially in response to higher level
+perturbations where non-linearities are evident.
 
 \section{Conclusions}
 \label{sec:conclusions}
 
 \begin{itemize}
 \item \todo{Hydrometeor responses show much more noise than temperature, water vapour mixing ratio, and relative humidity responses.}
+\item \todo{Steve: We need to think about what the main outcomes are (say, our
+three bullets).  The conclusion that I think would be most interesting to the
+broader community is the resolution needed for each model to approach apparent
+convergence of these time-averaged responses (noting that it isn’t a rigorous
+convergence test due to computational limitations).  The result suggests that
+for most models, to simulate convectively coupled dynamics correctly will likely
+require better resolution than is currently used in e.g. DYAMOND. Another
+conclusion is that tangent linear responses become relatively similar across
+several LES models once this resolution is reached, and so can be used as ground
+truth for testing GCM schemes.  Would be good to work through the results to see
+how confident we are in such findings, how important each one is, and if there
+are other key findings (another one you mention is the relative robustness of
+different types of response e.g. T vs q at different levels).}
 \end{itemize}
 
 %% Enter Figures and Tables near as possible to where they are first mentioned:
