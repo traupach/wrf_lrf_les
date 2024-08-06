@@ -16,6 +16,8 @@ import pandas as pd
 import seaborn as sns
 import seaborn.objects as so
 import xarray
+import metpy
+from metpy.units import units
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
@@ -1503,10 +1505,12 @@ def plot_mean_profiles(
     },
     figsize=(13, 4),
     ylim=(1000, 200),
+    xlims={},
     retick={},
     file=None,
     ncols=5,
     nrows=2,
+    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m']
 ):
     """
     Plot mean profiles for a given dataset, by resolution and model.
@@ -1517,16 +1521,23 @@ def plot_mean_profiles(
         figsize: Figure size.
         dataset: The dataset to plot.
         ylim: Y limits.
+        xlims: Optional x limits per variable.
         relabel: {variable: label} dictionary with new labels for x axes.
         retick: {variable: ticks} dictionary with new ticks for x axes.
         file: File to save plot to.
         ncols: Number of columns to use.
+        hue_order: Order for hues in plots.
     """
 
     _, axs = plt.subplots(
         nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'wspace': 0.1, 'hspace': 0.4}
     )
     profs = profs.sort_values(['Model', 'Resolution', 'level'])
+
+    lapses = pd.DataFrame({'level': profs.level.unique()}).sort_values('level', ascending=False)
+    lapses['lapse'] = metpy.calc.moist_lapse(pressure=lapses.level.values * units.hPa, temperature = 300 * units.K)
+    profs = profs.merge(lapses, on=['level'], how='left')
+    profs['tk'] = profs.tk - profs.lapse
 
     for i, v in enumerate(variables):
         sns.lineplot(
@@ -1539,7 +1550,7 @@ def plot_mean_profiles(
             style='Model',
             sort=False,
             estimator=None,
-            hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
+            hue_order=hue_order,
         )
         axs.flat[i].invert_yaxis()
 
@@ -1551,6 +1562,9 @@ def plot_mean_profiles(
 
         if v in retick:
             axs.flat[i].set_xticks(retick[v])
+
+        if v in xlims:
+            axs.flat[i].set_xlim(xlims[v])
 
         if v in relabel:
             axs.flat[i].set_xlabel(relabel[v])
