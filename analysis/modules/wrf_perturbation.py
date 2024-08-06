@@ -1784,7 +1784,8 @@ def plot_pw_ts(
         axs[i].set_title(f'WRF {r}')
 
     for ax in axs:
-        ax.set_ylabel('PW [kg m$^{-2}$]')
+        # Note labelled as column water vapour here, since in wrf-python PW is calculated as a sum of water vapour content and this then matches MONC plots.
+        ax.set_ylabel('CWV [mm]')
         ax.set_xlabel('')
 
     axs[-1].set_xlabel('Simulation days')
