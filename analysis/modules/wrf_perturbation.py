@@ -18,6 +18,7 @@ import seaborn.objects as so
 import xarray
 import metpy
 from metpy.units import units
+import matplotlib.lines as mlines
 
 FIGURE_SIZE = [15, 4]  # Default figure size [horizontal, vertical].
 
@@ -2207,6 +2208,7 @@ def plot_responses(
         show_negs: Show negative responses with reduced alpha?.
         file: Save to file with this starting path (and finished by pert pressure.pdf)
     """
+    refs_included = False
     assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
     perts = [x for x in np.unique(responses.pert_group)]
     for p in perts:
@@ -2263,24 +2265,28 @@ def plot_responses(
             # Add Kuang 2010 reference values.
             if variable == 'q':
                 r = refs[refs.Dataset == p]
-                axs.flat[i].scatter(
-                    r.q * 1000,
-                    r.level,
-                    facecolors='none',
-                    edgecolors='black',
-                    zorder=10,
-                    s=30,
-                )
+                if not r.empty:
+                    axs.flat[i].scatter(
+                        r.q * 1000,
+                        r.level,
+                        facecolors='none',
+                        edgecolors='black',
+                        zorder=10,
+                        s=30
+                    )
+                    refs_included = True
             if variable == 'tk':
                 r = refs[refs.Dataset == p]
-                axs.flat[i].scatter(
-                    r.tk,
-                    r.level,
-                    facecolors='none',
-                    edgecolors='black',
-                    zorder=10,
-                    s=30,
-                )
+                if not r.empty:
+                    axs.flat[i].scatter(
+                        r.tk,
+                        r.level,
+                        facecolors='none',
+                        edgecolors='black',
+                        zorder=10,
+                        s=30
+                    )
+                    refs_included = True
 
             # Relabel axes if required.
             if variable in var_labels:
@@ -2292,6 +2298,17 @@ def plot_responses(
             else:
                 axs.flat[i].set_ylabel('')
                 axs.flat[i].set_yticks([])
+
+        if refs_included:
+            leg = axs.flat[ncols - 1].get_legend()
+            handles = leg.legendHandles
+            labels = [t.get_text() for t in leg.get_texts()]
+            new_point = mlines.Line2D([], [], color='black', marker='o', linestyle='None', markerfacecolor='none',
+                            markersize=np.sqrt(30), label='Your New Label')
+            handles.append(new_point)
+            labels.append('Kuang 2010')
+            leg.remove()
+            axs.flat[ncols - 1].legend(handles=handles, labels=labels)
 
         sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
         _ = plt.suptitle(
