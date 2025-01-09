@@ -1,17 +1,17 @@
 &time_control
- run_days                    = 91,        ! Length of time to simulate.
+ run_days                    = 61,        ! Length of time to simulate.
  run_hours                   = 0,	  
  run_minutes                 = 0,	  
  run_seconds                 = 0,	  
  start_year                  = 2000,	  ! Simulation start time.
- start_month                 = 01,	  
+ start_month                 = 03,	  
  start_day                   = 01,	  
  start_hour                  = 00,	  
  start_minute                = 00,	  
  start_second                = 00,	  
  history_interval            = 60,        ! Output timestep [min].
  frames_per_outfile          = 24,        ! One file per 24 hours.
- restart                     = .false.,   ! Restart using wrfrst file?
+ restart                     = .true.,    ! Restart using wrfrst file?
  restart_interval            = 1440,      ! Restart interval [min] (1440=1d).
  io_form_history             = 2,         ! NetCDF format output files.
  io_form_restart             = 2,	  ! NetCDF format restart file.
@@ -53,10 +53,14 @@
  ssttsk                      = 301.15,    ! Starting surface temperature [K].
  light_nudging               = .false.,   ! Light nudging on U and V fields?
  ideal_evaporation           = .true.,    ! Use ideal evaporation?
- surface_wind                = 4.8,       ! Surface U wind for fluxes [m s-1].
+ surface_wind                = 5,         ! Surface U wind for fluxes [m s-1].
  const_rad_cooling           = .true., 	  ! Constant radiative cooling.
- relax_uv_winds              = .true.,    ! Relax U, V winds to a profile?
+ relax_u_winds               = .true.,    ! Relax U winds to a profile?
+ relax_v_winds               = .true.,    ! Relax V winds to a profile?
+ relax_mean_wind             = .true.,    ! Relax mean winds instead of point-by-point.
  wind_relaxation_time        = 10800,     ! Wind relaxation time [s].
+ extend_wind_relax_u         = .true.,    ! Relax whole U wind column.
+ extend_wind_relax_v         = .true.,    ! Relax whole V wind column.
  relax_stratosphere          = .true.,    ! Relax T and q in stratosphere.
  relax_t_profile_file        = 'RCE_T'    ! T target profile file.
  relax_q_profile_file        = 'RCE_q'    ! q target profile file.
@@ -91,8 +95,7 @@
  hybrid_opt                  = 0,         ! Use terrain following coordinates.
  rk_ord                      = 3,         ! Runge-Kutta 3rd-order time-integ.
  diff_opt                    = 2,         ! Full 3D diffusion.
- km_opt                      = 2,         ! 3D TKE diffusion as per em_quarter_ss
- 			       		  ! and em_les ideal cases.
+ km_opt                      = 4,         ! Horiz diffusion only, PBL does vert.
  damp_opt                    = 3,         ! Implicit damping of w in top layer.
  dampcoef                    = 0.2,       ! Damping coefficient.
  zdamp                       = 5000.,     ! Damping depth from model top.
