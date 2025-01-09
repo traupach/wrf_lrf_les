@@ -8,6 +8,7 @@ paper/*.fdb_latexmk
 paper/*.fls
 paper/*.log
 paper/*.gz
+paper/.vscode
 
 *.ipynb_checkpoints*
 *__pycache__*
