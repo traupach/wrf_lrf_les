@@ -37,23 +37,26 @@ Plant\affil{3}, Steven S.Sherwood\affil{1,2}, and Yi-Ling Hwong\affil{4}}
 
 \section{Introduction}
 
-Global and regional climate models (respectively GCMs and RCMs) must take convection into account because of its important atmospheric effects \cite{Manabe_JAS_1964, Wallace_2006}. However, models often use horizontal grid spacings that are much larger than the
-horizontal scale of convection, meaning that they are unable to resolve
-individual convective cells. In this case, the model must account for the
-effects of convection -- such as its heating effect or rain it may produce -- by
-parameterizing the sub-grid convection that it can not explicitly resolve. Such
-parameterization methods are called convection schemes. 
+Global and regional climate models (respectively GCMs and RCMs) must take
+convection into account because of its important atmospheric effects
+\cite{Manabe_JAS_1964, Wallace_2006}. However, models often use horizontal grid
+spacings that are much larger than the horizontal scale of convection, meaning
+that they are unable to resolve individual convective cells. In this case, the
+model must account for the effects of convection -- such as its heating effect
+or rain it may produce -- by parameterizing the sub-grid convection that it can
+not explicitly resolve. Such parameterization methods are called convection
+schemes. 
 
 Many convection schemes have been produced, each with different strengths,
-weaknesses, and assumptions \cite<e.g.>{Arakawa_JC_2004,
-Rio_CCCR_2019, Lin_AO_2022}. Such are the differences between these schemes, and
-so high is the sensitivity of models to convective cloud physics
-\cite<e.g.>{Emanuel_JAS_1999}, that convection parameterization is a leading
-source of uncertainty in model outputs \cite<e.g.>{Hwong_JAMES_2021}. It is
-difficult to compare convection schemes, since traditional methods in which
-simulated outputs are compared with observations \cite<e.g.>{Grell_ACP_2014,
-Kwon_MWR_2017, Zhang_JC_2017, Zhang_MWR_2011} rely on observation selection and
-accuracy \cite{Hwong_JAMES_2021}.
+weaknesses, and assumptions \cite<e.g.>{Arakawa_JC_2004, Rio_CCCR_2019,
+Lin_AO_2022}. Such are the differences between these schemes, and so high is the
+sensitivity of models to convective cloud physics \cite<e.g.>{Emanuel_JAS_1999},
+that convection parameterization is a leading source of uncertainty in model
+outputs \cite<e.g.>{Hwong_JAMES_2021}. It is difficult to compare convection
+schemes, since traditional methods in which simulated outputs are compared with
+observations \cite<e.g.>{Grell_ACP_2014, Kwon_MWR_2017, Zhang_JC_2017,
+Zhang_MWR_2011} rely on observation selection and accuracy
+\cite{Hwong_JAMES_2021}.
 
 The mathematical framework proposed by \citeA{Kuang_JAS_2010} uses a linear
 tangent model to approximate the feedback of small-scale processes on the
@@ -81,41 +84,43 @@ first-order characterization.
 
 To this end, the linear response framework was applied to single column models
 (SCMs) by \citeA{Herman_JAMES_2013} specifically for the purpose of testing two
-convection schemes against the CRM reference. \citeA{Hwong_JAMES_2021} used the framework to evaluate
-convection, planetary boundary, and microphysics schemes' responses to
-perturbations in SCMs. They showed that the results isolate the impact of the
-convection scheme in at least the tested SCMs, and examined many schemes in
-actual use. The technique allows for efficient comparison of different model
-setups, and identified a wide range of responses among current schemes, thus
-showing the potential of this test, but does not answer the question of which
-setup is most accurate. To answer this question we need a "truth" response,
-which is not available from observations. A study of the linear responses of a
-model that uses the least possible parameterization is required, along with robustness tests. \citeA{Kuang_JAS_2010}
-evaluated his linear responses using rather coarse resolution (2 km)  runs of
-the System for Atmospheric Modelling \cite<SAM, e.g.>{Khairoutdinov_JAS_2003},
-and in a relatively small domain (128 km square). This resolution would not be
-considered large-eddy resolving by today's standards, and the experiment has not
-been repeated in any other model.
+convection schemes against the CRM reference. \citeA{Hwong_JAMES_2021} used the
+framework to evaluate convection, planetary boundary, and microphysics schemes'
+responses to perturbations in SCMs. They showed that the results isolate the
+impact of the convection scheme in at least the tested SCMs, and examined many
+schemes in actual use. The technique allows for efficient comparison of
+different model setups, and identified a wide range of responses among current
+schemes, thus showing the potential of this test, but does not answer the
+question of which setup is most accurate. To answer this question we need a
+"truth" response, which is not available from observations. A study of the
+linear responses of a model that uses the least possible parameterization is
+required, along with robustness tests. \citeA{Kuang_JAS_2010} evaluated his
+linear responses using rather coarse resolution (2 km)  runs of the System for
+Atmospheric Modelling \cite<SAM, e.g.>{Khairoutdinov_JAS_2003}, and in a
+relatively small domain (128 km square). This resolution would not be considered
+large-eddy resolving by today's standards, and the experiment has not been
+repeated in any other model.
 
 In this study, we repeated the above perturbation experiments on two different
 models across a range of CRM and large eddy simulation (LES) resolutions,
 seeking to produce benchmark test results. This also enabled us to test the
 conclusion of \citeA{Hwong_JAMES_2021} that the test results are not sensitive
 to treatment of the planetary boundary layer (PBL), when convection is resolved
-explicitly and the PBL dynamics might interact more directly with it. The key 
-question is whether the linear responses are robust, or sensitive to decisions in 
-high-resolution modelling such as the grid length, model dynamical core, or 
-treatment of microphysics or eddy mixing; in particular, can we establish a 
-reference ``truth'' that is less uncertain than the variations between convection 
-schemes themselves? A related question is whether the response is dominated by the 
-modelled convection itself, or whether it might be sensitive to the specification of 
-surface properties in an idealized modelling setting. A third question addressed 
-here, which is becoming more relevant as we enter an age of global CRMs, is what 
-grid resolution they would need to properly represent convective-scale feedbacks on 
-large scale flows, arguably the key benefit of global CRMs, and how sensitive the 
-feedback might be to parameterizations remaining in those models or to the numerics 
-or other details of the CRM. In summary, can we judge differences between model 
-schemes as reported in \citeA{Hwong_JAMES_2021} using LES or CRM models?
+explicitly and the PBL dynamics might interact more directly with it. The key
+question is whether the linear responses are robust, or sensitive to decisions
+in high-resolution modelling such as the grid length, model dynamical core, or
+treatment of microphysics or eddy mixing; in particular, can we establish a
+reference ``truth'' that is less uncertain than the variations between
+convection schemes themselves? A related question is whether the response is
+dominated by the modelled convection itself, or whether it might be sensitive to
+the specification of surface properties in an idealized modelling setting. A
+third question addressed here, which is becoming more relevant as we enter an
+age of global CRMs, is what grid resolution they would need to properly
+represent convective-scale feedbacks on large scale flows, arguably the key
+benefit of global CRMs, and how sensitive the feedback might be to
+parameterizations remaining in those models or to the numerics or other details
+of the CRM. In summary, can we judge differences between model schemes as
+reported in \citeA{Hwong_JAMES_2021} using LES or CRM models?
 
 \section{Methods}
 \label{sec:methods}
@@ -131,41 +136,44 @@ Both models were used to simulate convection at high resolution over a water
 surface with periodic boundary conditions. The models used a constant sea
 surface temperature (SST) of 301.15 K. This value is a little different from
 that used in \citeA{Kuang_JAS_2010} but matches \citeA{Hwong_JAMES_2021}. We
-used idealized radiation as in \citeA{Kuang_JAS_2010}, \citeA{Herman_JAMES_2013} and \citeA{Hwong_JAMES_2021}. Following \citeA{Herman_JAMES_2013}, the radiative cooling tendency
-was $\partial \theta_{rad} / \partial t = \theta_t/\Pi$ K day$^{-1}$, where 
-$\Pi$ is the Exner function that converts temperature to potential temperature, and 
-$\theta_t$ is a temperature tendency set as \todo{double check in code for WRF}
+used idealized radiation as in \citeA{Kuang_JAS_2010}, \citeA{Herman_JAMES_2013}
+and \citeA{Hwong_JAMES_2021}. Following \citeA{Herman_JAMES_2013}, the radiative
+cooling tendency was $\partial \theta_{rad} / \partial t = \theta_t/\Pi$ K
+day$^{-1}$, where $\Pi$ is the Exner function that converts temperature to
+potential temperature, and $\theta_t$ is a temperature tendency set as
+\todo{updated to match WRF -- Chimene, please check MONC matches}
 
 \begin{align}
  \theta_t = \begin{cases}
     -1.5\; \textrm{K day}^{-1} & \textrm{if}\, p \geq 200\; \textrm{hPa}, \\
     0\; \textrm{K day}^{-1} & \textrm{if}\, p \leq 100\; \textrm{hPa}, \\
-    -1.5 + \frac{1.5 (p-100)}{100}\; \textrm{K day}^{-1} & \textrm{if}\, 100 < p < 200\; \textrm{hPa}. \\
- %* $t$'s value varies linearly between -1.5 and 0 K day$^{-1}$ from 100 to 200 hPa.
+    -\frac{1.5 (p-100)}{100}\; \textrm{K day}^{-1} & \textrm{if}\, 100 < p < 200\; \textrm{hPa}. \\
  \end{cases}
 \end{align}
 
-Our treatment of surface fluxes and winds also follows that of \citeA{Hwong_JAMES_2021}, which differed slightly from that of \citeA{Kuang_JAS_2010}. First, we used idealized evaporation as in \citeA{Chua_GRL_2019}, with minor
-differences. We used a constant surface wind speed of $W_s = 4.8$ m s$^{-1}$,
-following \citeA{Hwong_JAMES_2021} who used the same approach with a fixed value
-of 0.001 for the surface exchange coefficient. While the wind speed here and in
-\citeA{Hwong_JAMES_2021} was slightly different from that of
-\citeA{Kuang_JAS_2010}, the important quantity is the product of the wind with
-the surface exchange coefficient, and the exchange coefficient value in
-\citeA{Kuang_JAS_2010} was not stated. Here we used a fixed value of 0.005 for
-this quantity \todo{double check for WRF}. Level-mean horizontal winds
-were relaxed to $u = 0$ m s$^{-1}$ and $v = 5$ m s$^{-1}$, where $u$ is the
-zonal and $v$ is the meridional wind component, respectively, with a three-hour
-relaxation time.
+Our treatment of surface fluxes and winds also follows that of
+\citeA{Hwong_JAMES_2021}, which differed slightly from that of
+\citeA{Kuang_JAS_2010}. First, we used idealized evaporation as in
+\citeA{Chua_GRL_2019}, with minor differences. We used a constant surface wind
+speed of $W_s = 5$ m s$^{-1}$, following \citeA{Hwong_JAMES_2021} who used the
+same approach with a fixed value of 0.001 for the surface exchange coefficient.
+While the wind speed here and in \citeA{Hwong_JAMES_2021} was slightly different
+from that of \citeA{Kuang_JAS_2010}, the important quantity is the product of
+the wind with the surface exchange coefficient, and the exchange coefficient
+value in \citeA{Kuang_JAS_2010} was not stated. Here we used a fixed value of
+0.005 for this quantity. Level-mean horizontal winds were relaxed to $u = 0$ m
+s$^{-1}$ and $v = 5$ m s$^{-1}$, where $u$ is the zonal and $v$ is the
+meridional wind component, respectively, with a three-hour relaxation time.
 
-Following \cite{Kuang_JAS_2010} \todo{check}, for each resolution, the models were run until they reached radiative convective
-equilibrium (RCE) at time $t_1$. After RCE was reached, small perturbations in
-the imposed temperature or moisture forcings were introduced, while a control
-was run with no perturbations, and the models were allowed to again reach RCE at
-time $t_2$. For a time block after $t_2$, domain-mean profiles in the control
-runs were subtracted from the  domain-mean atmospheric profiles for
-the perturbed runs \todo{check order in code} to examine the differences made by the perturbations. In the following two
-sections we examine the model-specific setups for WRF and MONC, respectively.
+Following \cite{Kuang_JAS_2010}, for each resolution, the models were run until
+they reached radiative convective equilibrium (RCE) at time $t_1$. After RCE was
+reached, small perturbations in the imposed temperature or moisture forcings
+were introduced, while a control was run with no perturbations, and the models
+were allowed to again reach RCE at time $t_2$. For a time block after $t_2$,
+domain-mean profiles in the control runs were subtracted from the  domain-mean
+atmospheric profiles for the perturbed runs to examine the differences made by
+the perturbations. In the following two sections we examine the model-specific
+setups for WRF and MONC, respectively.
 
 \subsection{WRF}
 
@@ -185,12 +193,12 @@ vapor mixing ratio in the stratosphere were relaxed to the initial profile
 values to avoid model drift, as suggested by \citeA{Herman_JAMES_2013}.
 Relaxation was applied above 160 hPa with the inverse relaxation constant
 increasing linearly from $1/\tau = 0$ day$^{-1}$ at 160 hPa to $1/\tau = 0.5$
-day$^{-1}$ at and above 100 hPa \cite{Herman_JAMES_2013}. Full diffusion
-was used at all resolutions; at 4 km and 1 km
-resolutions, horizontal diffusion was diagnosed from deformation and vertical
-diffusion was assumed done by the planetary boundary layer scheme
-(\texttt{km\_opt = 4}) while the simulations at 100 m used a prognostic equation
-(\texttt{km\_opt = 2}) for turbulent kinetic energy \cite{Skamarock_2019}.
+day$^{-1}$ at and above 100 hPa \cite{Herman_JAMES_2013}. Full diffusion was
+used at all resolutions; at 4 km and 1 km resolutions, horizontal diffusion was
+diagnosed from deformation and vertical diffusion was assumed done by the
+planetary boundary layer scheme (\texttt{km\_opt = 4}) while the simulations at
+100 m used a prognostic equation (\texttt{km\_opt = 2}) for turbulent kinetic
+energy \cite{Skamarock_2019}.
 
 \begin{table}[t]
     \caption{Parameterizations used in the WRF simulations. These schemes were
@@ -203,7 +211,7 @@ diffusion was assumed done by the planetary boundary layer scheme
     \hline
     \textbf{Parameterization} & \textbf{Scheme} & \textbf{Reference} \\
     \hline
-    Microphysics & Thompson & \citeA{Thompson_MWR_2008} \\
+    Microphysics & Thompson 2-moment & \citeA{Thompson_MWR_2008} \\
     Boundary layer & YSU & \citeA{Hong_MWR_2006} \\
     Surface layer & Revised MM5 & \citeA{Jimenez_MWR_2012} \\
     \hline
@@ -222,7 +230,7 @@ $$
 
 \noindent where $\rho_a$ (kg m$^{-3}$) is the near surface air density, $T_s$
 (K) is surface temperature (we use SST), and $T_a$ (K) is the near-surface air
-temperature. \todo{Check $W_s$ is same as in Eq 2.} We used 
+temperature. We used 
 
 $$
 T_a = T_l \left(\frac{p_s}{p_l}\right)^{\frac{R_d}{c_p}},
@@ -236,7 +244,7 @@ for dry air. Latent heat flux (LH) was calculated using modified Equation 2 from
 \citeA{Chua_GRL_2019}, such that
 
 $$
-\textrm{LH} = 0.001 \rho_a W L (q_{sat} - q_a),
+\textrm{LH} = 0.001 \rho_a W_s L (q_{sat} - q_a),
 $$
 
 \noindent where $L$ is the typical latent heat of vaporization of water,
@@ -266,35 +274,31 @@ the RCE period was calculated for each run for comparison.
 
 MONC was run on a 64 $\times$ 64 km$^2$ domain for grid spacings of 1 km, 500 m,
 and 250 m. The MONC setup was similar to that used in \citeA{Daleu_QJRMS_2023}:
-the domain height was 20 km, with 85 levels on a stretched grid so there were more levels near the surface, and a
-Newtonian damping layer above 16 km. We used bi-periodic lateral boundary
-conditions. The 3D Smagorinsky scheme was used to calculate subgrid turbulent
-eddy fluxes, and the Cloud AeroSol Interactive Microphysics \cite<CASIM,
-see>{field23} scheme
-represented cloud processes. The model time step is variable in MONC and ranged between 1 and 2 seconds.
-
+the domain height was 20 km, with 85 levels on a stretched grid so there were
+more levels near the surface, and a Newtonian damping layer above 16 km. We used
+bi-periodic lateral boundary conditions. The 3D Smagorinsky scheme was used to
+calculate subgrid turbulent eddy fluxes, and the Cloud AeroSol Interactive
+Microphysics \cite<CASIM, see>{field23} scheme represented cloud processes. The
+model time step is variable in MONC and ranged between 1 and 2 seconds.
 Perturbations were made using a combination of the delta and Gaussian functions,
-as in Equation~4 of \citeA{Herman_JAMES_2013}. We used an idealized treatment of
-evaporation in the sense that a constant near-surface wind speed of 5
-m\,s$^{-1}$ was imposed \todo{confirm if 5 or 4.8 for WRF}. For pressure levels
-less than 160 hPa, temperature and moisture fields were relaxed to the values of
-a previous RCE run, following \cite{Herman_JAMES_2013} \todo{check if same for
-WRF and if so move to common settings}.
+as in Equation~4 of \citeA{Herman_JAMES_2013}. For pressure levels less than 160
+hPa, temperature and moisture fields were relaxed to the values of a previous
+RCE run, following \cite{Herman_JAMES_2013}.
 
 \subsection{Perturbations to Temperature and Humidity}
 
 Constant perturbations were applied to potential temperature or water vapor
-tendencies \todo{RSP: Text says tendencies but the numbers in the Table are in units of K and kg/kg rather than (say) K/d?} at given model levels. Given computational constrains, not all
+tendencies at given model levels. Given computational constrains, not all
 perturbations were applied in all runs.  Table \ref{tab:pert_runs} shows which
 perturbations were applied to which model runs. For the WRF runs, we used the
-results of \citeA{Hwong_JAMES_2021} to find two levels on which perturbations 
-provided the most information about perturbations across other levels (not shown 
-here). The two ``most representative'' levels were a low (850 hPa) and a high (412 
-hPa) perturbation level, which we use here in the high-resolution WRF runs. Other
-levels on which perturbations were applied were 415 hPa (MONC only), 500 hPa,
-600 hPa, and 730 hPa. For simplicity of comparison, in the following we refer to
-the MONC results for a perturbation at 415 hPa as results for a perturbation at
-412 hPa.
+results of \citeA{Hwong_JAMES_2021} to find two levels on which perturbations
+provided the most information about perturbations across other levels (not shown
+here). The two ``most representative'' levels were a low (850 hPa) and a high
+(412 hPa) perturbation level, which we use here in the high-resolution WRF runs.
+Other levels on which perturbations were applied were 415 hPa (MONC only), 500
+hPa, 600 hPa, and 730 hPa. For simplicity of comparison, in the following we
+refer to the MONC results for a perturbation at 415 hPa as results for a
+perturbation at 412 hPa.
 
 {
 \begin{table}
@@ -302,37 +306,38 @@ the MONC results for a perturbation at 415 hPa as results for a perturbation at
     \caption{Perturbations applied by variable, model, and grid spacing. Here,
     412 hPa refers to 412 hPa in the WRF runs but 415 hPa in the MONC runs. A
     $\bullet{}$ symbol indicates the given model was run with the given
-    resolution and perturbation. $T$ is \todo{potential} temperature in K and
+    resolution and perturbation. $T$ is potential temperature in K and
     $q$ is water vapor mixing ratio in kg kg$^{-1}$.}
     \label{tab:pert_runs}
     \renewcommand{\arraystretch}{0.6}
-    \begin{tabular}{lllccccc}
+    \footnotesize
+    \begin{tabular}{llrccccc}
         \multicolumn{3}{r}{\textbf{Model}} & \multicolumn{2}{c}{\textbf{WRF}} & \multicolumn{3}{c}{\textbf{MONC}} \\
-        \multicolumn{3}{r}{\textbf{Grid spacing}} & 4 and 1 km & 100 m & 1 km & 500 m & 250 m \\
+        \multicolumn{3}{r}{\textbf{Grid spacing}} & 4 \& 1 km & 100 m & 1 km & 500 m & 250 m \\
         
         \textbf{Variable} & \textbf{Perturbation} & \textbf{Level} & & & & & \\
         \hline
         % T +
-        T & $+0.5$ K & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  & $\bullet{}$ \\
+        T & $+0.5$ K day$^{-1}$ & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  & $\bullet{}$ \\
         & & 500 hPa & $\bullet{}$ & & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ \\
         & & 600 hPa & $\bullet{}$ & & $\bullet{}$ &  & $\bullet{}$ \\
         & & 730 hPa & $\bullet{}$ & & $\bullet{}$ &  & $\bullet{}$ \\
         & & 850 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ \\
         % T -
-        & $-0.5$ K & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  & $\bullet{}$ \\
+        & $-0.5$ K day$^{-1}$ & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  & $\bullet{}$ \\
         & & 500 hPa & $\bullet{}$ & & $\bullet{}$ &  & $\bullet{}$\\
         & & 600 hPa & $\bullet{}$ & & $\bullet{}$ &  & $\bullet{}$ \\
         & & 730 hPa & $\bullet{}$ & & $\bullet{}$ &  & $\bullet{}$ \\
         & & 850 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  & $\bullet{}$ \\
         \hline
         % q +
-        q & $+0.0002$ kg kg$^{-1}$ & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  &  \\
+        q & $+0.0002$ kg kg$^{-1}$ day$^{-1}$ & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  &  \\
         & & 500 hPa & $\bullet{}$ & & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ \\
         & & 600 hPa & $\bullet{}$ & & $\bullet{}$ &  &  \\
         & & 730 hPa & $\bullet{}$ & & $\bullet{}$ &  &  \\
         & & 850 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ \\
         % q -
-        & $-0.0002$ kg kg$^{-1}$ & 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  &  \\
+        & $-0.0002$ kg kg$^{-1}$ day$^{-1}$& 412 hPa & $\bullet{}$ & $\bullet{}$ & $\bullet{}$ &  &  \\
         & & 500 hPa & $\bullet{}$ & & $\bullet{}$ &  &  \\
         & & 600 hPa & $\bullet{}$ & & $\bullet{}$ &  &  \\
         & & 730 hPa & $\bullet{}$ & & $\bullet{}$ &  &  \\
@@ -348,11 +353,12 @@ the MONC results for a perturbation at 415 hPa as results for a perturbation at
 \subsection{Radiative-Convective Equilibrium Mean State}
 
 We used plots of spatially-averaged precipitable water by time to determine when
-the models had reached RCE. Figure \ref{fig:rce_pw} shows precipitable water by
-time for the WRF runs and columnar water vapor by time for the MONC runs \todo{RSP: isn't this the same thing?}. For
-the WRF runs, at 4 km grid spacing the RCE state had a precipitable water (PW)
-of $\sim$40 mm, which rose to $\sim$44 mm at 1 km grid spacing and $\sim$42 mm
-at 100 m grid spacing. For the MONC runs, \todo{\ldots}.
+the models had reached RCE. Figure \ref{fig:rce_pw} shows columnar water vapor
+(CWV) by time for the WRF and MONC runs. For the WRF runs, at 4 km grid spacing
+the RCE state had a CWV $\sim$40 mm, which rose to $\sim$44 mm at 1 km grid
+spacing and $\sim$42 mm at 100 m grid spacing. For the MONC runs, CWV also
+increased with decreased grid spacing, from $\sim$43 mm at 1 km grid spacing to
+$\sim$45 mm at 250 m grid spacing.
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/runs_timeseries.pdf}
@@ -372,23 +378,26 @@ at 100 m grid spacing. For the MONC runs, \todo{\ldots}.
 \end{figure}
 
 Mean profiles from the control run in RCE are shown in Figure
-\ref{fig:rce_profiles}. The mean states are similar across the two models \todo{YLH: This is already quite interesting - for the SCMs in Hwong et al (2021) the mean states have a huge spread (even though we also used idealized radiation and evaporation): this means simply by resolving convection explicitly we already bring the mean states closer to each other. Perhaps worth mentioning this in one sentence.},
+\ref{fig:rce_profiles}. The mean states are similar across the two models,
 especially within the context of larger inter-model comparisons of RCE states
-\todo{cite examples}. To some extent the similarities may be due to the
-idealized treatment of radiation and evaporation used here. Moisture content
-generally increases with increasing resolution, although the changes are modest
-at 1 km and higher-resolution grid spacing. MONC is marginally more moist than
-WRF. The additional moisture at finer resolutions appears in the lower part of
-the free troposphere above about 900 hPa, which we hypothesize is the result of
-some transport from shallow convection. Mean wind profiles for the 100 m run,
-which had increased vertical resolution, and was temporally shorter than
-the other runs, are not as smooth as those for the 1 km and 4 km runs. At 100 m
-grid spacing the profile of relative humidity is fairly uniform with height
-between $\sim$950 and $\sim$600 hPa, whereas at 1 km and 4 km grid spacing this
-part of the atmosphere was drier in the WRF runs, with the 4 km WRF simulation
-drying to $\sim$60\% relative humidity at about 800 hPa. The MONC runs also show
-decreased relative humidity with decreased resolution \todo{SS: avoid this terminology (what does it mean?) -- say decreased/increased grid sizes, or coarser/finer resolution}, and are drier than the
-WRF runs in a region around $\sim$600 hPa.
+\cite[e.g.]{Hwong_JAMES_2021}. To some extent the similarities may be due to the
+idealized treatment of radiation and evaporation used here, but it is notable
+that simply by resolving convection explicitly the mean states were brought into
+closer agreement than in \cite{Hwong_JAMES_2021}, in which single column models
+used idealised radiation and evaporation, as here, but convection was
+parameterized. Moisture content generally increases with finer resolution,
+although the changes are modest at 1 km and higher-resolution grid spacing. MONC
+is marginally more moist than WRF. The additional moisture at finer resolutions
+appears in the lower part of the free troposphere above about 900 hPa, which we
+hypothesize is the result of some transport from shallow convection. Mean wind
+profiles for the 100 m run, which had finer vertical resolution, and was
+temporally shorter than the other runs, are not as smooth as those for the 1 km
+and 4 km runs. At 100 m grid spacing the profile of relative humidity is fairly
+uniform with height between $\sim$950 and $\sim$600 hPa, whereas at 1 km and 4
+km grid spacing this part of the atmosphere was drier in the WRF runs, with the
+4 km WRF simulation drying to $\sim$60\% relative humidity at about 800 hPa. The
+MONC runs also show decreased relative humidity with coarser resolution, and are
+drier than the WRF runs in a region around $\sim$600 hPa.
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/rce_profiles}
@@ -403,30 +412,34 @@ WRF runs in a region around $\sim$600 hPa.
 
 Hydrometeor profiles, also shown in Figure \ref{fig:rce_profiles}, are sensitive
 to resolution. For the WRF runs, finer resolution resulted in more rain water
-below $\sim$650 hPa and less above, more cloud droplets and snow, more graupel below $\sim$500 hPa and less above,
-and mixed changes in ice content \todo{RSP: The language used here is fine if the WRF microphysics is single moment, but will be confusing if it is double moment. It would be a good idea to confirm that explicitly in the model descriptions.}. The MONC runs showed marginally less
-sensitivity, but the character of the changes was broadly the same as in WRF, except that MONC at finer resolution produced
-more rain at
-all levels. Profile shapes were \todo{SS: use consistent tense (past vs present)} broadly similar between WRF and MONC, with
-perhaps the strongest difference in liquid water, for which MONC produced
-significantly more at $\sim$800 hPa and less above $\sim$600 hPa. There was a large change in the liquid water content between the 4 km and 1 km grids
-in WRF, and a particularly marked difference in WRF between the 1 km and 100 m grids around $\sim$600 hPa. Graupel and
-snow are found at lower heights in WRF than in MONC. In both models finer resolution brings more snow at cloud top and less graupel, with relative differences varying by height. It is unclear
-whether these microphysical changes are simply a consequence of mean
-moisture changes or whether they reflect the impact of cloud
-turbulence differences.
+mass below $\sim$650 hPa and less above, more cloud droplet and snow mass, more
+graupel mass below $\sim$500 hPa and less above, and mixed changes in ice mass
+\todo{Bob: the WRF microphysics is two-moment. Does the wording above fix your
+concern?}. The MONC runs showed marginally less sensitivity, but the character
+of the changes was broadly the same as in WRF, except that MONC at finer
+resolution produced more rain at all levels. Profile shapes were broadly similar
+between WRF and MONC, with perhaps the strongest difference in liquid water, for
+which MONC produced significantly more at $\sim$800 hPa and less above $\sim$600
+hPa. There was a large change in the liquid water content between the 4 km and 1
+km grids in WRF, and a particularly marked difference in WRF between the 1 km
+and 100 m grids around $\sim$600 hPa. Graupel and snow were found at lower
+heights in WRF than in MONC. In both models finer resolution brings more snow at
+cloud top and less graupel, with relative differences varying by height. It is
+unclear whether these microphysical changes are simply a consequence of mean
+moisture changes or whether they reflect the impact of cloud turbulence
+differences.
 
 \subsection{Convective Organization}
 
-\todo{RSP: Perhaps needs a small intro to say why we did this. i.e. to check whether any of the model-model differences or resolution chnages might be due to some setups developing organiztion.} We tested for convective organization by examining the spatial variance of
-precipitable water scaled by its spatial mean (in WRF, not shown), and by
-examining snapshots of precipitation cross-sections inside the equilibrium
-period (in MONC, not shown) \todo{RSP: Chimene tested the same metric as you used for WRF. She also looked at the "subsidence fraction" which is the fractional area of the domain where the vertically integrated mass-weighted vertical wind is -ve. The latter was about 55\% but it would be considerably larger in an aggregated state} and found no evidence of meaningful organization in
-these fixed-radiation setups. Our domain sizes are chosen such that they are too
-small for self-aggregation of convection to be expected \cite{Muller_JAS_2012}.
-\todo{SS: Did Muller and Held use idealized radiation?  If not then their
-conclusions would not apply here and organization might not be expected at any
-domain size.} \todo{YLH: They use interactive radiation so yes, their conclusions are not really relevant here. I think it is sufficient to say there is no organization because we used fixed radiation everywhere. If you would like to cite something, you can cite Muller and Bony (2015) that shows imposing radation can lead to organization provided two contrasting profiles are imposed in dry and moist regions (which we did not do, so organization is not expected).}
+We tested for convective organization, to check whether any of the between-model
+or between-resolution differences may be due to some setups developing
+organization. To do so, we examined the spatial variance of precipitable water
+scaled by its spatial mean (not shown), and in MONC by examining the
+``subsidence fraction'', the fractional area of the domain where the vertically
+integrated mass-weighted vertical wind is negative (not shown). These metrics
+showed no evidence of meaningful organization, which is expected because we used
+fixed radiation everywhere without contrasting radiative cooling profiles in
+moist and dry regions \cite{Muller_GRL_2015}.
 
 \subsection{Responses to Heating (Temperature) Perturbations}
 
@@ -441,14 +454,13 @@ the temperature, water vapor mixing ratio, and relative humidity fields, MONC is
 more likely to show nonlinearity, or differences in responses to positive and
 negative perturbations, than WRF at 1 km or 4 km resolutions, with the strongest
 example being the temperature response in the upper troposphere to a temperature
-perturbation at 850 hPa. The 100 m WRF results also show some
-nonlinearity in their responses. In the hydrometeor fields, the strongest
-nonlinearity is found in the WRF results at 100 m grid spacing. However,
-there was a large range in responses at 100 m grid spacing (Figures
-\ref{fig:var_T_412} and \ref{fig:var_T_850}), meaning that the discrepancies
-between responses for positive and negative perturbations are less likely to be
-caused by nonlinearity than by noise in the response signal for these
-hydrometeor mixing ratios.
+perturbation at 850 hPa. The 100 m WRF results also show some nonlinearity in
+their responses. In the hydrometeor fields, the strongest nonlinearity is found
+in the WRF results at 100 m grid spacing. However, there was a large range in
+responses at 100 m grid spacing (Figures \ref{fig:var_T_412} and
+\ref{fig:var_T_850}), meaning that the discrepancies between responses for
+positive and negative perturbations are less likely to be caused by nonlinearity
+than by noise in the response signal for these hydrometeor mixing ratios.
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_T_0.5_@412}
@@ -486,57 +498,63 @@ produce smoother responses than the 1 km runs.
 
 \subsubsection{Moisture Responses}
 
-The moisture responses to the temperature perturbations again appear smoother vertically from WRF than from MONC \todo{SS: Is that all?  Can we add to this sentence to make it a statement of the key outcomes?}. The temperature perturbations at
-$\sim$412 and 850 hPa produce the strongest differences among the various runs.
-In some cases (WRF at 4 km grid spacing and MONC at 1 km and 500 m), the 850-hPa perturbation
-can induce a drying response at and just above the perturbation level. With WRF,
-this response becomes a moistening at finer resolution. With MONC, the drying is
-a little less marked at 500 m than at 1 km grids, and at 250 m the
-response was zero at this level. For the temperature perturbation at 850 hPa,
-moistening in the boundary layer increases for coarser resolutions in WRF, and
-to a lesser extent for MONC. A temperature perturbation at 412 hPa produces a
-minimum in the moistening in the WRF runs at around 900 hPa. In MONC there is a
-similarly pronounced minimum a little higher at about 850 hPa seen in the 1 km
-run. Similar comments apply for 500 and 600 hPa as for 412 hPa. There is often a
-small minimum in the moistening responses around or at the perturbation level
-itself, particularly for perturbations applied at lower levels (at higher levels
-a second minimum tends to appear below the perturbation). For a
-temperature perturbation at 730 hPa, the moistening minimum around the
-perturbation level is pronounced in MONC and reaches around zero, but it does not
-produce the drying seen when the perturbation is applied at 850 hPa. One way to
-think about the drying with perturbations at 850 hPa is that the minimum we see
-consistently just above the boundary layer combines with the minimum that we
-often see at or below the perturbation level.
+The moisture responses to the temperature perturbations again appear smoother
+vertically from WRF than from MONC \todo{SS: Is that all?  Can we add to this
+sentence to make it a statement of the key outcomes?}. The temperature
+perturbations at $\sim$412 and 850 hPa produce the strongest differences among
+the various runs. In some cases (WRF at 4 km grid spacing and MONC at 1 km and
+500 m), the 850-hPa perturbation can induce a drying response at and just above
+the perturbation level. With WRF, this response becomes a moistening at finer
+resolution. With MONC, the drying is a little less marked at 500 m than at 1 km
+grids, and at 250 m the response was zero at this level. For the temperature
+perturbation at 850 hPa, moistening in the boundary layer increases for coarser
+resolutions in WRF, and to a lesser extent for MONC. A temperature perturbation
+at 412 hPa produces a minimum in the moistening in the WRF runs at around 900
+hPa. In MONC there is a similarly pronounced minimum a little higher at about
+850 hPa seen in the 1 km run. Similar comments apply for 500 and 600 hPa as for
+412 hPa. There is often a small minimum in the moistening responses around or at
+the perturbation level itself, particularly for perturbations applied at lower
+levels (at higher levels a second minimum tends to appear below the
+perturbation). For a temperature perturbation at 730 hPa, the moistening minimum
+around the perturbation level is pronounced in MONC and reaches around zero, but
+it does not produce the drying seen when the perturbation is applied at 850 hPa.
+One way to think about the drying with perturbations at 850 hPa is that the
+minimum we see consistently just above the boundary layer combines with the
+minimum that we often see at or below the perturbation level.
 
 \subsubsection{Hydrometeor Responses}
 
-\todo{SS: Since this paragraph is pretty heavy, instead of starting by announcing what you are going to look at, can you lead off with the takeaway message?  The rest of the paragraph then fills in the details but knowing where it is going makes them much easier to digest.} We now turn to how hydrometeor content responds to heating perturbations (keeping in mind the high variability in the 100-m WRF
-hydrometeor responses). For the temperature perturbation at 850 hPa in WRF, there
-is generally a reduction of rain below the freezing level; MONC shows a stronger
-reduction than in WRF below the freezing level but an increase around the
-freezing level, which is a feature not seen in the WRF results. Except for a
-near-surface increase, a reduction in cloud liquid water also occurs, and this
-is over a deeper layer in WRF than in MONC. There is also some reduction to snow
-and increase in graupel at upper levels. For WRF runs with temperature
-perturbations at lower levels, the profiles of liquid water changes have
-reductions with minima that are aligned with or just above the perturbation
-height. As the perturbation level increases in the WRF runs, a maximum, in liquid
-water changes appears between the perturbation level and the surface. The 4 km
-WRF runs in particular show a sharp increase in cloud water at about 900 hPa
-under all temperature perturbations. The responses of hydrometeors in MONC have
-a broadly similar character, but some of the amplitudes are quite different.
-There are similar amplitudes to WRF for rain, but weaker responses in liquid
-water, ice and snow. MONC responded more strongly for graupel, however,
+\todo{SS: Since this paragraph is pretty heavy, instead of starting by
+announcing what you are going to look at, can you lead off with the takeaway
+message?  The rest of the paragraph then fills in the details but knowing where
+it is going makes them much easier to digest.} We now turn to how hydrometeor
+content responds to heating perturbations (keeping in mind the high variability
+in the 100-m WRF hydrometeor responses). For the temperature perturbation at 850
+hPa in WRF, there is generally a reduction of rain below the freezing level;
+MONC shows a stronger reduction than in WRF below the freezing level but an
+increase around the freezing level, which is a feature not seen in the WRF
+results. Except for a near-surface increase, a reduction in cloud liquid water
+also occurs, and this is over a deeper layer in WRF than in MONC. There is also
+some reduction to snow and increase in graupel at upper levels. For WRF runs
+with temperature perturbations at lower levels, the profiles of liquid water
+changes have reductions with minima that are aligned with or just above the
+perturbation height. As the perturbation level increases in the WRF runs, a
+maximum, in liquid water changes appears between the perturbation level and the
+surface. The 4 km WRF runs in particular show a sharp increase in cloud water at
+about 900 hPa under all temperature perturbations. The responses of hydrometeors
+in MONC have a broadly similar character, but some of the amplitudes are quite
+different. There are similar amplitudes to WRF for rain, but weaker responses in
+liquid water, ice and snow. MONC responded more strongly for graupel, however,
 especially in response to perturbations at 412 and 500 hPa. A positive
 temperature perturbation generally reduces graupel content except for some
 increases at high levels when the perturbation was closer to the surface. There
 are some changes in responses with grid length. For the WRF runs the rain
-changes tend to increase in magnitude with increasing resolution, while the MONC
+changes tend to increase in magnitude with finer resolution, while the MONC
 responses are more similar. For MONC the liquid water reductions are stronger at
 250 m than at 1 km spacings, and for temperature perturbations at lower levels
 snow is also more strongly reduced at 250 m than at 1 km grid spacing. The
-changes in graupel become weaker with increasing resolution in MONC runs yet
-stronger with increasing resolution for WRF runs. 
+changes in graupel become weaker with finer resolution in MONC runs yet stronger
+with decreasing grid spacing for WRF runs. 
 
 \subsection{Responses to Moistening (Humidity) Perturbations}
 
@@ -546,16 +564,22 @@ while perturbations for 500 hPa, 600 hPa, and 730 hPa, are shown in Figures
 \ref{fig:qpert_500}, \ref{fig:qpert_600}, and \ref{fig:qpert_730}, respectively.
 Several elements of these results are similar to the results for temperature
 perturbations: moisture and hydrometeor responses to moisture perturbations are
-again smaller than the differences in the mean profiles due to resolution \todo{SS: How can these be compared, they are in different units (one is e.g. K while the other is in K per K/day e.g. units of time).   Since the perturbations are intentionally small, we would not expect responses to them to be very large compared to anything.} \todo{RSP: Isn't the response a difference in the mean state when the strength of forcing is perturbed? So that will be in K along with the difference in mean state due to resolution}; WRF
-and MONC produced responses of similar amplitude, except for cloud liquid water
-and ice where the changes in MONC were much smaller; and MONC shows more
-nonlinearity in temperature, water vapor and relative humidity responses than
-WRF does at 1 km and 4 km grid spacings. MONC relative humidity seems to be
-particularly prone to non-linear responses. Similar to the responses to the
-temperature perturbations, the strongest apparent nonlinearity after moisture
-perturbations is in the hydrometeor fields and especially for the 100 m grid
-spacing WRF responses, but as for the temperature perturbations there was a
-large range in responses (Figures \ref{fig:var_q_412} and \ref{fig:var_q_850}).
+again smaller than the differences in the mean profiles due to resolution
+\todo{SS: How can these be compared, they are in different units (one is e.g. K
+while the other is in K per K/day e.g. units of time).   Since the perturbations
+are intentionally small, we would not expect responses to them to be very large
+compared to anything.} \todo{RSP: Isn't the response a difference in the mean
+state when the strength of forcing is perturbed? So that will be in K along with
+the difference in mean state due to resolution}; WRF and MONC produced responses
+of similar amplitude, except for cloud liquid water and ice where the changes in
+MONC were much smaller; and MONC shows more nonlinearity in temperature, water
+vapor and relative humidity responses than WRF does at 1 km and 4 km grid
+spacings. MONC relative humidity seems to be particularly prone to non-linear
+responses. Similar to the responses to the temperature perturbations, the
+strongest apparent nonlinearity after moisture perturbations is in the
+hydrometeor fields and especially for the 100 m grid spacing WRF responses, but
+as for the temperature perturbations there was a large range in responses
+(Figures \ref{fig:var_q_412} and \ref{fig:var_q_850}).
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_diffs_q_0.0002_@412}
@@ -576,24 +600,26 @@ large range in responses (Figures \ref{fig:var_q_412} and \ref{fig:var_q_850}).
 
 With moisture perturbations, temperature increases in the boundary layer are
 very consistent between resolutions in WRF, but the free tropospheric
-temperature increases are stronger at coarser resolution and less strong for 100-m grid spacing across the whole profile. Particularly notable is the increase in
-temperature increase between 1 km and 4 km grid spacings for a perturbation at
-412 hPa. MONC responses show a similar response below about 600 hPa and above
-about 850 hPa, but outside this region the responses for higher resolution runs
-are stronger than those for 1-km runs. The boundary-layer temperature increases
-are very consistent between WRF and MONC. The free-tropospheric increases are
-stronger in MONC for a low-level moisture perturbation and weaker for an
-upper-level moisture perturbation.
+temperature increases are stronger at coarser resolution and less strong for
+100-m grid spacing across the whole profile. Particularly notable is the
+increase in temperature increase between 1 km and 4 km grid spacings for a
+perturbation at 412 hPa. MONC responses show a similar response below about 600
+hPa and above about 850 hPa, but outside this region the responses for higher
+resolution runs are stronger than those for 1-km runs. The boundary-layer
+temperature increases are very consistent between WRF and MONC. The
+free-tropospheric increases are stronger in MONC for a low-level moisture
+perturbation and weaker for an upper-level moisture perturbation.
 
 \subsubsection{Moisture Responses}
 
 The WRF responses of specific humidity to moisture perturbations have minima at
-around 900 hPa and to a lesser extent around 650 hPa \todo{SS: regardless of the forcing level?  State this}. These minima are modest at
-fine grid spacing, but at coarse resolution the lower minimum becomes stronger
-even for perturbations made at upper levels. It does however remain positive for positive perturbations. Such minima are also present in MONC, the
-lower level one being a little higher and much more pronounced than in WRF at
-the same grid spacings, and the MONC responses also remaining positive for
-positive perturbations.
+around 900 hPa and to a lesser extent around 650 hPa \todo{SS: regardless of the
+forcing level?  State this}. These minima are modest at fine grid spacing, but
+at coarse resolution the lower minimum becomes stronger even for perturbations
+made at upper levels. It does however remain positive for positive
+perturbations. Such minima are also present in MONC, the lower level one being a
+little higher and much more pronounced than in WRF at the same grid spacings,
+and the MONC responses also remaining positive for positive perturbations.
 
 \subsubsection{Hydrometeor Responses}
 
@@ -620,19 +646,54 @@ broader community is the resolution needed for each model to approach apparent
 convergence of these time-averaged responses (noting that it isn’t a rigorous
 convergence test due to computational limitations).  The result suggests that
 for most models, to simulate convectively coupled dynamics correctly will likely
-require better resolution than is currently used in e.g. DYAMOND \todo{ref}. YLH: Yes, agree that a powerful and interesting conclusion would be to say at x km resolution the models appear to converge. One way to structure the Conclusion section might be to answer the main RQs laid out in the Introduction section (which are really interesting, i think). RSP: Agree that this is a key conclusion. Worth reminding the reader too that we are looking at perturbed forcing on an RCE base, so conclusions apply for deep convection. Mid-level or shallow convection woud no doubt need higher resolutions.}
-\item \todo{Steve: Another conclusion is that tangent linear responses become relatively similar
-across several LES models once this resolution is reached, and so can be used as
-ground truth for testing GCM schemes. RSP: This seems a fair conclusion for the 2 models we have running at different resolution. But it will be good to set this in the context of...}
+require better resolution than is currently used in e.g. DYAMOND \todo{ref}.
+YLH: Yes, agree that a powerful and interesting conclusion would be to say at x
+km resolution the models appear to converge. One way to structure the Conclusion
+section might be to answer the main RQs laid out in the Introduction section
+(which are really interesting, i think). RSP: Agree that this is a key
+conclusion. Worth reminding the reader too that we are looking at perturbed
+forcing on an RCE base, so conclusions apply for deep convection. Mid-level or
+shallow convection woud no doubt need higher resolutions.}
+\item \todo{Steve: Another conclusion is that tangent linear responses become
+relatively similar across several LES models once this resolution is reached,
+and so can be used as ground truth for testing GCM schemes. RSP: This seems a
+fair conclusion for the 2 models we have running at different resolution. But it
+will be good to set this in the context of...}
 \begin{enumerate}
-\item \todo{the difference between the two models (ie, each running at their highest resolution). If we can agree that the 2 models at their highest resolutions tell us the truth with an error bar, then a good question to ask is whether we can run one or other of the two models at a lower resolution ok and still be within truth + error bar}
-\item \todo{We haven't said much about the Kuang results in the results discussion, but it would be good to comment on that at the end. How do his single-resolution results compare to our highest resolution results? Do we think that they provide a good enough "truth" or do we now think that are likely deficient in some ways?}
-\item \todo{We can reflect back on the SCM / parameterized study. An important points will be to say that the differences between responses for different parameterizations are larger than any uncertainties that we believe are present in defining the "truth" response. Also, the conclusions here are not the right place to re-evaluate everything in that paper, but it might be useful to finish this new paper by commenting on one or two example responses seen there. i.e. in the earlier paper we could only say that scheme X had such and such a response that was unusual or a little suspicious but now that we have done the new study we can now say that we think this type of response from scheme X is actually just plain wrong.}
+\item \todo{the difference between the two models (ie, each running at their
+highest resolution). If we can agree that the 2 models at their highest
+resolutions tell us the truth with an error bar, then a good question to ask is
+whether we can run one or other of the two models at a lower resolution ok and
+still be within truth + error bar}
+\item \todo{We haven't said much about the Kuang results in the results
+discussion, but it would be good to comment on that at the end. How do his
+single-resolution results compare to our highest resolution results? Do we think
+that they provide a good enough "truth" or do we now think that are likely
+deficient in some ways?}
+\item \todo{We can reflect back on the SCM / parameterized study. An important
+points will be to say that the differences between responses for different
+parameterizations are larger than any uncertainties that we believe are present
+in defining the "truth" response. Also, the conclusions here are not the right
+place to re-evaluate everything in that paper, but it might be useful to finish
+this new paper by commenting on one or two example responses seen there. i.e. in
+the earlier paper we could only say that scheme X had such and such a response
+that was unusual or a little suspicious but now that we have done the new study
+we can now say that we think this type of response from scheme X is actually
+just plain wrong.}
 \end{enumerate}
-\item \todo{Steve: Would be good to work through the results
-to see how confident we are in such findings, how important each one is, and if
-there are other key findings (another one you mention is the relative robustness
-of different types of response e.g. T vs q at different levels). RSP: Yes, this seems important. We can try to summarize our overall impressions re convergence and differences between LES and GCMs etc but there clearly will be some responses that are much more robust than others. We don't want to go through everything in the results all over again, but we should be able to offer some general comments on which variables and levels are more or less robust. It might be best to do that at the beginning of the conclusions? Then we can move on to saying that for those responses which are robust, then these are our conclusions about the relative sizes of resolutions differences, LES differences and GCM scheme differences}
+\item \todo{Steve: Would be good to work through the results to see how
+confident we are in such findings, how important each one is, and if there are
+other key findings (another one you mention is the relative robustness of
+different types of response e.g. T vs q at different levels). RSP: Yes, this
+seems important. We can try to summarize our overall impressions re convergence
+and differences between LES and GCMs etc but there clearly will be some
+responses that are much more robust than others. We don't want to go through
+everything in the results all over again, but we should be able to offer some
+general comments on which variables and levels are more or less robust. It might
+be best to do that at the beginning of the conclusions? Then we can move on to
+saying that for those responses which are robust, then these are our conclusions
+about the relative sizes of resolutions differences, LES differences and GCM
+scheme differences}
 \end{itemize}
 
 %% Enter Figures and Tables near as possible to where they are first mentioned:
@@ -744,13 +805,18 @@ of different types of response e.g. T vs q at different levels). RSP: Yes, this 
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_var_T_0.5_@412}
-    \caption{Mean responses (solid line) and the $\pm$ 1 standard deviation range (shaded) for a temperature perturbation of $\pm$0.5 K at 412 hPa in the WRF runs at 100 m grid spacing. The solid vertical line shows zero response, the dashed horizontal line shows the level of maximum perturbation.}
+    \caption{Mean responses (solid line) and the $\pm$ 1 standard deviation
+    range (shaded) for a temperature perturbation of $\pm$0.5 K at 412 hPa in
+    the WRF runs at 100 m grid spacing. The solid vertical line shows zero
+    response, the dashed horizontal line shows the level of maximum
+    perturbation.}
     \label{fig:var_T_412}
 \end{figure}
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_var_T_0.5_@850}
-    \caption{As in Figure \ref{fig:var_T_412} but for a temperature perturbation at 850 hPa.}
+    \caption{As in Figure \ref{fig:var_T_412} but for a temperature perturbation
+    at 850 hPa.}
     \label{fig:var_T_850}
 \end{figure}
 
@@ -763,7 +829,8 @@ of different types of response e.g. T vs q at different levels). RSP: Yes, this 
 
 \begin{figure}[pth]
     \noindent\includegraphics[width=\textwidth]{figures/pert_var_q_0.0002_@850}
-    \caption{As in Figure \ref{fig:var_q_412} but for a water vapor mixing ratio perturbation of 0.2 g kg$^{-1}$ at 850 hPa.}
+    \caption{As in Figure \ref{fig:var_q_412} but for a water vapor mixing ratio
+    perturbation of 0.2 g kg$^{-1}$ at 850 hPa.}
     \label{fig:var_q_850}
 \end{figure}
 
