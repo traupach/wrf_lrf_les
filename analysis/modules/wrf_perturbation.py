@@ -1511,7 +1511,7 @@ def plot_mean_profiles(
     file=None,
     ncols=5,
     nrows=2,
-    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m']
+    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
 ):
     """
     Plot mean profiles for a given dataset, by resolution and model.
@@ -1536,7 +1536,9 @@ def plot_mean_profiles(
     profs = profs.sort_values(['Model', 'Resolution', 'level'])
 
     lapses = pd.DataFrame({'level': profs.level.unique()}).sort_values('level', ascending=False)
-    lapses['lapse'] = metpy.calc.moist_lapse(pressure=lapses.level.values * units.hPa, temperature = 300 * units.K)
+    lapses['lapse'] = metpy.calc.moist_lapse(
+        pressure=lapses.level.values * units.hPa, temperature=300 * units.K
+    )
     profs = profs.merge(lapses, on=['level'], how='left')
     profs['tk'] = profs.tk - profs.lapse
 
@@ -1857,9 +1859,12 @@ def plot_monc_cwv(
         )
 
         if hl_times is not None:
-            axs[i].axvspan(xmin=dat.groupby('pert_short').time.max().min()-hl_times[r], 
-                           xmax=dat.time.max(), 
-                           alpha=0.3, color='green')
+            axs[i].axvspan(
+                xmin=dat.groupby('pert_short').time.max().min() - hl_times[r],
+                xmax=dat.time.max(),
+                alpha=0.3,
+                color='green',
+            )
         axs[i].set_title(f'MONC {r}')
 
     for ax in axs:
@@ -2131,6 +2136,7 @@ def read_MONC_profs(
 
     return profs
 
+
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     """
     Collect together mean profiles for thecontrol run for MONC and WRF.
@@ -2267,24 +2273,14 @@ def plot_responses(
                 r = refs[refs.Dataset == p]
                 if not r.empty:
                     axs.flat[i].scatter(
-                        r.q * 1000,
-                        r.level,
-                        facecolors='none',
-                        edgecolors='black',
-                        zorder=10,
-                        s=30
+                        r.q * 1000, r.level, facecolors='none', edgecolors='black', zorder=10, s=30
                     )
                     refs_included = True
             if variable == 'tk':
                 r = refs[refs.Dataset == p]
                 if not r.empty:
                     axs.flat[i].scatter(
-                        r.tk,
-                        r.level,
-                        facecolors='none',
-                        edgecolors='black',
-                        zorder=10,
-                        s=30
+                        r.tk, r.level, facecolors='none', edgecolors='black', zorder=10, s=30
                     )
                     refs_included = True
 
@@ -2303,10 +2299,17 @@ def plot_responses(
             leg = axs.flat[ncols - 1].get_legend()
             handles = leg.legendHandles
             labels = [t.get_text() for t in leg.get_texts()]
-            new_point = mlines.Line2D([], [], color='black', marker='o', linestyle='None', markerfacecolor='none',
-                            markersize=np.sqrt(30), label='Your New Label')
+            new_point = mlines.Line2D(
+                [],
+                [],
+                color='black',
+                marker='o',
+                linestyle='None',
+                markerfacecolor='none',
+                markersize=np.sqrt(30),
+            )
             handles.append(new_point)
-            labels.append('Kuang 2010')
+            labels.append('Kuang (2010)')
             leg.remove()
             axs.flat[ncols - 1].legend(handles=handles, labels=labels)
 

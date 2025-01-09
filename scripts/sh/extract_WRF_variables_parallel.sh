@@ -15,7 +15,7 @@
 
 module load parallel
 
-SCRIPT="~/git/wrf_lrf_les/scripts/sh/extract_WRF_variables.sh"
+SCRIPT="bash ~/git/wrf_lrf_les/scripts/sh/extract_WRF_variables.sh"
 
 # ${PBS_NCPUS} is total number of CPUs to run on; {%} is replaced with
 # the CPU slot from 1..${PBS_NCPUS}.
