@@ -317,7 +317,7 @@ def plot_wrfinput_profiles(wrfin, sounding_file=None):
 
     # Water vapour mixing ratio (converted from kg kg-1 to g kg-1).
     ax[1].plot(wrfin.QV_BASE.isel(Time=0) * 1000, base_height, label='WRF input')
-    ax[1].set_xlabel('Water vapour\nmixing ratio [g kg-1]')
+    ax[1].set_xlabel('Water vapor\nmixing ratio [g kg-1]')
 
     # Wind U and V.
     U = wrfin.U.isel(Time=0).mean(['south_north', 'west_east_stag'])
@@ -2181,7 +2181,7 @@ def plot_responses(
     var_labels={
         'tk': 'Temperature\n[K]',
         'rh': 'RH\n[%]',
-        'q': 'Water vapour\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+        'q': 'Water vapor\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
         'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
