@@ -1576,6 +1576,7 @@ def plot_mean_profiles(
         axs.flat[i].ticklabel_format(style='sci', axis='x', useMathText=True, scilimits=(-4, 5))
 
     axs[0, 0].set_ylabel('Pressure [hPa]')
+    axs[1, 0].set_ylabel('Pressure [hPa]')
     sns.move_legend(axs[0, 0], 'upper left', bbox_to_anchor=(5.4, 0.25))
 
     if file is not None:
