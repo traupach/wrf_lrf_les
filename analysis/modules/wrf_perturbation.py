@@ -38,7 +38,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, quiet=False):
     """
     res_datasets = {}
 
-    for res in inputs.keys():
+    for res in inputs:
         datasets = []
 
         for setname, directory in inputs[res].items():
@@ -50,7 +50,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, quiet=False):
                 datasets[-1] = datasets[-1].resample(time=resample).nearest(tolerance=0)
 
             if drop_vars is not None:
-                dvars = [v for v in drop_vars if v in datasets[-1].keys()]
+                dvars = [v for v in drop_vars if v in datasets[-1]]
                 datasets[-1] = datasets[-1].drop_vars(dvars)
 
             datasets[-1]['Dataset'] = setname
@@ -131,7 +131,7 @@ def analyse_wrfinput(wrfinput_file, sounding_file=None, ideal=True, plot_profile
         + str(np.round(np.mean(zdiffs), 1))
         + ', '
         + str(np.round(np.max(zdiffs), 1))
-        + ' m'
+        + ' m',
     )
     print('Model-top pressure:\t\t\t\t' + str(np.round(wrfin.P_TOP.isel(Time=0).data, 1)) + ' ' + wrfin.P_TOP.attrs['units'])
     print('Coriolis sine latitude term (F):\t\t' + str(np.unique(wrfin.F)[0]) + ' ' + wrfin.F.attrs['units'])
@@ -257,8 +257,8 @@ def plot_wrfinput_profiles(wrfin, sounding_file=None):
     ax[1].set_xlabel('Water vapor\nmixing ratio [g kg-1]')
 
     # Wind U and V.
-    U = wrfin.U.isel(Time=0).mean(['south_north', 'west_east_stag'])
-    V = wrfin.V.isel(Time=0).mean(['south_north_stag', 'west_east'])
+    U = wrfin.U.isel(Time=0).mean(['south_north', 'west_east_stag'])  # noqa: N806
+    V = wrfin.V.isel(Time=0).mean(['south_north_stag', 'west_east'])  # noqa: N806
     ax[2].plot(U, base_height, label='WRF input U')
     ax[2].set_xlabel('Wind speed [m s-1]')
     ax[2].plot(V, base_height, label='WRF input V')
@@ -309,12 +309,12 @@ def check_wrfinput_ideal(wrfin):
 
     ## Ensure that mean QV, U, and V are the same as QV_BASE, U_BASE, and V_BASE respectively.
     mean_qvapour = wrfin.QVAPOR.isel(Time=0).mean(['south_north', 'west_east'])
-    mean_U = wrfin.U.isel(Time=0).mean(['south_north', 'west_east_stag'])
-    mean_V = wrfin.V.isel(Time=0).mean(['south_north_stag', 'west_east'])
+    mean_U = wrfin.U.isel(Time=0).mean(['south_north', 'west_east_stag'])  # noqa: N806
+    mean_V = wrfin.V.isel(Time=0).mean(['south_north_stag', 'west_east'])  # noqa: N806
 
-    assert np.max(np.abs(mean_qvapour - wrfin.QV_BASE)) < 1e-5, 'Grid-mean QVAPOR must equal QV_BASE.'
-    assert np.max(np.abs(mean_U - wrfin.U_BASE)) < 1e-5, 'Grid-mean U must equal U_BASE.'
-    assert np.max(np.abs(mean_V - wrfin.V_BASE)) < 1e-5, 'Grid-mean V must equal V_BASE.'
+    assert np.max(np.abs(mean_qvapour - wrfin.QV_BASE)) < 1e-5, 'Grid-mean QVAPOR must equal QV_BASE.'  # noqa: PLR2004
+    assert np.max(np.abs(mean_U - wrfin.U_BASE)) < 1e-5, 'Grid-mean U must equal U_BASE.'  # noqa: PLR2004
+    assert np.max(np.abs(mean_V - wrfin.V_BASE)) < 1e-5, 'Grid-mean V must equal V_BASE.'  # noqa: PLR2004
 
 
 def keep_left_axis(axes, invert_y=False):
@@ -346,22 +346,24 @@ def rewrap_labels(axes, length_x=20, length_y=24):
         ax.set_ylabel('\n'.join(textwrap.wrap(ax.get_ylabel().replace('\n', ' '), length_y)))
 
 
-def calc_profile_diffs(profs, control_name='Control', variables=['tk', 'q', 'rh'], neg=[]):
+def calc_profile_diffs(profs, control_name='Control', neg=None):
+    """Calculate profile differences."""
+    if neg is None:
+        neg = []
     diffs = diff_means(profs=profs, control_name=control_name)
     pos_diffs = diffs.drop_sel(Dataset=neg)
     neg_diffs = -1 * diffs.sel(Dataset=neg)
-    diffs = xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
-    return diffs
+    return xarray.concat([pos_diffs, neg_diffs], dim='Dataset')
 
 
 def compare_profiles(
     profs,
     control_name='Control',
-    variables=['tk', 'q', 'rh'],
+    variables=None,
     xlims=None,
     figsize=FIGURE_SIZE,
     title='',
-    neg=[],
+    neg=None,
     loc='best',
 ):
     """Find temporal means of variables, and plot the differences between them by pressure level.
@@ -377,6 +379,11 @@ def compare_profiles(
         loc: Loc argument to plt.legend.
 
     """
+    if variables is None:
+        variables = ['tk', 'q', 'rh']
+    if neg is None:
+        neg = []
+
     diffs = calc_profile_diffs(profs=profs, control_name=control_name, neg=neg)
 
     return plot_profiles(
@@ -400,13 +407,12 @@ def diff_means(profs, control_name='Control'):
     Returns: perturb - control differences in temporal means.
 
     """
+
     def take_diff(x):
         with xarray.set_options(keep_attrs=True):
-            diffs = x - profs.sel(Dataset=control_name)
-        return diffs
+            return x - profs.sel(Dataset=control_name)
 
-    diffs = profs.drop_sel(Dataset=control_name).groupby('Dataset').map(take_diff)
-    return diffs
+    return profs.drop_sel(Dataset=control_name).groupby('Dataset').map(take_diff)
 
 
 def pairwise_diffs(dat, start, end, comp_pairs, relative=False):
@@ -434,20 +440,20 @@ def pairwise_diffs(dat, start, end, comp_pairs, relative=False):
 
         if relative:
             diffs[-1] = diffs[-1] / profs.sel(Dataset=ref) * 100
-            for key in diffs[-1].keys():
+            for key in diffs[-1]:
                 diffs[-1][key].attrs['units'] = '%'
 
         diffs[-1]['Dataset'] = name
 
     return xarray.combine_nested(diffs, concat_dim='Dataset')
-    
+
 
 def plot_pairwise_diffs(
     dat,
     start,
     end,
     comp_pairs,
-    variables=['tk', 'q', 'ua', 'va', 'rh'],
+    variables=None,
     figsize=FIGURE_SIZE,
     relative=False,
     title='',
@@ -462,16 +468,21 @@ def plot_pairwise_diffs(
                     Differences will be test - ref.
         variables: Variables to plot differences of.
         relative: Calculate relative differences?
+        figsize: Figure size.
+        title: Figure title.
 
     """
+    if variables is None:
+        variables = ['tk', 'q', 'ua', 'va', 'rh']
+
     diffs = pairwise_diffs(dat=dat, start=start, end=end, comp_pairs=comp_pairs, relative=relative)
     plot_profiles(profs=diffs, variables=variables, figsize=figsize, vline=0, title=title)
 
 
 def plot_profiles(
     profs,
-    variables=['tk', 'q', 'ua', 'va', 'rh'],
-    ylims=[1000, 200],
+    variables=None,
+    ylims=None,
     xlims=None,
     figsize=FIGURE_SIZE,
     vline=None,
@@ -493,6 +504,11 @@ def plot_profiles(
     Returns: fig, ax for plot.
 
     """
+    if variables is None:
+        variables = ['tk', 'q', 'ua', 'va', 'rh']
+    if ylims is None:
+        ylims = [1000, 200]
+
     fig, ax = plt.subplots(ncols=len(variables), sharey=True, figsize=figsize)
     for i, var in enumerate(variables):
         _ = profs[var].plot(
@@ -520,7 +536,7 @@ def mean_profiles(
     dat,
     start,
     end,
-    variables=['tk', 'q', 'ua', 'va', 'rh'],
+    variables=None,
     plot=True,
     figsize=FIGURE_SIZE,
     title='',
@@ -534,10 +550,14 @@ def mean_profiles(
         variables: The variables to plot.
         figsize: Figure size [width, height].
         title: Plot title.
+        plot: Produce plot?
 
     Return: The mean profiles and all profiles that went into the mean.
 
     """
+    if variables is None:
+        variables = ['tk', 'q', 'ua', 'va', 'rh']
+
     all_profs = dat.sel(time=slice(start, end))[variables]
     profs = all_profs.mean('time', keep_attrs=True)
     if plot:
@@ -558,7 +578,7 @@ def plot_daily_rain(inputs, patterns, figsize=FIGURE_SIZE, ncols=5):
     """
     assert inputs.keys() == patterns.keys(), 'Inputs and patterns should have same keys.'
 
-    for res in inputs.keys():
+    for res in inputs:
         fields = []
         for setname, directory in inputs[res].items():
             files = sorted(glob.glob(directory + '/' + patterns[res]))
@@ -599,7 +619,7 @@ def plot_fields(inputs, pattern, var, timeidx=0, figsize=FIGURE_SIZE, meanover=N
     """
     assert inputs.keys() == pattern.keys(), 'Inputs and patterns should have same keys.'
 
-    for res in inputs.keys():
+    for res in inputs:
         fields = []
         for setname, directory in inputs[res].items():
             files = sorted(glob.glob(directory + '/' + pattern[res]))
@@ -643,7 +663,7 @@ def wind(dat):
     return wind
 
 
-def plot_wind(wind, sepVar='Dataset', figsize=[15, 7], title=''):
+def plot_wind(wind, sepVar='Dataset', figsize=(15, 7), title=''):
     """Plot wind fields at all levels.
 
     Arguments:
@@ -663,17 +683,19 @@ def plot_wind(wind, sepVar='Dataset', figsize=[15, 7], title=''):
     plt.show()
 
 
-def plot_wind_levels(wind, sepVar='Dataset', figsize=[15, 7], plot_levels=[850, 500, 350, 200], title=''):
+def plot_wind_levels(wind, figsize=(15, 7), plot_levels=None, title=''):
     """Plot wind fields at selected levels.
 
     Arguments:
         wind: Wind values returned by wind().
-        sepVar: Variable by which to divide the plot.
         figsize: Size for plot [width, height].
         plot_levels: Pressure levels for which to plot timeseries [hPa].
         title: Plot title.
 
     """
+    if plot_levels is None:
+        plot_levels = [850, 500, 350, 200]
+
     wind.sel(level=plot_levels).plot(hue='Dataset', row='level', figsize=figsize).set_titles('{value} hPa')
     plt.suptitle(title, y=1.02)
     plt.show()
@@ -698,7 +720,7 @@ def pressure_at_kth_eta_level(wrfvars, k_pert, dataset='Perturbed'):
         + str(np.round(min_pres.min().values, 1))
         + ' hPa to '
         + str(np.round(max_pres.max().values, 1))
-        + ' hPa.'
+        + ' hPa.',
     )
 
     fig, ax = plt.subplots()
@@ -757,16 +779,20 @@ def plot_radiative_cooling_by_level(dat, plot_levels, figsize=FIGURE_SIZE, title
     plt.show()
 
 
-def nc_equal(file1, file2, ignore_fields=[]):
+def nc_equal(file1, file2, ignore_fields=None):
     """Test whether two NetCDF files are equal, while ignoring certain fields.
 
     Arguments:
-        file1, file2: The two files to test.
+        file1: The first of two files to test.
+        file2: The second file.
         ignore_fields: Optional names of fields or attributes to ignore.
 
     Returns: whether file1 == file2 when ignoring specified fields.
 
     """
+    if ignore_fields is None:
+        ignore_fields = []
+
     nc1 = xarray.open_dataset(file1)
     nc2 = xarray.open_dataset(file2)
 
@@ -787,7 +813,8 @@ def compare_nc(file1, file2):
     """Show any differences in contents between two netCDF files.
 
     Arguments:
-        file1, file2: The two files to compare.
+        file1: The first of two files to compare.
+        file2: The second file.
 
     """
     nc1 = xarray.open_dataset(file1)
@@ -795,9 +822,9 @@ def compare_nc(file1, file2):
 
     diffs_found = False
 
-    common_fields = [field for field in nc1.keys() if field in nc2.keys()]
-    nc1_only_fields = [field for field in nc1.keys() if field not in nc2.keys()]
-    nc2_only_fields = [field for field in nc2.keys() if field not in nc1.keys()]
+    common_fields = [field for field in nc1 if field in nc2]
+    nc1_only_fields = [field for field in nc1 if field not in nc2]
+    nc2_only_fields = [field for field in nc2 if field not in nc1]
 
     if len(nc1_only_fields) > 0:
         print('The following fields are in file1 but not file2:')
@@ -825,13 +852,13 @@ def compare_nc(file1, file2):
                         str(np.round(mean_diff, 8)),
                         str(np.round(max_diff, 8)),
                         str(np.round(rel_diff, 2)),
-                    ]
-                )
+                    ],
+                ),
             )
 
     # Which attributes are different?
-    for key in nc1.attrs.keys():
-        if not nc1.attrs[key] == nc2.attrs[key]:
+    for key in nc1.attrs:
+        if nc1.attrs[key] != nc2.attrs[key]:
             print('Attribute ' + key + ' differs.')
             diffs_found = True
 
@@ -1063,18 +1090,18 @@ def true_false(v):
     """Return 'true' if v != 0 and 'false' if v == 0."""
     if v == 0:
         return 'False'
-    else:
-        return 'True'
+    return 'True'
 
 
 def compare_vert_levels(init, RCE, start, end, title=''):
     """Plot the vertical levels in the first timestep of a dataset, compared to the average levels between a start and end time.
 
     Arguments:
-    init: The 'initial time' dataset containing z.
-    RCE: The RCE dataset containing z.
-    start: Start time for RCE period.
-    end: End time for RCE period.
+        init: The 'initial time' dataset containing z.
+        RCE: The RCE dataset containing z.
+        start: Start time for RCE period.
+        end: End time for RCE period.
+        title: Plot title.
 
     """
     fig, ax = plt.subplots()
@@ -1109,35 +1136,38 @@ def target_tk_profiles(wrfout_file, pres, start, end):
     targets = targets.set_coords('pres')
     targets = targets.swap_dims({'bottom_top': 'pres'})
 
-    targets = targets.rename_vars({'RELAX_T_TARGET_PROFILE': 'target_T', 'RELAX_Q_TARGET_PROFILE': 'target_q'})
-    return targets
+    return targets.rename_vars({'RELAX_T_TARGET_PROFILE': 'target_T', 'RELAX_Q_TARGET_PROFILE': 'target_q'})
 
 
-def eta_profiles(dat, pres, start, end, variables=['eta_tk', 'eta_q', 'z', 'eta_T']):
+def eta_profiles(dat, pres, start, end, variables=None):
     """Calculate pressure-level profiles for processed variables.
 
     Arguments:
-    dat: wrfvar data to process.
-    pres: Pressure field to use (ie a single Dataset).
-    start, end: The time slice to use.
-    variables: Variables for which to calculate the mean profiles.
+        dat: wrfvar data to process.
+        pres: Pressure field to use (ie a single Dataset).
+        start: The start of the time slice to use.
+        end: End of the time slice.
+        variables: Variables for which to calculate the mean profiles.
 
     """
+    if variables is None:
+        variables = ['eta_tk', 'eta_q', 'z', 'eta_T']
+
     assert pres.Dataset.size == 1, 'Expecting 1 dataset in pres.'
     res = dat.sel(time=slice(start, end))[variables].mean('time', keep_attrs=True)
     res['pres'] = pres.sel(time=slice(start, end)).mean('time') / 100
     res.pres.attrs['long_name'] = 'Pressure'
     res.pres.attrs['units'] = 'hPa'
     res = res.set_coords('pres')
-    res = res.swap_dims({'bottom_top': 'pres'})
-    return res
+    return res.swap_dims({'bottom_top': 'pres'})
 
 
 def surface_temps(wrf_file, title=''):
     """Print out the (unique) value of SST, TSK, and TMN from a wrfout file.
 
     Arguments:
-    wrf_file: The wrfout file to open.
+        wrf_file: The wrfout file to open.
+        title: Plot title.
 
     """
     nc = xarray.open_dataset(wrf_file)
@@ -1150,15 +1180,15 @@ def surface_temps(wrf_file, title=''):
     assert len(tsk) == 1, 'Error: TSK is not unique.'
     assert tsk == tmn, 'ERROR: TSK does not equal TMN.'
 
-    title = title + ': ' if not title == '' else ''
+    title = title + ': ' if title != '' else ''
     print(title + 'Last time stamp in WRF file has SST of ' + str(sst[0]) + ' K and TSK of ' + str(tsk[0]) + ' K.')
 
 
 def plot_profile_range(
     dat,
     var,
-    ignoreDatasets=[],
-    figsize=[15, 6],
+    ignoreDatasets=None,
+    figsize=(15, 6),
     overplot_x=None,
     overplot_y=None,
     ncols=None,
@@ -1172,11 +1202,16 @@ def plot_profile_range(
         var: The variable to plot the profiles of.
         ignoreDatasets: A list of datasets to ignore.
         figsize: The figure size.
-        overplot_x, overplot_y: If specified, points to overplot in red.
-        ncols/nrows: Number of columns/rows to produce.
+        overplot_x: If specified, points to overplot in red.
+        overplot_y: If specified, points to overplot in red.
+        ncols: Number of columns to produce.
+        nrows: Number of rows to produce.
         title: Plot title.
 
     """
+    if ignoreDatasets is None:
+        ignoreDatasets = []  # noqa: N806
+
     assert (overplot_x is None) == (overplot_y is None), 'overplot_x and overplot_y are both required.'
 
     sets = [ds for ds in dat.Dataset.values if ds not in ignoreDatasets]
@@ -1210,18 +1245,19 @@ def plot_profile_range(
     plt.tight_layout()
 
 
-def plot_tq_stratosphere(dat, RCE_profiles, p_from=200, p_to=80, figsize=[13, 4], **kwargs):
+def plot_tq_stratosphere(dat, RCE_profiles, p_from=200, p_to=80, figsize=(13, 4), **kwargs):
     """Plot T and q profiles by Dataset, showing mean and range of each profile, with overlaid RCE profiles.
 
     Arguments:
         dat: wrfvars data to plot.
         RCE_profiles: RCE profile data.
-        p_from, p_to: Pressure range to plot [hPa].
+        p_from: Start of pressure range to plot [hPa].
+        p_to: End of pressure range to plot [hPa].
         figsize: Figure size [width, height].
         kwargs: Extra arguments to plot_profile_range().
 
     """
-    RCE = RCE_profiles.sel(pres=slice(p_from, p_to))
+    RCE = RCE_profiles.sel(pres=slice(p_from, p_to))  # noqa: N806
     dat = dat.sel(level=slice(p_from, p_to))
     plot_profile_range(dat=dat, var='tk', figsize=figsize, overplot_x=RCE.target_T, overplot_y=RCE.pres, **kwargs)
     plot_profile_range(dat=dat, var='q', figsize=figsize, overplot_x=RCE.target_q, overplot_y=RCE.pres, **kwargs)
@@ -1235,7 +1271,7 @@ def as_date(d, date_format='%Y-%m-%d'):
         date_format: The format the date is in.
 
     """
-    return datetime.datetime.strptime(d, date_format)
+    return datetime.datetime.strptime(d, date_format)  # noqa: DTZ007
 
 
 def dat_properties(dat, variables, start, end, datasets=None):
@@ -1277,7 +1313,7 @@ def model_setups(inputs, dataset='RCE'):
         dataset: The dataset to show information for.
 
     """
-    for res in inputs.keys():
+    for res in inputs:
         print('Model setup for ' + res + ' (' + dataset + '):')
         analyse_wrfinput(
             wrfinput_file=inputs[res][dataset] + 'wrfinput_d01',
@@ -1300,7 +1336,7 @@ def input_map(perts, basedir):
             'Control': basedir + perts['dir'][i] + '/control/',
         }
         for level in perts['levels']:
-            for T in perts['T']:
+            for T in perts['T']:  # noqa: N806
                 pert_name = 'T ' + T + ' @' + level
                 d = basedir + perts['dir'][i] + '/pert_' + level + 'hPa_T_' + T + 'K/'
                 if os.path.exists(d):
@@ -1324,7 +1360,7 @@ def add_mass_flux(wrfvars):
         wrfvars with mass flux added.
 
     """
-    for res in wrfvars.keys():
+    for res in wrfvars:
         wrfvars[res]['level_pressure'], _ = xarray.broadcast(wrfvars[res].level, wrfvars[res].wa)
         wrfvars[res]['air_density'] = atm.density(p=wrfvars[res].level_pressure, q_v=wrfvars[res].q, theta=wrfvars[res].T + 300)
         wrfvars[res]['conv_mass_flux'] = wrfvars[res].air_density * wrfvars[res].updraft_proportion * wrfvars[res].mean_updraft
@@ -1341,27 +1377,16 @@ def add_mass_flux(wrfvars):
 
 def plot_mean_profiles(
     profs,
-    variables=['tk', 'q', 'ua', 'va', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
-    relabel={
-        'tk': 'Temperature\n[K]',
-        'q': 'Water vapor\nmixing ratio\n[g kg$^{-1}$]',
-        'ua': 'U wind\n[m s$^{-1}$]',
-        'va': 'V wind\n[m s$^{-1}$]',
-        'rh': 'Relative\nhumidity [%]',
-        'qcloud': 'Cloud water\nmixing\nratio\n[g kg$^{-1}$]',
-        'qice': 'Ice\nmixing\nratio\n[g kg$^{-1}$]',
-        'qsnow': 'Snow\nmixing\nratio\n[g kg$^{-1}$]',
-        'qrain': 'Rain\nmixing\nratio\n[g kg$^{-1}$]',
-        'qgraup': 'Graupel\nmixing\nratio\n[g kg$^{-1}$]',
-    },
+    variables=None,
+    relabel=None,
     figsize=(13, 4),
     ylim=(1000, 200),
-    xlims={},
-    retick={},
+    xlims=None,
+    retick=None,
     file=None,
     ncols=5,
     nrows=2,
-    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
+    hue_order=None,
 ):
     """Plot mean profiles for a given dataset, by resolution and model.
 
@@ -1376,9 +1401,32 @@ def plot_mean_profiles(
         retick: {variable: ticks} dictionary with new ticks for x axes.
         file: File to save plot to.
         ncols: Number of columns to use.
+        nrows: Number of rows to use.
         hue_order: Order for hues in plots.
 
     """
+    if variables is None:
+        variables = ['tk', 'q', 'ua', 'va', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
+    if relabel is None:
+        relabel = {
+            'tk': 'Temperature\n[K]',
+            'q': 'Water vapor\nmixing ratio\n[g kg$^{-1}$]',
+            'ua': 'U wind\n[m s$^{-1}$]',
+            'va': 'V wind\n[m s$^{-1}$]',
+            'rh': 'Relative\nhumidity [%]',
+            'qcloud': 'Cloud water\nmixing\nratio\n[g kg$^{-1}$]',
+            'qice': 'Ice\nmixing\nratio\n[g kg$^{-1}$]',
+            'qsnow': 'Snow\nmixing\nratio\n[g kg$^{-1}$]',
+            'qrain': 'Rain\nmixing\nratio\n[g kg$^{-1}$]',
+            'qgraup': 'Graupel\nmixing\nratio\n[g kg$^{-1}$]',
+        }
+    if hue_order is None:
+        hue_order = ['4 km', '1 km', '500 m', '250 m', '100 m']
+    if xlims is None:
+        xlims = {}
+    if retick is None:
+        retick = {}
+
     _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'wspace': 0.1, 'hspace': 0.4})
     profs = profs.sort_values(['Model', 'Resolution', 'level'])
 
@@ -1430,34 +1478,39 @@ def plot_mean_profiles(
 
 def MONC_file_list(
     lead='Responses',
-    available={
-        '1 km': {
-            'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
-            'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
-            'minus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850],
-            'plus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850],
-        },
-        '500 m': {'plus_0p5_K_p_day': [500, 850], 'plus_0p2_g_p_kg_p_day': [500, 850]},
-        '250 m': {
-            'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
-            'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
-            'plus_0p2_g_p_kg_p_day': [500, 850],
-        },
-    },
-    perts={
-        'minus_0p5_K_p_day': 'T -0.5',
-        'plus_0p5_K_p_day': 'T 0.5',
-        'minus_0p2_g_p_kg_p_day': 'q -0.0002',
-        'plus_0p2_g_p_kg_p_day': 'q 0.0002',
-    },
+    available=None,
+    perts=None,
 ):
+    """Generate a list of MONC files."""
+    if available is None:
+        available = {
+            '1 km': {
+                'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                'minus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850],
+                'plus_0p2_g_p_kg_p_day': [415, 500, 600, 730, 850],
+            },
+            '500 m': {'plus_0p5_K_p_day': [500, 850], 'plus_0p2_g_p_kg_p_day': [500, 850]},
+            '250 m': {
+                'minus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                'plus_0p5_K_p_day': [415, 500, 600, 730, 850],
+                'plus_0p2_g_p_kg_p_day': [500, 850],
+            },
+        }
+    if perts is None:
+        perts = {
+            'minus_0p5_K_p_day': 'T -0.5',
+            'plus_0p5_K_p_day': 'T 0.5',
+            'minus_0p2_g_p_kg_p_day': 'q -0.0002',
+            'plus_0p2_g_p_kg_p_day': 'q 0.0002',
+        }
     d = {}
     for res, avail in available.items():
         for pert, levels in avail.items():
             for lev in levels:
                 # Rename 415 to 412 to match WRF simulation outputs.
                 lev_p = lev
-                if lev == 415:
+                if lev == 415:  # noqa: PLR2004
                     lev_p = 412
 
                 res_ns = res.replace(' ', '')
@@ -1470,12 +1523,15 @@ def MONC_file_list(
 def MONC_CWV_data(
     path='data/MONC/',
     pert_files=MONC_file_list(lead='CWV'),
-    RCE_files={
-        '1km/CWV_from_unpert_with_Hor_Res_of_1km.csv': ['RCE', '1 km'],
-        '500m/CWV_from_unpert_with_Hor_Res_of_500m.csv': ['RCE', '500 m'],
-        '250m/CWV_from_unpert_with_Hor_Res_of_250m.csv': ['RCE', '250 m'],
-    },
+    RCE_files=None,
 ):
+    """Read MONC column water vapour data."""
+    if RCE_files is None:
+        RCE_files = {  # noqa: N806
+            '1km/CWV_from_unpert_with_Hor_Res_of_1km.csv': ['RCE', '1 km'],
+            '500m/CWV_from_unpert_with_Hor_Res_of_500m.csv': ['RCE', '500 m'],
+            '250m/CWV_from_unpert_with_Hor_Res_of_250m.csv': ['RCE', '250 m'],
+        }
     files = RCE_files | pert_files
     all_dat = []
     for file, [level, res] in files.items():
@@ -1486,11 +1542,11 @@ def MONC_CWV_data(
 
     monc = pd.concat(all_dat).reset_index()
     monc = monc.rename(columns={'Time (day)': 'time', 'CWV (mm)': 'cwv'})
-    monc = monc.drop(columns=['level_0', 'index'])
-    return monc
+    return monc.drop(columns=['level_0', 'index'])
 
 
 def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')):
+    """Read MONC response data."""
     all_dat = []
     for file, [level, res] in files.items():
         dat = pd.read_csv(f'{path}/{file}')
@@ -1511,7 +1567,7 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
             'Delta_qsnow (g/kg)': 'qsnow',
             'Delta_qrain (g/kg)': 'qrain',
             'Delta_qgraupel (g/kg)': 'qgraup',
-        }
+        },
     )
     monc = monc.drop(columns=['level_0', 'index'])
     monc['model'] = 'MONC'
@@ -1519,7 +1575,7 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
 
 
 def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
-    # Read in reference (Kuang 2010) results.
+    """Read in reference (Kuang 2010) results."""
     refs = {
         'q_dq': {
             'var': 'q',
@@ -1548,7 +1604,7 @@ def kuang_data(ref_dir='/g/data/up6/tr2908/LRF_SCM_results/'):
 
     res = pd.DataFrame()
 
-    for ref, key in refs.items():
+    for key in refs.values():
         dat = pd.read_csv(ref_dir + key['file'], header=None)
 
         # Column is perturbation level, row is reponse level.
@@ -1583,21 +1639,8 @@ def plot_pw_ts(
     pw_ts,
     RCE_times,
     axs,
-    hues=[
-        'Control',
-        'RCE',
-        'T @412',
-        'T @500',
-        'T @600',
-        'T @730',
-        'T @850',
-        'q @412',
-        'q @500',
-        'q @600',
-        'q @730',
-        'q @850',
-    ],
-    ress=['4 km', '1 km', '100 m'],
+    hues=None,
+    ress=None,
 ):
     """Plot curves of precipitable water over time, by perterbation, grouping positive and negative perturbations, and by model.
 
@@ -1606,8 +1649,26 @@ def plot_pw_ts(
         RCE_times: Start and end times to highlight by resolution (dictionary of tuples).
         axs: Axes to plot to.
         hues: The order for hue category values.
+        ress: Resolutions.
 
     """
+    if hues is None:
+        hues = [
+            'Control',
+            'RCE',
+            'T @412',
+            'T @500',
+            'T @600',
+            'T @730',
+            'T @850',
+            'q @412',
+            'q @500',
+            'q @600',
+            'q @730',
+            'q @850',
+        ]
+    if ress is None:
+        ress = ['4 km', '1 km', '100 m']
     for i, r in enumerate(ress):
         dat = pw_ts[r]
         min_time = dat.time.min()
@@ -1642,7 +1703,8 @@ def plot_pw_ts(
         axs[i].set_title(f'WRF {r}')
 
     for ax in axs:
-        # Note labelled as column water vapour here, since in wrf-python PW is calculated as a sum of water vapour content and this then matches MONC plots.
+        # Note labelled as column water vapour here, since in wrf-python PW is calculated as a sum of water vapour content
+        # and this then matches MONC plots.
         ax.set_ylabel('CWV [mm]')
         ax.set_xlabel('')
 
@@ -1652,22 +1714,9 @@ def plot_pw_ts(
 def plot_monc_cwv(
     monc,
     axs,
-    hl_times={'1 km': 20, '500 m': 10, '250 m': 10},
-    ress=['1 km', '500 m', '250 m'],
-    hues=[
-        'Control',
-        'RCE',
-        'T @412',
-        'T @500',
-        'T @600',
-        'T @730',
-        'T @850',
-        'q @412',
-        'q @500',
-        'q @600',
-        'q @730',
-        'q @850',
-    ],
+    hl_times=None,
+    ress=None,
+    hues=None,
 ):
     """Plot curves of MONC-derived columnar water vapour (CWV) over time, by perterbation, grouping positive and negative perturbations.
 
@@ -1679,6 +1728,26 @@ def plot_monc_cwv(
         hues: The order for hue category values.
 
     """
+    if hues is None:
+        hues = [
+            'Control',
+            'RCE',
+            'T @412',
+            'T @500',
+            'T @600',
+            'T @730',
+            'T @850',
+            'q @412',
+            'q @500',
+            'q @600',
+            'q @730',
+            'q @850',
+        ]
+    if ress is None:
+        ress = ['1 km', '500 m', '250 m']
+    if hl_times is None:
+        hl_times = {'1 km': 20, '500 m': 10, '250 m': 10}
+
     for i, r in enumerate(ress):
         dat = monc.loc[monc.res == r].copy()
         dat['pert_short'] = [x[0:2] + x[-4:] for x in dat.pert.values]
@@ -1722,7 +1791,7 @@ def load_cache_data(
     runs_start,
     RCE_times,
     cache_dir='data/WRF',
-    prof_vars=['T', 'tk', 'q', 'ua', 'va', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
+    prof_vars=None,
 ):
     """Load precipitable water and mean profile data; generate cache files if they don't exist.
 
@@ -1731,10 +1800,15 @@ def load_cache_data(
         dirs: Set names and their directory names.
         cache_dir: Cache directory.
         prof_vars: Profile variables to read.
+        RCE_times: RCE times for each run.
+        runs_start: Start times for each run.
 
     Returns: lists of PW and mean profiles by resolution.
 
     """
+    if prof_vars is None:
+        prof_vars = ['T', 'tk', 'q', 'ua', 'va', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
+
     pw_ts = {}
     pw_sv_ts = {}
     profs = {}
@@ -1807,18 +1881,21 @@ def load_cache_data(
     return pw_ts, profs, pw_sv_ts, resps_mean, resps_std
 
 
-def WRF_responses(profs, variables=['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']):
+def WRF_responses(profs, variables=None):
     """Calculate WRF responses to perturbations as differences in mean profiles.
 
     Return in the same form as MONC differences on file.
 
     Arguments:
         profs: The profiles to use.
-        vars: The variables to consider.
+        variables: The variables to consider.
 
     Returns: Mean differences and standard deviation of differences.
 
     """
+    if variables is None:
+        variables = ['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']
+
     # Collect WRF differences together in the same form as the MONC differences.
     wrf_profs = profs[variables]
 
@@ -1837,8 +1914,8 @@ def WRF_responses(profs, variables=['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', '
 
 def concat_diffs(
     responses,
-    hydromet_vars=['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
-    variables=['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh'],
+    hydromet_vars=None,
+    variables=None,
 ):
     """Collect differences together and organise.
 
@@ -1850,6 +1927,11 @@ def concat_diffs(
     Returns: responses in one DataFrame.
 
     """
+    if hydromet_vars is None:
+        hydromet_vars = ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
+    if variables is None:
+        variables = ['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']
+
     diffs = pd.concat(responses).reset_index(drop=True)
     diffs = diffs.sort_values(['pressure', 'model', 'res'], ascending=False)
     diffs = diffs.rename(columns={'model': 'Model', 'res': 'Resolution'})
@@ -1867,8 +1949,7 @@ def concat_diffs(
     for v in variables:
         neg[v] = -1 * neg[v]
 
-    diffs = pd.concat([neg, pos])
-    return diffs
+    return pd.concat([neg, pos])
 
 
 def plot_ts_wrf_monc(
@@ -1876,25 +1957,12 @@ def plot_ts_wrf_monc(
     monc_cwv,
     WRF_RCE_times,
     figsize=(12, 8),
-    hues=[
-        'Control',
-        'RCE',
-        'T @412',
-        'T @500',
-        'T @600',
-        'T @730',
-        'T @850',
-        'q @412',
-        'q @500',
-        'q @600',
-        'q @730',
-        'q @850',
-    ],
+    hues=None,
     file=None,
     ncols=2,
     nrows=3,
-    wrf_res=['4 km', '1 km', '100 m'],
-    monc_res=['1 km', '500 m', '250 m'],
+    wrf_res=None,
+    monc_res=None,
 ):
     """Plot curves of precipitable water (for WRF) or columnar water vapour (for MONC) over time, by perturbation, resolution, and by model.
 
@@ -1905,8 +1973,33 @@ def plot_ts_wrf_monc(
           figsize: Figure width x height.
           hues: The order for hue category values.
           file: Output file for plot.
+          WRF_RCE_times: RCE times for the WRF runs.
+          monc_res: Resolutions of MONC data.
+          ncols: Number of columns.
+          nrows: Number of rows.
+          wrf_res: Resolutions of WRF data.
 
     """
+    if hues is None:
+        hues = [
+            'Control',
+            'RCE',
+            'T @412',
+            'T @500',
+            'T @600',
+            'T @730',
+            'T @850',
+            'q @412',
+            'q @500',
+            'q @600',
+            'q @730',
+            'q @850',
+        ]
+    if wrf_res is None:
+        wrf_res = ['4 km', '1 km', '100 m']
+    if monc_res is None:
+        monc_res = ['1 km', '500 m', '250 m']
+
     _, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, gridspec_kw={'hspace': 0.5})
     plot_pw_ts(pw_ts=wrf_pw_ts, RCE_times=WRF_RCE_times, axs=axs[:, 0], hues=hues, ress=wrf_res)
     plot_monc_cwv(monc=monc_cwv, axs=axs[:, 1], hues=hues, ress=monc_res)
@@ -1918,43 +2011,59 @@ def plot_ts_wrf_monc(
 
 def read_MONC_profs(
     path='data/MONC/',
-    files={
-        '1km/Mean_profiles_from_unpert_with_Hor_Res_of_1km.csv': '1 km',
-        '500m/Mean_profiles_from_unpert_with_Hor_Res_of_500m.csv': '500 m',
-        '250m/Mean_profiles_from_unpert_with_Hor_Res_of_250m.csv': '250 m',
-    },
-    renamer={
-        'Pressure (hPa)': 'level',
-        'theta (K)': 'T',
-        'Temp (K)': 'tk',
-        'qv (g/kg)': 'q',
-        'RH (%)': 'rh',
-        'qliq (g/kg)': 'qcloud',
-        'qice (g/kg)': 'qice',
-        'qsnow (g/kg)': 'qsnow',
-        'qrain (g/kg)': 'qrain',
-        'qgraupel (g/kg)': 'qgraup',
-    },
+    files=None,
+    windfiles=None,
+    renamer=None,
 ):
     """Read MONC profiles from CSV files.
 
     Arguments:
         path: Path to MONC data files.
         files: Files to read and their resolutions.
+        windfiles: Files for wind data for each resolution.
+        renamer: Rename variables?
 
     """
+    if files is None:
+        files = {
+            '1km/Mean_profiles_from_unpert_with_Hor_Res_of_1km.csv': '1 km',
+            '500m/Mean_profiles_from_unpert_with_Hor_Res_of_500m.csv': '500 m',
+            '250m/Mean_profiles_from_unpert_with_Hor_Res_of_250m.csv': '250 m',
+        }
+    if windfiles is None:
+        windfiles = {
+            '1 km': '1km/mean_winds_1km.csv',
+            '500 m': '500m/mean_winds_500m.csv',
+            '250 m': '250m/mean_winds_250m.csv',
+        }
+    if renamer is None:
+        renamer = {
+            'Pressure (hPa)': 'level',
+            'theta (K)': 'T',
+            'Temp (K)': 'tk',
+            'qv (g/kg)': 'q',
+            'RH (%)': 'rh',
+            'qliq (g/kg)': 'qcloud',
+            'qice (g/kg)': 'qice',
+            'qsnow (g/kg)': 'qsnow',
+            'qrain (g/kg)': 'qrain',
+            'qgraupel (g/kg)': 'qgraup',
+        }
     profs = []
     for f, res in files.items():
         d = pd.read_csv(f'{path}/{f}')
         d['model'] = 'MONC'
         d['res'] = res
+
+        d = d.rename(columns=renamer)
+        winds = pd.read_csv(f'{path}/{windfiles[res]}')
+        assert(np.all(np.diff(d.level[::-1]) > 0))
+        d['ua'] = np.interp(x=d.level[::-1], xp=winds.hPa[::-1], fp=winds.u[::-1])[::-1] * -1 # Swap sign to match WRF -- makes no difference to analysis because no coriolis force.
+        d['va'] = np.interp(x=d.level[::-1], xp=winds.hPa[::-1], fp=winds.v[::-1])[::-1]
         profs.append(d)
 
-    profs = pd.concat(profs)
-    profs = profs.rename(columns=renamer)
-    profs['model'] = 'MONC'
+    return pd.concat(profs)
 
-    return profs
 
 
 def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
@@ -1966,7 +2075,7 @@ def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
 
     """
     wrf_ctrl_profs = pd.concat(
-        [wrf_profs[x].sel(Dataset='Control').to_dataframe().drop(columns='Dataset').assign(res=x, model='WRF') for x in wrf_profs]
+        [wrf_profs[x].sel(Dataset='Control').to_dataframe().drop(columns='Dataset').assign(res=x, model='WRF') for x in wrf_profs],
     )
     wrf_ctrl_profs = wrf_ctrl_profs.reset_index()
 
@@ -1979,26 +2088,15 @@ def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     wrf_ctrl_profs['qgraup'] = wrf_ctrl_profs.qgraup * 1000
 
     profs = pd.concat([wrf_ctrl_profs, monc_ctrl_profs])
-    profs = profs.rename(columns={'res': 'Resolution', 'model': 'Model'})
-
-    return profs
+    return profs.rename(columns={'res': 'Resolution', 'model': 'Model'})
 
 
 def plot_responses(
     responses,
     refs,
-    hue_order=['4 km', '1 km', '500 m', '250 m', '100 m'],
-    variables=['tk', 'q', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
-    var_labels={
-        'tk': 'Temperature\n[K]',
-        'rh': 'RH\n[%]',
-        'q': 'Water vapor\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-    },
+    hue_order=None,
+    variables=None,
+    var_labels=None,
     figsize=(12, 8),
     ncols=4,
     nrows=2,
@@ -2026,6 +2124,21 @@ def plot_responses(
         file: Save to file with this starting path (and finished by pert pressure.pdf)
 
     """
+    if var_labels is None:
+        var_labels = {
+            'tk': 'Temperature\n[K]',
+            'rh': 'RH\n[%]',
+            'q': 'Water vapor\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        }
+    if hue_order is None:
+        hue_order = ['4 km', '1 km', '500 m', '250 m', '100 m']
+    if variables is None:
+        variables = ['tk', 'q', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
     refs_included = False
     assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
     perts = list(np.unique(responses.pert_group))
@@ -2134,14 +2247,8 @@ def plot_responses(
 def plot_responses_with_std(
     resp,
     std,
-    variables=['qcloud', 'qice', 'qsnow', 'qrain', 'qgraup'],
-    var_labels={
-        'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-        'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
-    },
+    variables=None,
+    var_labels=None,
     figsize=(12, 3),
     ncols=5,
     nrows=1,
@@ -2153,7 +2260,7 @@ def plot_responses_with_std(
     """Make plots showing perturbation responses.
 
     Args:
-        responses: Responses to plot.
+        resp: Responses to plot.
         std: Standard devs of responses.
         variables: Variables to plot.
         var_labels: Label for each variable.
@@ -2166,6 +2273,16 @@ def plot_responses_with_std(
         file: Save to file with this starting path (and finished by pert pressure.pdf)
 
     """
+    if variables is None:
+        variables = ['qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
+    if var_labels is None:
+        var_labels = {
+            'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        }
     assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
 
     resp = resp.copy()
