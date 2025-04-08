@@ -677,7 +677,7 @@ parameterizations. The temperature and water vapor responses also tend to be
 closer to the results of \citeA{Kuang_JAS_2010} as grid spacing becomes finer,
 especially in the lower troposphere below $\sim$600 hPa, indicating that model
 disagreement and sensitivity to parameterization choice is reduced at finer
-resolutions. In the upper troposphere above $\sim$500 hPa, our
+resolutions \todo{YLH: I think Kuang (2010) uses a resolution of 2km, and we have finer resolutions than his, so I am not entirely sure if saying that his is the "truth" that we are aiming for is a fair comparison. Perhaps skip the part about "closer to results of Kuang"}. In the upper troposphere above $\sim$500 hPa, our
 highest-resolution results show a smaller mean response than in
 \citeA{Kuang_JAS_2010}. The question is, then, what resolution is required to
 consider a response a benchmark result?
@@ -713,6 +713,11 @@ can now say that we think this type of response from scheme X is actually just
 plain wrong. A related question is whether the response is dominated by the
 modelled convection itself, or whether it might be sensitive to the
 specification of surface properties in an idealized modelling setting.}
+
+\todo{YLH: i have added the following paragraph, please modify as you see fit}
+
+A comparison of our findings with those of the SCM responses in Hwong et al. (2021) reveals several observations. The variations in responses across different convective parameterizations in \citeA{Hwong_JAMES_2021} are generally more pronounced than the uncertainties we estimate within our CRM and LES responses, as well as between the two models. This is particularly noteworthy given the authors’ hesitation to regard Kuang’s (2010) 2-km CRM results as the definitive “truth,” on the grounds that CRM outcomes can be sensitive to model resolution. Hence, the relatively more consistent responses across different resolutions in our study provide confidence in the robustness of our results and offer a clearer perspective on what constitutes a “correct” response. This suggests that high-resolution model outputs can serve as a valuable benchmark for identifying substantial deficiencies in convective parameterizations, particularly when the latter deviate significantly from the responses observed in our simulations. For instance, the pronounced kinks frequently observed in the SCM responses—especially near critical atmospheric levels such as the freezing level and cloud base—appear less prominent or even disappear at finer resolutions in our results, underscoring the problematic threshold-like behavior of convective parameterizations. However, this conclusion does not hold uniformly throughout the entire atmospheric column. As noted earlier, the responses in our high-resolution simulations become increasingly uncertain at higher altitudes, at times exhibiting a spread that exceeds those of the SCMs in \citeA{Hwong_JAMES_2021}. For instance, the temperature response above 300 hPa to a moisture perturbation at 850 hPa appears to show greater variability than the corresponding spread observed in the SCMs. This suggests that in the upper troposphere, the influence of other parameterization schemes—most probably the microphysics scheme—becomes increasingly dominant, surpassing the impact of any convective scheme employed in a model.
+
 
 In summary, the key conclusions of our study are as follows:
 
