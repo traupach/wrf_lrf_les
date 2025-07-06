@@ -26,8 +26,9 @@ Plant\affil{5}, Steven C. Sherwood\affil{2,3,4}, and Yi-Ling Hwong\affil{6}}
 \correspondingauthor{Timothy H. Raupach}{timothy.h.raupach@gmail.com}
 
 \begin{keypoints}
-    \item Time-averaged responses to localised humidity and temperature perturbations were examined
-    in idealised simulations at cloud-resolving resolutions by two numerical models.
+    \item Time-averaged responses to localised humidity and temperature
+    perturbations were examined in idealised simulations at cloud-resolving
+    resolutions by two numerical models.
     \item For the two models examined, accurate simulation of
     convectively-coupled dynamics required a grid spacing of lower than $\sim$1
     km.
@@ -45,11 +46,15 @@ convection can not be explicitly modelled. In this case models use convection
 schemes to parameterize sub-grid convection and its effects. Convection
 parameterization is a leading source of uncertainty in model outputs, and a lack
 of ground truth complicates the assessment of convective scheme performance.
-Here we test a previously proposed linear framework for quantifying and testing convective responses, using two models run at convection-permitting resolution, to attempt
-to establish a reference ``truth'' for model responses to temperature and
-humidity perturbations. For the models examined, a grid spacing finer than $\sim$1 km was required for consistent (hence potentially accurate) responses, implying good representation of
-convectively-coupled dynamics. The results from these tests at 100 m and 250 m
-grid spacing could reasonably be used as ground truth for idealized tests of convective schemes, as their spread is mostly small compared to the spread of previously reported scheme behavior.
+Here we test a previously proposed linear framework for quantifying and testing
+convective responses, using two models run at convection-permitting resolution,
+to attempt to establish a reference ``truth'' for model responses to temperature
+and humidity perturbations. For the models examined, a grid spacing finer than
+$\sim$1 km was required for consistent (hence potentially accurate) responses,
+implying good representation of convectively-coupled dynamics. The results from
+these tests at 100 m and 250 m grid spacing could reasonably be used as ground
+truth for idealized tests of convective schemes, as their spread is mostly small
+compared to the spread of previously reported scheme behavior.
 \end{abstract}
 
 \section*{Plain Language Summary}
@@ -115,7 +120,9 @@ provided evidence that these linear responses were sufficient to capture the
 dynamics of convectively-coupled waves, which evolve slowly compared to typical
 convective response times and have relatively small amplitudes. Even if a linear
 approximation is inadequate for fully describing convection for more general
-purposes, it can be a useful first-order characterization, relevance to scheme evaluation for example since current GCMs often fail to correctly represent coupled waves.
+purposes, it can be a useful first-order characterization, relevance to scheme
+evaluation for example since current GCMs often fail to correctly represent
+coupled waves.
 
 To this end, the linear response framework was applied to single column models
 (SCMs) by \citeA{Herman_JAMES_2013}, specifically for the purpose of testing two
@@ -162,7 +169,8 @@ reported in H21.
 We used two numerical models in this work: the Advanced Research (AR) version of
 the Weather Research and Forecasting (WRF) model, version 4.1.4
 \cite{Skamarock_2019}, and the Met Office/NERC Cloud Model
-\cite<MONC,>{Brown_2020}.  We assess results by comparing the model responses with each other and with the original results of K10.
+\cite<MONC,>{Brown_2020}.  We assess results by comparing the model responses
+with each other and with the original results of K10.
 
 \subsection{Common Model Settings}
 
@@ -252,8 +260,7 @@ respectively. A summary is shown in Table \ref{tab:model_setups}.
     \caption{Model settings per model, highlighting those that differed between
     resolutions. PBL stands for Planetary Boundary Layer. RCEMIP refers to a
     Radiative-Convective Equilibrium Model Intercomparison Project (RCEMIP)
-    profile \cite{Wing_GMD_2018}. \todo{THR: Bob can you help me fill in the
-    MONC parts here?}}
+    profile \cite{Wing_GMD_2018}. The initial profile for the MONC runs is an RCE profile obtained for the intercomparison study of \citeA{Daleu_JAMES_2015}.}
     \label{tab:model_setups}
     \renewcommand{\arraystretch}{0.65}
     \footnotesize
@@ -263,10 +270,10 @@ respectively. A summary is shown in Table \ref{tab:model_setups}.
         \hline
         Domain size & 20$\times$20 km$^2$ & 20$\times$20 km$^2$ & 64$\times$64 km$^2$ & 64$\times$64 km$^2$ & 64$\times$64 km$^2$ \\
         Vertical levels & 74 & 370 & 85 & 85 & 85 \\
-        PBL scheme & Enabled & Disabled & & & \\
+        PBL scheme & Enabled & Disabled & NA & NA & NA \\
         Model time step & 6 s & 1 s & 1-2 s & 1-2 s & 1-2 s\\
-        Output frequency & 1 h & 2 h & & & \\
-        Initial state & RCEMIP profile & Mean 1 km profile & & & \\
+        Output frequency & 1 h & 2 h & 1 h & 1 h & 1 h \\
+        Initial state & RCEMIP profile & Mean 1 km profile & RCE profile & RCE profile & RCE profile \\
         Value of \texttt{km\_opt} & 4 & 2 & NA & NA & NA \\
         \hline
     \end{tabular}
@@ -545,25 +552,20 @@ boundary layer mixing.
 The two models show responses in hydrometeor content that are broadly similar in
 character, but sometimes with large differences in magnitudes and disagreement
 on resolution effects. 850 hPa heating generally reduces rain water content
-below \todo{SS: Does precipitation change much in these experiments (I would
-think not since we impose radiative heating)?  If not, does this reduction in
-mixing ratio imply an increase in drop fall speed?  I guess it could also be a
-downward shift in conversion to rain.  These could happen together as a result
-of higher mixing ratios in the BL, if drop number stays the same.} the freezing
-level; MONC shows a stronger reduction than WRF below the freezing level, but an
-increase around the freezing level not seen in WRF. Except for an upward spike
-around 900 hPa in some runs, cloud liquid water also decreases. There is also
-some reduction in snow and increase in graupel at upper levels but to a highly
-variable degree. Graupel and temperature changes in the upper troposphere seem
-to correlate fairly well across the simulations at both heating levels, which
-may indicate that the variability in freezing processes helps cause different
-temperature responses. As the perturbation level increases in the WRF runs, the
-graupel response flips sign, while all other changes are qualitatively not that
-different. The two models showed a broadly similar character of microphysical
-responses to temperature perturbations, but there were sometimes different
-amplitudes of responses which are presumably attributable to differences in
-microphysics schemes. The models also did not agree on how responses change with
-resolution.
+below the freezing level; MONC shows a stronger reduction than WRF below the
+freezing level, but an increase around the freezing level not seen in WRF.
+Except for an upward spike around 900 hPa in some runs, cloud liquid water also
+decreases. There is also some reduction in snow and increase in graupel at upper
+levels but to a highly variable degree. Graupel and temperature changes in the
+upper troposphere seem to correlate fairly well across the simulations at both
+heating levels, which may indicate that the variability in freezing processes
+helps cause different temperature responses. As the perturbation level increases
+in the WRF runs, the graupel response flips sign, while all other changes are
+qualitatively not that different. The two models showed a broadly similar
+character of microphysical responses to temperature perturbations, but there
+were sometimes different amplitudes of responses which are presumably
+attributable to differences in microphysics schemes. The models also did not
+agree on how responses change with resolution.
 
 \subsection{Responses to Moistening (Humidity) Perturbations}
 
@@ -643,23 +645,24 @@ vary among the models here).
 In this work we examined time-averaged responses to temperature and moisture
 forcing perturbations in simulated RCE states, using two models at a range of
 grid spacings including LES runs without PBL schemes enabled. The aim has been
-to test the sensitivity of responses to model design, parameterization, and resolution.
-The study builds on \citeA{Kuang_JAS_2010}, here K10, who first calculated such
-responses, and other studies (in particular \citeA{Hwong_JAMES_2021}, here H21)
-who used them to test convective schemes used in global models.
+to test the sensitivity of responses to model design, parameterization, and
+resolution. The study builds on \citeA{Kuang_JAS_2010}, here K10, who first
+calculated such responses, and other studies (in particular
+\citeA{Hwong_JAMES_2021}, here H21) who used them to test convective schemes
+used in global models.
 
 We sought a ``truth'' response or benchmark results against which other models
 could be tested. The linear responses in our results are sensitive to model
 resolution and model used, but do show a tendency to produce smoother vertical
 structures and indications of convergence as grid spacing is reduced, suggesting
 that model disagreement and artifacts from parameterizations or numerics are
-reduced at finer resolutions. These temperature and water vapor responses tend to
-be closer to the results of K10 as grid spacing becomes finer, indicating
-surprising accuracy of K10's 2-km grid calculations. However, above
-$\sim$500 hPa we find a smaller mean response than in K10, while in the boundary
-layer we find gradients in response within the lowest kilometer of the
-atmosphere that were not found in the early study. The question is, then, what
-resolution is required to consider a response a benchmark result?
+reduced at finer resolutions. These temperature and water vapor responses tend
+to be closer to the results of K10 as grid spacing becomes finer, indicating
+surprising accuracy of K10's 2-km grid calculations. However, above $\sim$500
+hPa we find a smaller mean response than in K10, while in the boundary layer we
+find gradients in response within the lowest kilometer of the atmosphere that
+were not found in the early study. The question is, then, what resolution is
+required to consider a response a benchmark result?
 
 We can narrow down the grid spacing required to properly represent
 convective-scale feedbacks on large scale flows by examining the sensitivity of
@@ -695,15 +698,15 @@ uniformly throughout the entire atmospheric column: the temperature responses
 show increasing spread at higher altitudes, at times exceeding those of the SCMs
 in H21. 
 
-We also compared concentrations of hydrometeors and their
-responses, not done in previous studies. Concentrations of snow and graupel in control runs, and responses of
-these (and of rain mixing ratio) in experiments, were highly diverse and appear
-likely to be responsible for some of the surprisingly large spread in upper-
-troposphere temperature responses and perhaps others. The treatment (often
-implicit) of microphysics within convection schemes may lack the diversity or
-sensitivity exhibited here in the LES and CRM models, explaining the narrower
-range of temperature responses in H21; this would imply that the true
-uncertainty of some responses exceeds the spreads reported in H21.
+We also compared concentrations of hydrometeors and their responses, not done in
+previous studies. Concentrations of snow and graupel in control runs, and
+responses of these (and of rain mixing ratio) in experiments, were highly
+diverse and appear likely to be responsible for some of the surprisingly large
+spread in upper- troposphere temperature responses and perhaps others. The
+treatment (often implicit) of microphysics within convection schemes may lack
+the diversity or sensitivity exhibited here in the LES and CRM models,
+explaining the narrower range of temperature responses in H21; this would imply
+that the true uncertainty of some responses exceeds the spreads reported in H21.
 
 In summary, the key conclusions of our study are as follows:
 
@@ -726,7 +729,9 @@ the specification of surface properties in an idealized modelling setting.
 
 \section{Open Research}
 
-Analysis code for this work, including modified WRF implementation code, WRF namelists, and all responses reported here in machine readible form, are provided at \todo{DOI}. \todo{Bob, what MONC config files could we include?}
+Analysis code for this work, including modified WRF implementation code, example
+WRF and MONC namelists, and all responses reported here in machine readible
+form, are provided at \todo{DOI}.
 
 % AGU requires an Availability Statement for the underlying data needed to
 % understand, evaluate, and build upon the reported research at the time of peer

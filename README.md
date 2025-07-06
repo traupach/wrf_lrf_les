@@ -8,7 +8,7 @@ simulation (LES) resolutions.
 
 - `WRF` - WRF source files modified for this project.
 - `scripts` - Scripts organised by language.
-- `runtime` - Data files used for running WRF.
+- `runtime` - Data files used for running WRF, and an example MONC namelist file.
 - `analysis` - Jupyter notebooks and python code used for analysis.
 
 ## Installation
