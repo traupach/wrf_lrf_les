@@ -9,7 +9,7 @@ simulation (LES) resolutions.
 This work supports the journal article "Responses to Humidity and Temperature Perturbations in High-Resolution Simulations of Convection" by 
 Timothy H. Raupach, Chimene L. Daleu, Robert S. Plant, Steven C. Sherwood and Yi-Ling Huang. 
 
-The contents of this repository is licensed under CC-BY-4.0-NC. 
+The contents of this repository is licensed under CC-BY-4.0-NC, except for files in the `WRF` directory which have their own license.
 
 Contact email: Tim Raupach <t.raupach@unsw.edu.au>.
 
