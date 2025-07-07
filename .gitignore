@@ -10,6 +10,8 @@ paper/*.log
 paper/*.gz
 paper/.vscode
 
+*.DS_Store*
+
 *.ipynb_checkpoints*
 *__pycache__*
 
