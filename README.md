@@ -10,6 +10,7 @@ simulation (LES) resolutions.
 - `scripts` - Scripts organised by language.
 - `runtime` - Data files used for running WRF, and an example MONC namelist file.
 - `analysis` - Jupyter notebooks and python code used for analysis.
+- `data` - perturbation response data, including `data/results/all_responses.csv' which contains all model responses, collated.
 
 ## Installation
 
@@ -135,7 +136,7 @@ Changes are made to the following files:
 	- added new grid variables:
 		- `RTHFORCETEN`, `RQVFORCETEN` - tendency due to perturbation forcing in U and V respectively.
 		- `RURELAXTEN`, `RVRELAXTEN` - tendency due to wind relaxation in U and V respectively.
-q		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V wind profiles for wind relaxation.
+		- `RELAX_U_TARGET_PROFILE`, `RELAX_V_TARGET_PROFILE` - the target U and V wind profiles for wind relaxation.
 		- `RELAX_T_TARGET_PROFILE`, `RELAX_Q_TARGET_PROFILE` - the target T and q profiles, used in the stratosphere.
 	- added new namelist options. 
 - `WRFV3/dyn_em/Makefile` - added compilation rules for `module_nudging` and `module_LRF`.
