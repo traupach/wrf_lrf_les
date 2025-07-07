@@ -4,6 +4,13 @@ This project contains modifications to WRF code, plus runtime and analysis code 
 Broadly the idea is follow the linear response function (LRF) approach of [Kuang (2010)](https://doi.org/10.1175/2009JAS3260.1), using WRF run at large eddy 
 simulation (LES) resolutions.
 
+This work supports the journal article "Responses to Humidity and Temperature Perturbations in High-Resolution Simulations of Convection" by 
+Timothy H. Raupach, Chimene L. Daleu, Robert S. Plant, Steven C. Sherwood and Yi-Ling Huang. 
+
+The contents of this repository is licensed under CC-BY-4.0-NC.
+
+Contact email: Tim Raupach <t.raupach@unsw.edu.au>.
+
 ## Directory structure
 
 - `WRF` - WRF source files modified for this project.
