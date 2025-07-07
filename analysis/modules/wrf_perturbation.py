@@ -2218,7 +2218,7 @@ def plot_responses(
 
         if refs_included:
             leg = axs.flat[ncols - 1].get_legend()
-            handles = leg.legendHandles
+            handles = leg.get_lines()
             labels = [t.get_text() for t in leg.get_texts()]
             new_point = mlines.Line2D(
                 [],
