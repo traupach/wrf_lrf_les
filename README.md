@@ -1,6 +1,6 @@
 # WRF perturbation studies at LES resolution
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15826349.svg)](https://doi.org/10.5281/zenodo.15826349)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15826348.svg)](https://doi.org/10.5281/zenodo.15826348)
 
 This project contains modifications to WRF code, plus runtime and analysis code to investigate the response of WRF to temperature and humidity perturbations. 
 Broadly the idea is follow the linear response function (LRF) approach of [Kuang (2010)](https://doi.org/10.1175/2009JAS3260.1), using WRF run at large eddy 
