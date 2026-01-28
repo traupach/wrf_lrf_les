@@ -61,7 +61,7 @@ def read_wrfvars(inputs, resample=None, drop_vars=None, quiet=False):
             keydiffs = set(keys).symmetric_difference(set(datasets[i].keys()))
             assert len(keydiffs) == 0, 'Dataset keys have differences: ' + str(keydiffs) + '. Consider using drop_vars.'
 
-        dat = xarray.combine_nested(datasets, concat_dim='Dataset', compat='equals', combine_attrs='drop_conflicts').chunk(-1)
+        dat = xarray.combine_nested(datasets, concat_dim='Dataset', compat='equals', join='outer', combine_attrs='drop_conflicts').chunk(-1)
         dat = prettify_long_names(dat)
 
         dat['rh'] = atm.relative_humidity(theta=dat.T + 300, p=dat.level, q=dat.q).load()
@@ -243,7 +243,7 @@ def plot_wrfinput_profiles(wrfin, sounding_file=None):
 
     """
     base_height = wrfin.Z_BASE.isel(Time=0) / 1000
-    fig, ax = plt.subplots(ncols=4)
+    _, ax = plt.subplots(ncols=4)
 
     # Potential temperature profile. 300 K is added as per instruction in WRF user guide
     # under 'special WRF output variables'.
@@ -1571,6 +1571,11 @@ def MONC_response_data(path='data/MONC/', files=MONC_file_list(lead='Responses')
     )
     monc = monc.drop(columns=['level_0', 'index'])
     monc['model'] = 'MONC'
+
+    # Convert hydromet variables from g kg-1 to 1e-3 g kg-1.
+    for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
+        monc[v] = monc[v] * 1000
+
     return monc
 
 
@@ -1814,6 +1819,9 @@ def load_cache_data(
     profs = {}
     resps_mean = {}
     resps_std = {}
+    mean_5d = {}
+    min_5d = {}
+    max_5d = {}
 
     for inp in inputs:
         d = dirs[inp]
@@ -1822,6 +1830,9 @@ def load_cache_data(
         cache_file_prof = f'{cache_dir}/prof_{d}.nc'
         cache_file_resps_mean = f'{cache_dir}/responses_mean_{d}.nc'
         cache_file_resps_std = f'{cache_dir}/responses_std_{d}.nc'
+        cache_file_5d_mean = f'{cache_dir}/responses_5d_mean_{d}.nc'
+        cache_file_5d_mins = f'{cache_dir}/responses_5d_mins_{d}.nc'
+        cache_file_5d_maxs = f'{cache_dir}/responses_5d_maxs_{d}.nc'
 
         if not (
             os.path.exists(cache_file_pw)
@@ -1829,59 +1840,99 @@ def load_cache_data(
             and os.path.exists(cache_file_pw_sv)
             and os.path.exists(cache_file_resps_mean)
             and os.path.exists(cache_file_resps_std)
+            and os.path.exists(cache_file_5d_mean)
+            and os.path.exists(cache_file_5d_mins)
+            and os.path.exists(cache_file_5d_maxs)
         ):
             wrfvars = read_wrfvars(inputs={inp: inputs[inp]}, quiet=False)
 
             # Cache precipitable water.
-            pw = wrfvars[inp].pw.expand_dims({'res': [inp]}).load()
-            pw.to_netcdf(cache_file_pw)
-            del pw
+            if not os.path.exists(cache_file_pw):
+                pw = wrfvars[inp].pw.expand_dims({'res': [inp]}).load()
+                pw.to_netcdf(cache_file_pw)
+                del pw
 
             # Cache variance/mean of PW.
-            pw_sv = wrfvars[inp].pw_scaled_var.expand_dims({'res': [inp]}).load()
-            pw_sv.to_netcdf(cache_file_pw_sv)
-            del pw_sv
+            if not os.path.exists(cache_file_pw_sv):
+                pw_sv = wrfvars[inp].pw_scaled_var.expand_dims({'res': [inp]}).load()
+                pw_sv.to_netcdf(cache_file_pw_sv)
+                del pw_sv
 
             # Remove RCE runs because we are only interested in perturbed runs.
             wrfvars[inp] = wrfvars[inp].drop_sel(Dataset='RCE').sel(time=slice(runs_start[inp], None)).chunk(-1)
 
             # Calculate mean profiles and cache them.
-            rce_profs, p = mean_profiles(
-                dat=wrfvars[inp].chunk({'time': -1, 'Dataset': 1, 'level': -1}),
-                variables=prof_vars,
-                start=RCE_times[inp][0],
-                end=RCE_times[inp][1],
-                plot=False,
-            )
-            p.load().to_netcdf(cache_file_prof)
-            del p
+            if not (os.path.exists(cache_file_prof)
+                    and os.path.exists(cache_file_resps_mean)
+                    and os.path.exists(cache_file_resps_mean)
+                    and os.path.exists(cache_file_resps_std)
+                    and os.path.exists(cache_file_5d_mean)
+                    and os.path.exists(cache_file_5d_mins)
+                    and os.path.exists(cache_file_5d_maxs)):
+                rce_profs, p = mean_profiles(
+                    dat=wrfvars[inp].chunk({'time': -1, 'Dataset': 1, 'level': -1}),
+                    variables=prof_vars,
+                    start=RCE_times[inp][0],
+                    end=RCE_times[inp][1],
+                    plot=False,
+                )
+                p.load().to_netcdf(cache_file_prof)
+                del p
 
             # Calculate responses and cache them.
-            mean_r, std_r = WRF_responses(profs=rce_profs.load())
-            mean_r = mean_r.expand_dims({'res': [inp]})
-            std_r = std_r.expand_dims({'res': [inp]})
-            mean_r.to_netcdf(cache_file_resps_mean)
-            std_r.to_netcdf(cache_file_resps_std)
-            del mean_r, std_r
+            if not (os.path.exists(cache_file_resps_mean)
+                    and os.path.exists(cache_file_resps_std)
+                    and os.path.exists(cache_file_5d_mean)
+                    and os.path.exists(cache_file_5d_mins)
+                    and os.path.exists(cache_file_5d_maxs)):
+                rce_profs = rce_profs.load()
+                mean_r, std_r, mean_5d_r, min_5d_r, max_5d_r = WRF_responses(profs=rce_profs.load(),
+                                                                             window=60 if inp == '100 m' else 120)
+                mean_r = mean_r.expand_dims({'res': [inp]})
+                std_r = std_r.expand_dims({'res': [inp]})
+                mean_5d_r = mean_5d_r.expand_dims({'res': [inp]})
+                min_5d_r = min_5d_r.expand_dims({'res': [inp]})
+                max_5d_r = max_5d_r.expand_dims({'res': [inp]})
+                mean_r.to_netcdf(cache_file_resps_mean)
+                std_r.to_netcdf(cache_file_resps_std)
+                mean_5d_r.to_netcdf(cache_file_5d_mean)
+                min_5d_r.to_netcdf(cache_file_5d_mins)
+                max_5d_r.to_netcdf(cache_file_5d_maxs)
+                del mean_r, std_r, mean_5d_r, min_5d_r, max_5d_r
 
         pw_ts[inp] = xarray.open_dataset(cache_file_pw)
         pw_sv_ts[inp] = xarray.open_dataset(cache_file_pw_sv)
         profs[inp] = xarray.open_dataset(cache_file_prof)
         resps_mean[inp] = xarray.open_dataset(cache_file_resps_mean)
         resps_std[inp] = xarray.open_dataset(cache_file_resps_std)
+        mean_5d[inp] = xarray.open_dataset(cache_file_5d_mean)
+        min_5d[inp] = xarray.open_dataset(cache_file_5d_mins)
+        max_5d[inp] = xarray.open_dataset(cache_file_5d_maxs)
 
-    resps_mean = xarray.merge([resps_mean[x] for x in resps_mean])
+    resps_mean = xarray.merge([resps_mean[x] for x in resps_mean],  join='outer', compat='no_conflicts')
     resps_mean = resps_mean.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
     resps_mean['model'] = 'WRF'
 
-    resps_std = xarray.merge([resps_std[x] for x in resps_std])
+    resps_std = xarray.merge([resps_std[x] for x in resps_std], join='outer', compat='no_conflicts')
     resps_std = resps_std.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
     resps_std['model'] = 'WRF'
 
-    return pw_ts, profs, pw_sv_ts, resps_mean, resps_std
+    resps_mean_5d = xarray.merge([mean_5d[x] for x in mean_5d], join='outer', compat='no_conflicts')
+    resps_mean_5d = resps_mean_5d.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_mean_5d['model'] = 'WRF'
+
+    resps_min_5d = xarray.merge([min_5d[x] for x in min_5d], join='outer', compat='no_conflicts')
+    resps_min_5d = resps_min_5d.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_min_5d['model'] = 'WRF'
+
+    resps_max_5d = xarray.merge([max_5d[x] for x in max_5d], join='outer', compat='no_conflicts')
+    resps_max_5d = resps_max_5d.to_dataframe().reset_index().rename(columns={'Dataset': 'pert', 'level': 'pressure'})
+    resps_max_5d['model'] = 'WRF'
+
+    return pw_ts, profs, pw_sv_ts, resps_mean, resps_std, resps_mean_5d, resps_max_5d, resps_min_5d
 
 
-def WRF_responses(profs, variables=None):
+def WRF_responses(profs, variables=None, window=120):
     """Calculate WRF responses to perturbations as differences in mean profiles.
 
     Return in the same form as MONC differences on file.
@@ -1889,8 +1940,10 @@ def WRF_responses(profs, variables=None):
     Arguments:
         profs: The profiles to use.
         variables: The variables to consider.
+        window: Number of times to include in each rolling window; default is 120 (5 days).
 
-    Returns: Mean differences and standard deviation of differences.
+    Returns: Mean differences and standard deviation of differences. Note hydrometeor variable 
+    responses are given in 1e-3 g kg-1.
 
     """
     if variables is None:
@@ -1899,46 +1952,44 @@ def WRF_responses(profs, variables=None):
     # Collect WRF differences together in the same form as the MONC differences.
     wrf_profs = profs[variables]
 
-    # Convert quantities in kg kg-1 to g kg-1.
+    # Convert quantities in kg kg-1 to 1e-3 g kg-1.
     for v in ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']:
-        wrf_profs[v] = wrf_profs[v] * 1000
+        wrf_profs[v] = wrf_profs[v] * 1000 * 1000
 
     wrf_diffs = wrf_profs.drop_sel(Dataset='Control') - wrf_profs.sel(Dataset='Control')
 
-    # Calculate mean differences.
+    # Calculate mean and standard deviation of differences.
     mean_diffs = wrf_diffs.mean('time')
     std_diffs = wrf_diffs.std('time')
 
-    return mean_diffs, std_diffs
+    # Calculate rolling window means.
+    window_diffs = wrf_diffs.rolling(time=window).mean()
+    window_mean = window_diffs.mean('time')
+    window_max = window_diffs.max('time')
+    window_min = window_diffs.min('time')
+
+    return mean_diffs, std_diffs, window_mean, window_min, window_max
 
 
 def concat_diffs(
     responses,
-    hydromet_vars=None,
     variables=None,
 ):
     """Collect differences together and organise.
 
     Arguments:
         responses: A list of responses to concatenate.
-        hydromet_vars: Hydrometeor variables to be given a factor of 1e3.
         variables: All variables to consider negative responses for.
 
     Returns: responses in one DataFrame.
 
     """
-    if hydromet_vars is None:
-        hydromet_vars = ['q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
     if variables is None:
         variables = ['T', 'tk', 'q', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup', 'rh']
 
     diffs = pd.concat(responses).reset_index(drop=True)
     diffs = diffs.sort_values(['pressure', 'model', 'res'], ascending=False)
     diffs = diffs.rename(columns={'model': 'Model', 'res': 'Resolution'})
-
-    # Give hydrometeors a factor of 1e3 so units go from g kg-1 to 1e-3 g kg-1.
-    for v in hydromet_vars:
-        diffs[v] = diffs[v] * 1000
 
     diffs['pert_group'] = [x.replace('-', '') for x in diffs.pert]
     diffs['neg'] = ['-' in x for x in diffs.pert]
@@ -2079,7 +2130,7 @@ def mean_control_profiles(wrf_profs, monc_ctrl_profs=read_MONC_profs()):
     )
     wrf_ctrl_profs = wrf_ctrl_profs.reset_index()
 
-    # Convert wrf mixing ratios to g kg-1.
+    # Convert wrf mixing ratios from kg kg-1 to g kg-1.
     wrf_ctrl_profs['q'] = wrf_ctrl_profs.q * 1000
     wrf_ctrl_profs['qcloud'] = wrf_ctrl_profs.qcloud * 1000
     wrf_ctrl_profs['qice'] = wrf_ctrl_profs.qice * 1000
@@ -2145,7 +2196,7 @@ def plot_responses(
     for p in perts:
         p_level = float(p[-3:])
 
-        fig, axs = plt.subplots(
+        _, axs = plt.subplots(
             ncols=ncols,
             nrows=nrows,
             figsize=figsize,
@@ -2197,6 +2248,7 @@ def plot_responses(
             if variable == 'q':
                 r = refs[refs.Dataset == p]
                 if not r.empty:
+                    # Convert from g kg-1 to 1e-3 g kg-1.
                     axs.flat[i].scatter(r.q * 1000, r.level, facecolors='none', edgecolors='black', zorder=10, s=30)
                     refs_included = True
             if variable == 'tk':
@@ -2242,7 +2294,6 @@ def plot_responses(
 
         if file is not None:
             plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
-
 
 def plot_responses_with_std(
     resp,
@@ -2347,6 +2398,150 @@ def plot_responses_with_std(
             p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'),
             y=1.1,
             x=0.4,
+        )
+
+        if file is not None:
+            plt.savefig(f'{file}{p.replace(" ", "_")}.pdf', bbox_inches='tight', dpi=300)
+
+def plot_responses_min_max(
+    responses,
+    mins=None,
+    maxs=None,
+    hue_order=None,
+    variables=None,
+    var_labels=None,
+    figsize=(12, 8),
+    ncols=4,
+    nrows=2,
+    hspace=0.5,
+    wspace=0.1,
+    min_pressure=200,
+    show_negs=False,
+    file='results/resps_5d_min_max_',
+):
+    """Make plots showing perturbation responses.
+
+    Args:
+        responses: Responses to plot.
+        mins: Minimum responses.
+        maxs: Max responses.
+        hue_order: Order to display colours in.
+        variables: Variables to plot.
+        var_labels: Label for each variable.
+        figsize: Figure size.
+        ncols: Number of columns.
+        nrows: Number of rows.
+        hspace: gridspec hspace parameter.
+        wspace: gridspec wspace parameter.
+        min_pressure: Minimum pressure to show.
+        show_negs: Show negative responses with reduced alpha?.
+        file: Save to file with this starting path (and finished by pert pressure.pdf)
+
+    """
+    if var_labels is None:
+        var_labels = {
+            'tk': 'Temperature\n[K]',
+            'rh': 'RH\n[%]',
+            'q': 'Water vapor\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qcloud': 'Cloud water\nmixing ratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qice': 'Ice\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qsnow': 'Snow\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qrain': 'Rain\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+            'qgraup': 'Graupel\nmixing\nratio\n[10$^{-3}$ g kg$^{-1}$]',
+        }
+    if hue_order is None:
+        hue_order = ['4 km', '1 km', '500 m', '250 m', '100 m']
+    if variables is None:
+        variables = ['tk', 'q', 'rh', 'qcloud', 'qice', 'qsnow', 'qrain', 'qgraup']
+
+    assert len(variables) <= ncols * nrows, 'Not enough col/rows.'
+    perts = list(np.unique(responses.pert_group))
+    for p in perts:
+        p_level = float(p[-3:])
+
+        _, axs = plt.subplots(
+            ncols=ncols,
+            nrows=nrows,
+            figsize=figsize,
+            gridspec_kw={'hspace': hspace, 'wspace': wspace},
+        )
+        d = responses[responses.pert_group == p]
+        d = d[d.pressure >= min_pressure]
+
+        for i, variable in enumerate(variables):
+            axs.flat[i].axvline(0, color='black')
+            axs.flat[i].axhline(p_level, color='black', linestyle='--')
+
+            sns.lineplot(
+                data=d[~d.neg],
+                x=variable,
+                y='pressure',
+                ax=axs.flat[i],
+                style='Model',
+                hue='Resolution',
+                sort=False,
+                estimator=None,
+                legend=(i == ncols - 1),
+                hue_order=hue_order[::-1],
+                palette=sns.color_palette('turbo', len(hue_order)),
+                zorder=5,
+            )
+
+            # Add bands around differences.
+            for keys, _ in mins.groupby(['Resolution', 'Model']):
+                rows = np.logical_and.reduce([mins.Resolution == keys[0],
+                                              mins.Model == keys[1],
+                                              np.logical_not(mins.neg),
+                                              mins.pert_group == p])
+                rows2 = np.logical_and.reduce([maxs.Resolution == keys[0],
+                                               maxs.Model == keys[1],
+                                               np.logical_not(maxs.neg),
+                                               mins.pert_group == p])
+                assert np.all(rows == rows2), 'Row mismatch'
+                axs.flat[i].fill_betweenx(
+                    y=mins[rows]['pressure'],
+                    x1=mins[rows][variable],
+                    x2=maxs[rows][variable],
+                    color='grey',
+                    alpha=0.1,
+                    zorder=0,
+                )
+
+            if len(d[d.neg]) > 0 and show_negs:
+                sns.lineplot(
+                    data=d[d.neg],
+                    x=variable,
+                    y='pressure',
+                    ax=axs.flat[i],
+                    style='Model',
+                    hue='Resolution',
+                    sort=False,
+                    estimator=None,
+                    legend=False,
+                    hue_order=hue_order[::-1],
+                    alpha=0.5,
+                    palette=sns.color_palette('turbo', len(hue_order)),
+                    zorder=5,
+                )
+
+            axs.flat[i].invert_yaxis()
+            axs.flat[i].set_ylim(1000, min_pressure)
+
+            # Relabel axes if required.
+            if variable in var_labels:
+                axs.flat[i].set_xlabel(var_labels[variable])
+
+            # Handle ticks.
+            if i % ncols == 0:
+                axs.flat[i].set_ylabel('Pressure [hPa]')
+            else:
+                axs.flat[i].set_ylabel('')
+                axs.flat[i].set_yticks([])
+
+        sns.move_legend(axs.flat[ncols - 1], 'upper left', bbox_to_anchor=(1, 0.25))
+        _ = plt.suptitle(
+            p.replace('T 0.5', 'Temperature perturbation').replace('q 0.0002', 'Moisture perturbation'),
+            y=0.93,
         )
 
         if file is not None:
